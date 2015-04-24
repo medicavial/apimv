@@ -18,7 +18,6 @@ Route::group(array('prefix' => 'api'), function()
 	Route::get('/', function()
 	{
 		return View::make('hello');
-
 	});
 
     Route::post('login', array('uses' => 'UserController@login'));
@@ -43,7 +42,6 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'consulta'), function()
 	{
-
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 	    Route::get('escolaridad', array('uses' => 'BusquedaController@escolaridad'));
@@ -57,7 +55,6 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('verificafolio/{folio}/{etapa}', array('uses' => 'BusquedaController@verificafolio'));
 	    Route::get('verificafoliopase/{folio}', array('uses' => 'BusquedaController@verificafoliopase'));
 	    Route::get('verificaprefijo/{prefijo}/{empresa}', array('uses' => 'BusquedaController@verificaprefijo'));
-
 	});
 
 	Route::group(array('prefix' => 'entregas'), function()
@@ -88,16 +85,24 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'qualitas'), function()
 	{
+		Route::post('actualiza/{envio}', array('uses' => 'QualitasController@actualiza'));
+    	Route::post('envios', array('uses' => 'QualitasController@envios'));
+		Route::get('envios/{envio}', array('uses' => 'QualitasController@envio'));
+    	Route::post('genera', array('uses' => 'QualitasController@generaArchivos'));
+    	Route::get('procesado/{envio}', array('uses' => 'QualitasController@procesado'));
+    	Route::post('procesa', array('uses' => 'QualitasController@procesa'));
+    	Route::post('rechazos', array('uses' => 'QualitasController@rechazos'));
+    	Route::post('sinarchivo', array('uses' => 'QualitasController@sinarchivo'));
     	Route::post('sinprocesar', array('uses' => 'QualitasController@sinprocesar'));
+    	Route::post('incompletos', array('uses' => 'QualitasController@incompletos'));
+    	Route::post('invalidos', array('uses' => 'QualitasController@invalidos'));
 	});
-
 
 	Route::group(array('prefix' => 'reportes'), function()
 	{
     	Route::post('controldocumentos', array('uses' => 'ReportesController@control'));
     	Route::get('descargar/{archivo}', array('uses' => 'ReportesController@descargar'))->where('archivo', '[A-Za-z0-9\-\_\.]+');
 	});
-
 
 });
 
@@ -132,10 +137,16 @@ Route::get('/', function()
 
 	// })->export('xls');
 
-	$reserva = Reserva::where('PAS_folio','HSCO000401')->first();
-	$nombre = DB::select("EXEC MVImgs_Datos @folio = 'ROMV000005'");
 
-	return $nombre;
+	// $datos = DB::select("EXEC MVImgs_Datos @folio = 'ROMV000005'");
+
+	// foreach ($datos as $dato) {
+	// 	$nombre = $dato->Archivo;
+	// }
+	// $envios = DB::select("SELECT EnviosQualitas.ENQ_claveint, ENQ_fechaenvio,ENQ_procesado, (SELECT COUNT(*) from DetalleEnvio where DetalleEnvio.ENQ_claveint = EnviosQualitas.ENQ_claveint) as Cuenta
+	// 			FROM EnviosQualitas  WHERE ENQ_fechaenvio BETWEEN '01/04/2015' and '22/04/2015' ");
+
+	// return $envios;
 
 });
 

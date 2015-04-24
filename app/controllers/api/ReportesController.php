@@ -26,7 +26,7 @@ class ReportesController extends BaseController {
 
 	    if (File::exists($ruta))
 	    {
-	        return Response::download($ruta, $archivo,['Content-Length: ' . File::size($ruta)]);
+	        return Response::download($ruta);
 	    }
 	    else
 	    {
