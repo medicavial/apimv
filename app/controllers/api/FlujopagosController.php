@@ -5,7 +5,6 @@ class FlujopagosController extends BaseController {
 
 	//Consulta de flujo de pagos
 	public function general(){
- 
 		return DB::select("EXEC MV_FLU_ListaPagos");
 	}
 

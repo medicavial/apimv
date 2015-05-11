@@ -1,5 +1,7 @@
 <?php
 
+include(app_path() . '/classes/Historiales.php');
+
 class EntregasController extends BaseController {
 
 
@@ -20,6 +22,8 @@ class EntregasController extends BaseController {
 	    	$etapa = $foliodato['FLD_etapa'];
 	    	$entrega = $foliodato['FLD_numeroEntrega'];
 
+			Historial::aceptaEntrega($clave);
+			
 			$flujo = Flujo::find($clave);
 
 			$flujo->FLD_AROent = $arearecibe;
@@ -36,16 +40,16 @@ class EntregasController extends BaseController {
 
 			if ($arearecibe == 6) {
 
-				// $reserva = Reserva::where('PAS_folio',$folio)->first();
 				$flujopagos = new Flujopagos;
 				$flujopagos->FLD_claveint = $clave;
 				$flujopagos->PAS_folio = $folio;
 				$flujopagos->RPA_etapa = $etapa;
 				$flujopagos->RPA_numEnt = $entrega;
-				// $flujopagos->RES_claveint = $reserva->RES_claveint;
+	
 				$flujopagos->save();
 
 			}
+
 
 		}
 
@@ -71,6 +75,8 @@ class EntregasController extends BaseController {
 	    	$etapa = $foliodato['FLD_etapa'];
 	    	$entrega = $foliodato['FLD_numeroEntrega'];
 
+	    	Historial::rechazaEntrega($clave, $motivo);
+
 			$flujo = Flujo::find($clave);
 
 			$flujo->USU_ent = NULL;
@@ -88,6 +94,7 @@ class EntregasController extends BaseController {
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) rechazados Correctamente'));
+		
 	}
 
 }

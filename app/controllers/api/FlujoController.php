@@ -1,5 +1,7 @@
 <?php
 
+include(app_path() . '/classes/Historiales.php');
+
 class FlujoController extends BaseController {
 
 
@@ -32,6 +34,9 @@ class FlujoController extends BaseController {
 			$flujo->FLD_observaciones = $observaciones;
 
 			$flujo->save();
+
+			$clave = $flujo->FLD_claveint;
+			Historial::altaEntrega($clave);
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
@@ -72,9 +77,8 @@ class FlujoController extends BaseController {
 			}
 
 			$flujo->save();
-
 	    	//definimos un arreglo para poder asignarle el valor 
-
+			Historial::altaEntrega($clave);
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
@@ -125,7 +129,11 @@ class FlujoController extends BaseController {
 
 
 		if ($stmt->execute()) {
-			return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 
+
+			if(Historial::altaOriginal($folio,$etapa,$numentrega)){
+				return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 
+			}
+
 		}else{
 			return Response::json(array('respuesta' => 'Hubo un error intentelo nuevamente'), 500); 
 		}
@@ -180,6 +188,7 @@ class FlujoController extends BaseController {
 			$area = $dato['ARO_porRecibir'];
 			$documento = $dato['DOC_claveint'];
 
+			Historial::quitaEntrega($clave);
 
 			if($dato['FLD_formaRecep'] == 'JF'){	
 				Flujo::find($clave)->delete();
@@ -205,10 +214,13 @@ class FlujoController extends BaseController {
 		$folios =  Input::all(); 
 
 	    foreach ($folios as $foliodato) {
+
 	    	$clave = $foliodato['FLD_claveint'];
 			$flujo = Flujo::find($clave);
 			$flujo->FLD_envNPC = 0;
 			$flujo->save();
+
+			Historial::bajaNPC($clave);
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) removidos Correctamente'));
@@ -224,10 +236,14 @@ class FlujoController extends BaseController {
 		$folios =  Input::all(); 
 
 	    foreach ($folios as $foliodato) {
+
 	    	$clave = $foliodato['FLD_claveint'];
 			$flujo = Flujo::find($clave);
 			$flujo->FLD_envNPC = 1;
 			$flujo->save();
+
+			Historial::altaNPC($clave);
+
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));

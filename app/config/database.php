@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'default' => 'sqlsrv',
+	'default' => 'production',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -78,6 +78,26 @@ return array(
 			'driver'   => 'sqlsrv',
 			'host'     => 'SISTEMAS4',
 			'database' => 'MV2',
+			'username' => 'sa',
+			'password' => 'ACc3soMv',
+			'prefix'   => '',
+		),
+
+
+		'test' => array(
+			'driver'   => 'sqlsrv',
+			'host'     => 'SISTEMAS4',
+			'database' => 'MV2',
+			'username' => '',
+			'password' => '',
+			'prefix'   => '',
+		),
+
+
+		'production' => array(
+			'driver'   => 'sqlsrv',
+			'host'     => 'GEN',
+			'database' => 'MV',
 			'username' => '',
 			'password' => '',
 			'prefix'   => '',

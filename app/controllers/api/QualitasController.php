@@ -43,6 +43,54 @@ class QualitasController extends BaseController {
 
 	}
 
+	public function consulta($folio){
+
+ 
+		$datos =  DB::select("EXEC MVQualitasWSconsulta @folio = '$folio'");
+
+		foreach ($datos as $dato){
+
+			$folio = $dato->folioSistema;
+			$fecha = $dato->FechaCaptura;
+
+			$nombre = $this->nombreArchivo($folio) . "(QS07.jpg,GN19.jpg,ME02.pdf)";
+			$imagenes = $this->archivos($folio,$fecha,$nombre);
+
+			$detalle[] = $imagenes;
+
+		    $data[] = array(
+				"folioElectronico" => $dato->folioElectronico,
+				"folioAdministradora" => $dato->folioAdministradora,
+				"folioSistema" => $dato->folioSistema,
+				"claveproovedor" => $dato->claveproovedor,
+				"claveprestador" => $dato->claveprestador,
+				"Siniestro" => $dato->Siniestro,
+				"Reporte" => $dato->Reporte,
+				"Poliza" => $dato->Poliza,
+				"Lesionado" => $dato->Lesionado,
+				"Afectado" => $dato->Afectado,
+				"Cobertura" => $dato->Cobertura,
+				"Subtotal" => $dato->Subtotal,
+				"iva" => $dato->iva,
+				"Descuento" => $dato->Descuento,
+				"Total" => $dato->Total,
+				"TipoUnidad" => $dato->TipoUnidad,
+				"FechaCaptura" => $dato->FechaCaptura,
+				"Unidad" => $dato->Unidad,
+				"Estatus" => $dato->Estatus,
+				"FechaRecepcion" => $dato->FechaRecepcion,
+				"ID_asociado" => $dato->ID_asociado,
+				"nombreArchivos" => $nombre,
+				"imagenes" => $imagenes
+		    );
+
+		}
+
+		return $data;
+	
+	
+	}
+
 	public function invalidos(){
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
@@ -68,12 +116,61 @@ class QualitasController extends BaseController {
 
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
-		return DB::select("EXEC MVQualitasWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		$datos =  DB::select("EXEC MVQualitasWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		$data = array();
+		
+		foreach ($datos as $dato) {
+			
+            $valor5 = $dato->claveprestador;
+			$valor6 = $dato->Siniestro;
+            $valor7 = $dato->Reporte;
+            $valor10 = $dato->Cobertura;
+            $valor15 = $dato->Afectado;
+            $valor18 = $dato->Unidad;
+
+            if ($valor6 == $valor7) {
+				$motivo = 'Siniestro igual a reporte';
+			}elseif ($valor10 == 99 || $valor15 == 99) {
+				$motivo = 'Cobertura o Afectado Invalido';
+			}elseif ($valor5 == '07370' && $valor18 != 33) {
+				$motivo = 'Falta Clave de Provedor Qualitas';
+			}
+
+    		if ($valor6 == $valor7 || $valor10 == 99 || $valor15 == 99 || ($valor5 == '07370' && $valor18 != 33) ) {
+
+    			$data[] = array(
+			        "folioElectronico" => $dato->folioElectronico,
+		            "folioAdministradora" => $dato->folioAdministradora,
+		            "folioSistema" =>$dato->folioSistema,
+		            "claveproovedor" =>$dato->claveproovedor,
+		            "claveprestador" => $dato->claveprestador,
+		            "Siniestro" => $dato->Siniestro,
+		            "Reporte" => $dato->Reporte,
+		            "Poliza" =>$dato->Poliza,
+					"Lesionado" =>$dato->Lesionado,
+					"Afectado" => $dato->Afectado,
+					"Cobertura" => $dato->Cobertura,
+					"Subtotal" => $dato->Subtotal,
+					"iva" => $dato->iva,
+					"Descuento" => $dato->Descuento,
+					"Total" => $dato->Total,
+					"TipoUnidad" => $dato->TipoUnidad,
+					"FechaCaptura" => $dato->FechaCaptura,
+					"Motivo" => $motivo
+			    );
+
+    		}
+            
+
+
+		}
+
+		return $data;
 	
 	}
 
 	public function generaArchivos(){
-
 
 		$datos = Input::all();
 
@@ -105,7 +202,6 @@ class QualitasController extends BaseController {
 		//verificamos folio x folio para ver si cumople con 
 		foreach ($datos as $dato) {
 			
-
 			$folio = $dato['folioSistema'];
 			$fecha = $dato['FechaCaptura'];
 
@@ -113,7 +209,6 @@ class QualitasController extends BaseController {
 			$DiaNro = date('d', strtotime($fecha));
 			$AnyoNro = date('Y', strtotime($fecha));
 			
-
 			if($MesNro=='01'){ 
 				$MesNro="1"; 
 			} 
@@ -150,10 +245,7 @@ class QualitasController extends BaseController {
 				$MesNro="9"; 
 			} 
 
-			$archivo = DB::select("EXEC MVImgs_Datos @folio = '$folio'");
-			foreach ($archivo as $data) {
-				$nombre = $data->Archivo;
-			}
+			$nombre = $this->nombreArchivo($folio);
 
 			//$ruta = "C:\\Users\\salcala.MEDICAVIAL\\Desktop\\MV\\QUALITAS\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
 			//ruta en producción
@@ -195,7 +287,6 @@ class QualitasController extends BaseController {
 			   
 			}else {
 
-				
 				array_push($incorrectos, $dato);
 
 			}
@@ -209,6 +300,22 @@ class QualitasController extends BaseController {
 
  		return Response::json($resultado);
 	
+	}
+
+	public function principal(){
+
+ 		$datos =  Input::all();
+		
+ 		//aqui se actualiza en pase para mandarlos a rechazos
+ 		foreach ($datos as $dato) {
+ 			$folio = $dato['folioSistema'];
+ 			$pase = Pase::find($folio);
+ 			$pase->PAS_procQ = 0;
+ 			$pase->save();
+ 		}
+
+ 		return Response::json(array('respuesta' => 'Datos procesados Correctamente'));
+
 	}
 
 	public function procesa(){
@@ -280,7 +387,44 @@ class QualitasController extends BaseController {
 
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
-		return DB::select("EXEC MVQualitasWSarchivos @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		$datos =  DB::select("EXEC MVQualitasWSarchivos @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		foreach ($datos as $dato){
+
+			$folio = $dato->folioSistema;
+			$fecha = $dato->FechaCaptura;
+
+			$nombre = $this->nombreArchivo($folio);
+			$imagenes = $this->archivos($folio,$fecha,$nombre);
+
+			$detalle[] = $imagenes;
+
+		    $data[] = array(
+		        "folioElectronico" => $dato->folioElectronico,
+	            "folioAdministradora" => $dato->folioAdministradora,
+	            "folioSistema" =>$dato->folioSistema,
+	            "claveproovedor" =>$dato->claveproovedor,
+	            "claveprestador" => $dato->claveprestador,
+	            "Siniestro" => $dato->Siniestro,
+	            "Reporte" => $dato->Reporte,
+	            "Poliza" =>$dato->Poliza,
+				"Lesionado" =>$dato->Lesionado,
+				"Afectado" => $dato->Afectado,
+				"Cobertura" => $dato->Cobertura,
+				"Subtotal" => $dato->Subtotal,
+				"iva" => $dato->iva,
+				"Descuento" => $dato->Descuento,
+				"Total" => $dato->Total,
+				"TipoUnidad" => $dato->TipoUnidad,
+				"FechaCaptura" => $dato->FechaCaptura
+		    );
+
+		}
+
+		$respuesta = array('listado' => $data,'detalle' => $detalle);
+
+		return $respuesta;
+	
 	
 	}
 
@@ -288,7 +432,75 @@ class QualitasController extends BaseController {
 
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
-		return DB::select("EXEC MVQualitasWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		$datos =  DB::select("EXEC MVQualitasWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		$data = array();
+
+		foreach ($datos as $dato) {
+			
+            $valor5 = $dato->claveprestador;
+			$valor6 = $dato->Siniestro;
+            $valor7 = $dato->Reporte;
+            $valor10 = $dato->Cobertura;
+            $valor18 = $dato->Unidad;
+
+            if ($valor6 != $valor7) {
+
+            	if ($valor10 != 99) {
+
+            		if ($valor5 == '07370' && $valor18 == 33 ) {
+
+            			$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+
+            		}else{
+
+						$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+            			
+            		}
+
+            	}
+            }
+
+
+		}
+
+		return $data;
 	
 	}
 
@@ -301,6 +513,190 @@ class QualitasController extends BaseController {
 			$cad .= substr($str,rand(0,62),1);
 		}
 		return $cad;
+
+	}
+
+	private function nombreArchivo($folio){
+		$archivo = DB::select("EXEC MVImgs_Datos @folio = '$folio'");
+		foreach ($archivo as $data) {
+			$nombre = $data->Archivo;
+		}
+
+		return $nombre;
+	}
+
+	private function archivos($folio, $fecha, $nombre){
+
+		$MesNro = date('m', strtotime($fecha));
+		$DiaNro = date('d', strtotime($fecha));
+		$AnyoNro = date('Y', strtotime($fecha));
+		
+
+		if($MesNro=='01'){ 
+			$MesNro="1"; 
+		} 
+
+		if($MesNro=='02'){ 
+			$MesNro="2"; 
+		} 
+
+		if($MesNro=='03'){ 
+			$MesNro="3"; 
+		} 
+
+		if($MesNro=='04'){ 
+			$MesNro="4"; 
+		} 
+
+		if($MesNro=='05'){ 
+			$MesNro="5"; 
+		} 
+
+		if($MesNro=='06'){ 
+			$MesNro="6"; 
+		} 
+
+		if($MesNro=='07'){ 
+			$MesNro="7"; 
+		} 
+
+		if($MesNro=='08'){ 
+			$MesNro="8"; 
+		} 
+
+		if($MesNro=='09'){ 
+			$MesNro="9"; 
+		} 
+
+		//$ruta = "C:\\Users\\salcala.MEDICAVIAL\\Desktop\\MV\\QUALITAS\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+		//ruta en producción
+		$ruta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+
+		$encontrados = array();
+
+		$encontrados['folio'] = $folio;
+		$encontrados['Fecha_Captura'] = $fecha;
+		$encontrados['nombreEsperado'] = $nombre;
+
+		//verifica 
+		if (file_exists($ruta)){
+
+			$directorio = opendir($ruta); //ruta actual
+
+			$encontrados['QS_07'] = 0;
+			$encontrados['ME_024'] = 0;
+			$encontrados['ME_023'] = 0;
+			$encontrados['ME_022'] = 0;
+			$encontrados['ME_021'] = 0;
+			$encontrados['GN_19'] = 0;
+			$encontrados['QS07'] = 0;
+			$encontrados['ME021'] = 0;
+			$encontrados['ME022'] = 0;
+			$encontrados['ME023'] = 0;
+			$encontrados['ME024'] = 0;
+			$encontrados['ME02'] = 0;
+			$encontrados['GN19'] = 0;
+			$encontrados['nombreActual'] = '';
+
+			while ($archivo = readdir($directorio)) //obtenemos un archivo y luego otro sucesivamente
+			{
+			    if (!is_dir($archivo))//verificamos si es o no un directorio
+			    {	
+			    	//originales
+
+			    	if (preg_match('/QS_07.jpg/' , $archivo)) {
+			    		$encontrados['QS_07'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME_024.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_024'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME_023.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_023'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME_022.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_022'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+
+			    	if (preg_match('/ME_021.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_021'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/GN_19.jpg/' , $archivo) == 1) {
+			    		$encontrados['GN_19'] = 1;
+			    		//$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	//comprimidas
+
+			    	if (preg_match('/QS07.jpg/' , $archivo) == 1) {
+			    		$encontrados['QS07'] = 1;
+			    		$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME021.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME021'] = 1;
+			    		$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME022.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME022'] = 1;
+			    		$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME023.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME023'] = 1;
+			    		$encontrados['nombreActual'] = $archivo;
+			    	}
+
+			    	if (preg_match('/ME024.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME024'] = 1;
+			    		$encontrados['nombreActual'] = $archivo;
+			    	}
+
+
+			    	if (preg_match('/GN19.jpg/' , $archivo) == 1) {
+			    		$encontrados['GN19'] = 1;
+			    		$encontrados['nombre'] = $archivo;
+			    	}
+
+			    	if (preg_match( '/ME02.pdf/' , $archivo) == 1) {
+			    		$encontrados['ME02'] = 1;
+			    		$encontrados['nombre'] = $archivo;
+			    	}
+
+			    }
+
+
+			}
+
+		}else{
+
+			$encontrados['QS_07'] = 0;
+			$encontrados['ME_024'] = 0;
+			$encontrados['ME_023'] = 0;
+			$encontrados['ME_022'] = 0;
+			$encontrados['ME_021'] = 0;
+			$encontrados['GN_19'] = 0;
+			$encontrados['QS07'] = 0;
+			$encontrados['ME021'] = 0;
+			$encontrados['ME022'] = 0;
+			$encontrados['ME023'] = 0;
+			$encontrados['ME024'] = 0;
+			$encontrados['ME02'] = 0;
+			$encontrados['GN19'] = 0;
+			$encontrados['nombreActual'] = 'No existe carpeta';
+		}
+
+		return $encontrados;
 
 	}
 

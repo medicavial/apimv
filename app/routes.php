@@ -86,9 +86,11 @@ Route::group(array('prefix' => 'api'), function()
 	Route::group(array('prefix' => 'qualitas'), function()
 	{
 		Route::post('actualiza/{envio}', array('uses' => 'QualitasController@actualiza'));
+		Route::get('consulta/{folio}', array('uses' => 'QualitasController@consulta'));
     	Route::post('envios', array('uses' => 'QualitasController@envios'));
 		Route::get('envios/{envio}', array('uses' => 'QualitasController@envio'));
     	Route::post('genera', array('uses' => 'QualitasController@generaArchivos'));
+    	Route::post('principal', array('uses' => 'QualitasController@principal'));
     	Route::get('procesado/{envio}', array('uses' => 'QualitasController@procesado'));
     	Route::post('procesa', array('uses' => 'QualitasController@procesa'));
     	Route::post('rechazos', array('uses' => 'QualitasController@rechazos'));
@@ -147,6 +149,19 @@ Route::get('/', function()
 	// 			FROM EnviosQualitas  WHERE ENQ_fechaenvio BETWEEN '01/04/2015' and '22/04/2015' ");
 
 	// return $envios;
+	// $folio = 'ROMV000005';
+	// $etapa = 1;
+	// $entrega = 1;
+
+	// $datos = Documento::where('DOC_folio',$folio)->where('DOC_etapa',$etapa)->where('DOC_numeroEntrega',$entrega)->get();
+
+	// foreach ($datos as $dato) {
+	// 	$documento = $dato['DOC_claveint'];
+	// }
+
+	$datos = Documento::find(516030)->DOC_folio;;
+
+	return  $datos;
 
 });
 
