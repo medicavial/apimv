@@ -45,7 +45,9 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 	    Route::get('escolaridad', array('uses' => 'BusquedaController@escolaridad'));
+	    Route::get('folio/{folio}', array('uses' => 'BusquedaController@folio'));
 	    Route::get('folioweb/{folio}', array('uses' => 'BusquedaController@folioweb'));
+	    Route::get('lesionado/{lesionado}', array('uses' => 'BusquedaController@lesionado'));
 	    Route::get('productos', array('uses' => 'BusquedaController@productos'));
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
@@ -108,8 +110,10 @@ Route::group(array('prefix' => 'api'), function()
 
 });
 
-Route::get('/', function()
-{
+
+Route::get('/', array('uses' => 'HomeController@index'));
+
+
 
 	// $fechaini = '01/01/2015';
 	// $fechafin = '01/04/2015';
@@ -159,9 +163,23 @@ Route::get('/', function()
 	// 	$documento = $dato['DOC_claveint'];
 	// }
 
-	$datos = Documento::find(516030)->DOC_folio;;
+	// $datos = Documento::find(516030)->DOC_folio;
 
-	return  $datos;
+	// $reportes = '04140615280';
 
-});
+	
+ //    $wsdl = "http://201.151.239.105:8081/wsProveedores/siniestros?wsdl";
+ //    $username = '11555';
+ //    $password = '2WXH59';
+
+ //    $client = new SoapClient($wsdl,array('trace' => 1));
+
+ //    $wsse_header = new WsseAuthHeader($username, $password);
+ //    $client->__setSoapHeaders(array($wsse_header));
+ //    $param = array('reporte' => $reporte);
+ //    $respuesta = $client->getSiniestroByReporte($param);
+
+	// $reportes
+
+	// return  $datos;
 

@@ -19,6 +19,43 @@ class BusquedaController extends BaseController {
 		return Escolaridad::select('ESC_claveint as id','ESC_nombre as nombre')->get();
 	}
 
+	public function folio($folio){
+
+		$datos = DB::select("EXEC MV_DCU_ListadoDocumentosXFolio  @folio='$folio'");
+		$respuesta = array();
+		
+		foreach ($datos as $dato) {
+
+			$respuesta[] = array(
+
+				'Folio' =>  $dato->Folio,
+	            'Etapa' =>  $dato->Etapa,
+	            'Fax' =>  $dato->Fax,
+	            'FechaFax' =>  $dato->FechaFax,
+	            'Original' =>  $dato->Original,
+	            'FechaOriginal' =>  $dato->FechaOriginal,
+	            'F.E.' =>  $dato->FacExp,
+	            'FechaF.E.' =>  $dato->FechaFacExp,
+	            'Situacion' =>  $dato->Situacion,
+	            'Unidad' =>  $dato->Unidad,
+	            'FechaPago' =>  $dato->FechaPago,
+	            'FechaCaptura' =>  $dato->FechaCaptura,
+	            'Lesionado' =>  $dato->DOC_lesionado,
+	            'Factura' =>  $dato->DOC_factura,
+	            'Remesa' =>  $dato->DOC_remesa,
+	            'Producto' =>  $dato->PRO_nombre,
+	            'Escolaridad' =>  $dato->ESC_nombre,
+	            'Cancelado' =>  $dato->Cancelado,
+	            'Numero' =>  $dato->etapaEntrega,
+	            'Empresa' =>  $dato->EMP_nombrecorto
+			);
+
+		}
+
+		return $respuesta;
+
+	}
+
 	public function folioweb($folio){
 		$folioweb = DB::connection('mysql')->table('Expediente')
 				->join('Compania', 'Compania.CIA_clave', '=', 'Expediente.CIA_clave')
@@ -28,6 +65,42 @@ class BusquedaController extends BaseController {
 				->where('Exp_folio','=', $folio)
 				->get();
 		return $folioweb;
+	}
+
+	public function lesionado($lesionado){
+
+		$datos = DB::select("EXEC MV_DCU_ListadoDocumentosXLesionado  @lesionado='% $lesionado %'");
+		$respuesta = array();
+		foreach ($datos as $dato) {
+
+			$respuesta[] = array(
+
+				'Folio' =>  $dato->Folio,
+	            'Etapa' =>  $dato->Etapa,
+	            'Fax' =>  $dato->Fax,
+	            'FechaFax' =>  $dato->FechaFax,
+	            'Original' =>  $dato->Original,
+	            'FechaOriginal' =>  $dato->FechaOriginal,
+	            'F.E.' =>  $dato->FacExp,
+	            'FechaF.E.' =>  $dato->FechaFacExp,
+	            'Situacion' =>  $dato->Situacion,
+	            'Unidad' =>  $dato->Unidad,
+	            'FechaPago' =>  $dato->FechaPago,
+	            'FechaCaptura' =>  $dato->FechaCaptura,
+	            'Lesionado' =>  $dato->DOC_lesionado,
+	            'Factura' =>  $dato->DOC_factura,
+	            'Remesa' =>  $dato->DOC_remesa,
+	            'Producto' =>  $dato->PRO_nombre,
+	            'Escolaridad' =>  $dato->ESC_nombre,
+	            'Cancelado' =>  $dato->Cancelado,
+	            'Numero' =>  $dato->etapaEntrega,
+	            'Empresa' =>  $dato->EMP_nombrecorto
+			);
+
+		}
+
+		return $respuesta;
+		
 	}
 
 	public function productos(){
@@ -105,4 +178,5 @@ class BusquedaController extends BaseController {
 	public function verificaprefijo($prefijo , $empresa){
 		return DB::select("EXEC MV_DCU_ValidaPrefijoFolio  @prefijo='$prefijo', @empresa='$empresa'");
 	}
+
 }

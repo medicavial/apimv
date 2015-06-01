@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'default' => 'production',
+	'default' => 'test',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -88,8 +88,8 @@ return array(
 			'driver'   => 'sqlsrv',
 			'host'     => 'SISTEMAS4',
 			'database' => 'MV2',
-			'username' => '',
-			'password' => '',
+			'username' => 'sa',
+			'password' => 'ACc3soMv',
 			'prefix'   => '',
 		),
 
