@@ -12,6 +12,14 @@ class BusquedaController extends BaseController {
 	public function empresas(){
 		return Empresa::where('emp_activa','=', 0)
 				->select('emp_claveint as id','emp_nombrecorto as nombre')
+				->orderBy('emp_nombrecorto')
+				->get();
+	}
+
+	public function empresasweb(){
+		return EmpresaWeb::where('Cia_activa','=', 'S')
+				->select('Cia_clave as Clave', 'Cia_nombrecorto as Nombre')
+				->orderBy('Cia_nombrecorto')
 				->get();
 	}
 
@@ -67,9 +75,51 @@ class BusquedaController extends BaseController {
 		return $folioweb;
 	}
 
+	public function flujo($folio){
+		return DB::select("EXEC MV_FLU_BuscaDocumento  @folio='$folio'");
+	}
+
+	public function historial($folio,$etapa,$entrega){
+
+		$datos = DB::table('HistorialFlujo')
+		->join('Documento', 'HistorialFlujo.his_folio', '=', 'Documento.DOC_folio')
+		->join('Empresa', 'Empresa.EMP_claveint', '=', 'Documento.EMP_claveint')
+		->join('Unidad', 'Unidad.UNI_claveint', '=', 'Documento.UNI_claveint')
+		->select('his_folio' , 'his_fecha' , 'his_etapa' , 'his_entrega' , 'his_hora' , 'his_titulo' , 'his_descripcion' , 'his_accion' , 'EMP_NombreCorto' , 'DOC_lesionado' , 'UNI_nombrecorto')
+		->where('His_folio', '=', $folio)
+		->where('His_etapa', '=', $etapa)
+		->where('his_entrega', '=', $entrega)
+		->get();
+
+		$historial = array();
+
+		foreach ($datos as $dato => $value) {
+
+			$historial[] = array(
+
+				'His_folio' =>  $value->his_folio,
+	            'His_etapa' =>  $value->his_etapa,
+	            'his_entrega' =>  $value->his_entrega,
+	            'his_fecha' =>  $value->his_fecha,'d/m/Y',
+	            'his_hora' =>  $value->his_hora,'G:ia',
+	            'his_titulo' =>  $value->his_titulo,
+	            'his_descripcion' =>  $value->his_descripcion,
+	            'his_accion' =>  $value->his_accion,
+	            'EMP_NombreCorto' =>  $value->EMP_NombreCorto,
+	            'DOC_lesionado' =>  $value->DOC_lesionado,
+	            'UNI_nombrecorto' =>  $value->UNI_nombrecorto
+			);
+
+		}
+
+
+
+		return $historial;
+	}
+
 	public function lesionado($lesionado){
 
-		$datos = DB::select("EXEC MV_DCU_ListadoDocumentosXLesionado  @lesionado='% $lesionado %'");
+		$datos = DB::select("EXEC MV_DCU_ListadoDocumentosXLesionado  @lesionado='%$lesionado%'");
 		$respuesta = array();
 		foreach ($datos as $dato) {
 
@@ -137,11 +187,30 @@ class BusquedaController extends BaseController {
 		return $usuarios;
 	}
 
+	public function usuariosweb(){
+		return UsuarioWeb::join('Permiso','Permiso.Usu_login' ,'=','Usuario.Usu_login')
+				->select('Usuario.Usu_login as Clave','Usu_nombre as Nombre')
+				->where('Usu_activo','S')
+				->whereNotIn('Usuario.Usu_login', ['algo','lendex'])
+				->where('Per_seguimiento','S')
+				->orderBy('Usu_nombre')
+				->get();
+	}
+
 
 
 	public function unidades(){
 		return Unidad::where('uni_activa','=', 0)
 				->select('uni_claveint as id','uni_nombrecorto as nombre')
+				->orderBy('uni_nombrecorto')
+				->get();
+	}
+
+
+	public function unidadesweb(){
+		return UnidadWeb::where('Uni_activa','=', 'S')
+				->select('Uni_clave as UnidadClave','Uni_nombre as Nombre')
+				->orderBy('Uni_nombre')
 				->get();
 	}
 	

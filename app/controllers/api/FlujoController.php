@@ -1,5 +1,7 @@
 <?php
 
+ini_set('memory_limit', '-1');
+
 include(app_path() . '/classes/Historiales.php');
 
 class FlujoController extends BaseController {
@@ -67,12 +69,15 @@ class FlujoController extends BaseController {
 			$flujo->FLD_rechazado = 0;
 			$flujo->FLD_observaciones = $observaciones;
 			///Si es archivo se autorecibe el documento con usuario recepcionautomatica que es 36 
-			if ($arearecibe == 7) {
+			if ($arearecibe == 7 || $arearecibe == 9) {
+
 				$flujo->USU_rec =  $usuariorecibe;
 				$flujo->FLD_fechaRec =  date('d/m/Y H:i:s'); 
 				$flujo->FLD_AROrec =  $arearecibe;
 				$flujo->USU_activo =  $usuariorecibe;
-			}else{
+				$flujo->ARO_activa =  $arearecibe;
+			}
+			else{
 				$flujo->FLD_porRecibir = 1;
 			}
 
@@ -86,6 +91,7 @@ class FlujoController extends BaseController {
 	}
 
 	public function activos($usuario){
+
 		return DB::select("EXEC MV_FLU_ListaGralXUsu @usuario=$usuario");
 	}
 
@@ -106,37 +112,46 @@ class FlujoController extends BaseController {
 	    $totalfactura = Input::get('totalfactura');
 	    $factura = Input::get('factura');
 
-		$conexion = DB::connection()->getPdo();
+		$documento = new documento;
 
-		$query = "EXEC MV_DCU_CapturaOriginal @folio = :folio, @etapa = :etapa, @lesionado = :lesionado,  @unidad = :unidad, @empresa = :empresa, @ambulancia = 0, @fechapago = NULL,  @originalfecha = :originalfecha,  
-				@usuario = :usuario, @remesa = :remesa, @numentrega = :entrega  , @producto = :producto, @folioFac = :factura, @totalFac = :totalfactura, @escolaridad = :escolaridad, @internet = 1 "; 
+		$documento->DOC_folio = $folio;
+		$documento->DOC_etapa = $etapa;
+		$documento->DOC_lesionado = $lesionado;                                
+		$documento->UNI_claveint = $unidad;
+		$documento->DOC_ambulancia = 0;
+		$documento->DOC_fechapago = NULL; 
+		$documento->DOC_original = 1; 
+		$documento->DOC_originalfecha = $fecha; 
+		$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
+		$documento->EMP_claveint = $empresa; 
+		$documento->USU_original = $usuario; 
+		$documento->DOC_remesa = $remesa; 
+		$documento->DOC_numeroentrega = $numentrega;              
+		$documento->PRO_claveint = $producto; 
+		$documento->DOC_factura = $factura; 
+		$documento->DOC_totalFac = $totalfactura; 
+		$documento->ESC_claveint = $escolaridad; 
+
+		$documento->save();
+
+
+		$clave = $documento->DOC_claveint;
+
+		$flujo = new Flujo;
+
+		$flujo->FLD_formaRecep = 'O'; 
+	    $flujo->FLD_AROrec = 1; 		  
+	    $flujo->USU_rec = $usuario;
+	    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
+        $flujo->USU_activo = $usuario;
+        $flujo->DOC_claveint = $clave; 
+
+        $flujo->save();
+
+		Historial::altaOriginal($folio,$etapa,$numentrega);
 		
-		$stmt = $conexion->prepare( $query ); 
-
-		$stmt->bindParam('folio',$folio);
-		$stmt->bindParam('etapa',$etapa);
-		$stmt->bindParam('lesionado',$lesionado);
-		$stmt->bindParam('unidad',$unidad);
-		$stmt->bindParam('empresa',$empresa);
-		$stmt->bindParam('usuario',$usuario);
-		$stmt->bindParam('remesa',$remesa);
-		$stmt->bindParam('entrega',$numentrega);
-		$stmt->bindParam('producto',$producto);
-		$stmt->bindParam('factura',$factura);
-		$stmt->bindParam('totalfactura',$totalfactura);
-		$stmt->bindParam('escolaridad',$escolaridad);
-		$stmt->bindParam('originalfecha',$fecha);
-
-
-		if ($stmt->execute()) {
-
-			if(Historial::altaOriginal($folio,$etapa,$numentrega)){
-				return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 
-			}
-
-		}else{
-			return Response::json(array('respuesta' => 'Hubo un error intentelo nuevamente'), 500); 
-		}
+		return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 
+		
 
 	}
 
@@ -151,27 +166,51 @@ class FlujoController extends BaseController {
 	    $totalfactura = Input::get('totalfactura');
 	    $factura = Input::get('factura');
 
-		$conexion = DB::connection()->getPdo();
 
-		$query = "EXEC MV_DCU_ActualizaDocumento @claveint = :clave, @lesionado = :lesionado, @ambulancia = 0, @fechapago = '',  @originalfecha = :fecha,  
-				@usuario = :usuario , @remesa = :remesa, @folioFac = :factura, @totalFac = :totalfactura";
+	    $documento =  documento::find($claveint);	    
+
+		$documento->DOC_lesionado = $lesionado;                                
+		$documento->DOC_ambulancia = 0;
+		$documento->DOC_fechapago = NULL; 
+		$documento->DOC_original = 1; 
+		$documento->DOC_originalfecha = $fecha; 
+		$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
+		$documento->USU_original = $usuario; 
+		$documento->DOC_remesa = $remesa; 
+		$documento->DOC_factura = $factura; 
+		$documento->DOC_totalFac = $totalfactura; 
+
+		$documento->save();
+
+		$flujo = new Flujo;
+
+		$flujo->FLD_formaRecep = 'O'; 
+	    $flujo->FLD_AROrec = 1; 		  
+	    $flujo->USU_rec = $usuario;
+	    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
+        $flujo->USU_activo = $usuario;
+        $flujo->DOC_claveint = $claveint; 
+
+        $flujo->save();
+
+		// $conexion = DB::connection()->getPdo();
+
+		// $query = "EXEC MV_DCU_ActualizaDocumento @claveint = :clave, @lesionado = :lesionado, @ambulancia = 0, @fechapago = '',  @originalfecha = :fecha,  
+		// 		@usuario = :usuario , @remesa = :remesa, @folioFac = :factura, @totalFac = :totalfactura";
 		
-		$stmt = $conexion->prepare( $query ); 
+		// $stmt = $conexion->prepare( $query ); 
 
-		$stmt->bindParam('clave',$claveint);
-		$stmt->bindParam('folio',$folio);
-		$stmt->bindParam('lesionado',$lesionado);
-		$stmt->bindParam('usuario',$usuario);
-		$stmt->bindParam('remesa',$remesa);
-		$stmt->bindParam('factura',$factura);
-		$stmt->bindParam('totalfactura',$totalfactura);
-		$stmt->bindParam('originalfecha',$fecha);
+		// $stmt->bindParam('clave',$claveint);
+		// $stmt->bindParam('folio',$folio);
+		// $stmt->bindParam('lesionado',$lesionado);
+		// $stmt->bindParam('usuario',$usuario);
+		// $stmt->bindParam('remesa',$remesa);
+		// $stmt->bindParam('factura',$factura);
+		// $stmt->bindParam('totalfactura',$totalfactura);
+		// $stmt->bindParam('originalfecha',$fecha);
 
-		if ($stmt->execute()) {
-			return Response::json(array('respuesta' => 'Folio Actualizado Correctamente')); 
-		}else{
-			return Response::json(array('respuesta' => 'Hubo un error intentelo nuevamente'), 500); 
-		}
+		return Response::json(array('respuesta' => 'Folio Actualizado Correctamente')); 
+
 
 	}
 
@@ -260,6 +299,38 @@ class FlujoController extends BaseController {
 
 	public function npc($usuario){
 		return DB::select("EXEC MV_FLU_ListaGralXUsuNPC @usuario=$usuario");
+	}
+
+
+	public function consulta($usuario){
+
+		$respuesta = array();
+
+		$condicionRechazo = ['USU_activo' => $usuario, 'FLD_porRecibir' => 0, 'FLD_rechazado' => 1];
+		$condicionXRecibir = ['USU_recibe' => $usuario, 'FLD_rechazado' => 0];
+		
+		$respuesta['rechazos'] = Flujo::where($condicionRechazo)->count();
+		$respuesta['xrecibir'] = Flujo::where($condicionXRecibir)->count();
+
+		return $respuesta;
+
+	}
+
+
+	public function activosarea($area){
+		return DB::select("EXEC MV_FLU_ListaGralXArea @area=$area");
+	}
+
+	public function entregasarea($area){
+		return DB::select("EXEC MV_FLU_ListaEntregaXArea @area=$area");
+	}
+
+	public function recepcionarea($area){
+		return DB::select("EXEC MV_FLU_ListaRecepcionXArea @area=$area");
+	}
+
+	public function rechazosarea($area){
+		return DB::select("EXEC MV_FLU_ListaGralXAreaRechazo @area=$area");
 	}
 
 }

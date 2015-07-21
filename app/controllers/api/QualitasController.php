@@ -47,6 +47,7 @@ class QualitasController extends BaseController {
 
  
 		$datos =  DB::select("EXEC MVQualitasWSconsulta @folio = '$folio'");
+		$data = array();
 
 		foreach ($datos as $dato){
 
@@ -188,7 +189,7 @@ class QualitasController extends BaseController {
 		$clave = $this->generar_clave();
 		$fechacarpeta =  $Dia . "-" . $Mes . "-" . $Anyo;
 		$filename = "archivo-". $fechacarpeta . "-". $clave . ".zip";
-		$carpetaexporta = storage_path().'/exports/'.$filename;
+		$carpetaexporta = public_path().'/exports/'.$filename;
 
 		// $zip = new ZipArchive();
 		// $zip->open($filename, ZipArchive::CREATE);
@@ -388,6 +389,8 @@ class QualitasController extends BaseController {
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
 		$datos =  DB::select("EXEC MVQualitasWSarchivos @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		$data = array();
 
 		foreach ($datos as $dato){
 

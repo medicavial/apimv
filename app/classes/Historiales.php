@@ -43,6 +43,53 @@ class Historial {
 
     }
 
+
+
+    public static function altaTicket($folio,$foliointerno,$etapa,$usuario)
+    {
+
+        $datos = Documento::where('DOC_folio',$folio)->where('DOC_etapa',$etapa)->get();
+		foreach ($datos as $dato) {
+			$documento = $dato['DOC_claveint'];
+		}
+
+		$flujo = Flujo::where('DOC_claveint',$documento)->first();
+		$claveflujo = $flujo->FLD_claveint;
+
+		$usuarios = DB::table('UsuarioArea')
+		->where('USU_claveint', 1)
+		->get();
+
+		foreach ($usuarios as $user => $value) {
+			$area = $value->ARO_claveint;
+		}
+
+		$areaNombre = Areas::find($area)->ARO_nombre;
+		$nombre = User::find($usuario)->USU_nombre;
+
+    	$descripcion =  "El Usuario " . $nombre . " del area " . $areaNombre . " emitió ticket con folio interno " . $foliointerno . "";
+
+		$historial = new Historico;
+		$historial->HIS_folio = $folio;
+		$historial->HIS_fecha =  date('d/m/Y H:i:s'); 
+		$historial->HIS_hora =  date('d/m/Y H:i:s'); 
+		$historial->HIS_titulo =  'Se emitio Ticket'; //indica que se ingreso un nuevo expediente en recepcion de documentos
+		$historial->HIS_descripcion =  $descripcion; 
+		$historial->HIS_area =  $area;
+		$historial->HIS_usuario =  $usuario;
+		$historial->HIS_accion = 'Ticket';
+		$historial->HIS_etapa =  $etapa;
+		$historial->HIS_entrega =  0;
+		$historial->DOC_claveint =  $documento;  
+		$historial->FLD_claveint =  $claveflujo;
+		$historial->save();
+		
+		return  true;
+
+    }
+
+
+
     public static function altaEntrega($clave)
     {
 
@@ -247,7 +294,7 @@ class Historial {
 		$arearecibe = Areas::find($flujo->ARO_porRecibir)->ARO_nombre;
 		$usuariorecibe = User::find($flujo->USU_recibe)->USU_nombre;
 		
-		$titulo = "Se quito como entrega de docuemnto";
+		$titulo = "Se quito como entrega de documento";
 		$descripcion = "El usuario " . $usuarioentrega . "  removio el documento impidiendo que llegara al area: " . $arearecibe;
 
 		$historial = new Historico;

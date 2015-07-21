@@ -4,14 +4,6 @@ class UserController extends BaseController {
 
 	public function login(){
 
-		// $user = Input::get('user');
-		// $psw = Input::get('psw');
-		// if (Auth::attempt(array('USU_login' => $user, 'USU_password' => $psw ))){
-		// 	return Auth::user();
-		// }else{
-		// 	return Response::json(array('respuesta' => 'Nombre de Usuario o contraseña Invalida'), 500); 
-		// }
-
 		$user = Input::get('user');
 		$psw = md5(Input::get('psw'));
 		$usuario = DB::table('Usuario')

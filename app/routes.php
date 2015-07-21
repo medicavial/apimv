@@ -31,7 +31,6 @@ Route::group(array('prefix' => 'api'), function()
     Route::post('insertanpc', array('uses' => 'FlujoController@insertanpc'));
     Route::post('eliminanpc', array('uses' => 'FlujoController@eliminanpc'));
 
-
     //busquedas de control de documentos
 	Route::group(array('prefix' => 'controldocumentos'), function()
 	{
@@ -40,23 +39,59 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('fechas', array('uses' => 'ControlController@fechas'));
 	});
 
+	//busquedas de tickets normales y de pagos
+	Route::group(array('prefix' => 'tickets'), function()
+	{
+		Route::post('', array('uses' => 'TicketController@altaticket'));
+		Route::put('', array('uses' => 'TicketController@actualizaticket'));
+    	Route::post('consulta', array('uses' => 'TicketController@consulta'));
+    	Route::get('categorias', array('uses' => 'TicketController@categorias'));
+    	Route::get('detalle/{foliointerno}/{folio}', array('uses' => 'TicketController@detalle'));
+    	Route::get('folio/{folio}', array('uses' => 'TicketController@folio'));
+    	Route::get('foliointerno/{folio}', array('uses' => 'TicketController@foliointerno'));
+    	Route::get('maximo', array('uses' => 'TicketController@maximo'));
+    	Route::get('status', array('uses' => 'TicketController@status'));
+    	Route::get('subcategorias/{categoria}', array('uses' => 'TicketController@subcategorias'));
+
+    	Route::group(array('prefix' => 'pagos'), function()
+		{
+			Route::post('', array('uses' => 'TicketController@altaticketpagos'));
+			Route::put('', array('uses' => 'TicketController@actualizaticketpagos'));
+	    	Route::post('consulta', array('uses' => 'TicketController@consultapagos'));
+	    	Route::get('categorias', array('uses' => 'TicketController@categoriaspagos'));
+	    	Route::get('detalle/{foliointerno}/{folio}', array('uses' => 'TicketController@detallepagos'));
+	    	Route::get('folio/{folio}', array('uses' => 'TicketController@foliopagos'));
+	    	Route::get('foliointerno/{folio}', array('uses' => 'TicketController@foliointernopagos'));
+	    	Route::get('status', array('uses' => 'TicketController@statuspagos'));
+	    	Route::get('subcategorias/{categoria}', array('uses' => 'TicketController@subcategoriaspagos'));
+		});
+
+	});
+
 	Route::group(array('prefix' => 'consulta'), function()
 	{
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
+		Route::get('empresasweb', array('uses' => 'BusquedaController@empresasweb'));
 	    Route::get('escolaridad', array('uses' => 'BusquedaController@escolaridad'));
 	    Route::get('folio/{folio}', array('uses' => 'BusquedaController@folio'));
 	    Route::get('folioweb/{folio}', array('uses' => 'BusquedaController@folioweb'));
+	    Route::get('flujo/{folio}', array('uses' => 'BusquedaController@flujo'));
+	    Route::get('historial/{folio}/{etapa}/{entrega}', array('uses' => 'BusquedaController@historial'));
 	    Route::get('lesionado/{lesionado}', array('uses' => 'BusquedaController@lesionado'));
 	    Route::get('productos', array('uses' => 'BusquedaController@productos'));
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
 	    Route::get('usuarios/{area}', array('uses' => 'BusquedaController@usuariosarea'));
+	    Route::get('usuariosweb', array('uses' => 'BusquedaController@usuariosweb'));
 	    Route::get('unidades', array('uses' => 'BusquedaController@unidades'));
+	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));
 	    Route::get('verificaetapaentrega/{folio}/{etapa}', array('uses' => 'BusquedaController@verificaetapaentrega'));
 	    Route::get('verificafolio/{folio}/{etapa}', array('uses' => 'BusquedaController@verificafolio'));
 	    Route::get('verificafoliopase/{folio}', array('uses' => 'BusquedaController@verificafoliopase'));
 	    Route::get('verificaprefijo/{prefijo}/{empresa}', array('uses' => 'BusquedaController@verificaprefijo'));
+	    
+	    
 	});
 
 	Route::group(array('prefix' => 'entregas'), function()
@@ -68,6 +103,8 @@ Route::group(array('prefix' => 'api'), function()
 
     Route::group(array('prefix' => 'flujo'), function()
 	{
+		Route::get('consulta/{usuario}', array('uses' => 'FlujoController@consulta'));
+
 		Route::post('alta', array('uses' => 'FlujoController@alta'));
 		Route::post('actualiza', array('uses' => 'FlujoController@actualiza'));
 		Route::get('activos/{usuario}', array('uses' => 'FlujoController@activos'));
@@ -76,6 +113,12 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('recepcion/{usuario}', array('uses' => 'FlujoController@recepcion'));
 		Route::get('rechazos/{usuario}', array('uses' => 'FlujoController@rechazos'));
 		Route::get('npc/{usuario}', array('uses' => 'FlujoController@npc'));
+
+		Route::get('activosarea/{area}', array('uses' => 'FlujoController@activosarea'));
+		Route::get('entregasarea/{area}', array('uses' => 'FlujoController@entregasarea'));
+		Route::get('recepcionarea/{area}', array('uses' => 'FlujoController@recepcionarea'));
+		Route::get('rechazosarea/{area}', array('uses' => 'FlujoController@rechazosarea'));
+
 	});
 
 	Route::group(array('prefix' => 'flujopagos'), function()
@@ -106,6 +149,9 @@ Route::group(array('prefix' => 'api'), function()
 	{
     	Route::post('controldocumentos', array('uses' => 'ReportesController@control'));
     	Route::get('descargar/{archivo}', array('uses' => 'ReportesController@descargar'))->where('archivo', '[A-Za-z0-9\-\_\.]+');
+    	Route::get('tickets', array('uses' => 'ReportesController@tickets'));
+    	Route::get('ticketsdia', array('uses' => 'ReportesController@ticketsdia'));
+    	Route::post('ticketsdia', array('uses' => 'ReportesController@ticketsdiaespecifico'));
 	});
 
 });
