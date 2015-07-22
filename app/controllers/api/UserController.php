@@ -6,12 +6,10 @@ class UserController extends BaseController {
 
 		$user = Input::get('user');
 		$psw = md5(Input::get('psw'));
-		$usuario = DB::table('Usuario')
-					->leftJoin('UsuarioArea', 'Usuario.USU_claveint', '=', 'UsuarioArea.USU_claveint')
-					->select('Usuario.USU_claveint as clave', 'USU_Nombre as nombre', 'ARO_claveint as area', 'USU_login as usuario', 'USU_usuarioWeb as usuarioweb')
+		$usuario = User::leftJoin('UsuarioArea', 'Usuario.USU_claveint', '=', 'UsuarioArea.USU_claveint')
+					->select('Usuario.USU_claveint as clave', 'USU_Nombre as nombre', 'ARO_claveint as area', 'USU_login as usuario', 'USU_usuarioWeb as usuarioweb','Usuario.*')
 					->where('USU_login','=',$user)
 					->where('USU_password','=',$psw)
-					->take(1)
 					->get();
 
 		if ($usuario) {

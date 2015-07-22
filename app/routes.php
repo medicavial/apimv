@@ -83,6 +83,7 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
 	    Route::get('usuarios/{area}', array('uses' => 'BusquedaController@usuariosarea'));
+	    Route::get('usuariostodos/{area}', array('uses' => 'BusquedaController@usuariostodosarea'));
 	    Route::get('usuariosweb', array('uses' => 'BusquedaController@usuariosweb'));
 	    Route::get('unidades', array('uses' => 'BusquedaController@unidades'));
 	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));

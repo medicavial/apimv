@@ -187,6 +187,17 @@ class BusquedaController extends BaseController {
 		return $usuarios;
 	}
 
+	public function usuariostodosarea($area){
+
+		$usuarios = DB::table('Usuario')
+		->join('UsuarioArea', 'Usuario.USU_claveint', '=', 'UsuarioArea.USU_claveint')
+		->select('Usuario.USU_claveint as id','USU_login as nombre')
+		->where('ARO_claveint', '=', $area)
+		->get();
+		
+		return $usuarios;
+	}
+
 	public function usuariosweb(){
 		return UsuarioWeb::join('Permiso','Permiso.Usu_login' ,'=','Usuario.Usu_login')
 				->select('Usuario.Usu_login as Clave','Usu_nombre as Nombre')
