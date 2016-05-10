@@ -1,4 +1,5 @@
 <?php
+include(app_path() . '/classes/Header.php');
 
 class QualitasController extends BaseController {
 
@@ -23,6 +24,10 @@ class QualitasController extends BaseController {
 				->where('PAS_folio', $folio)
 				->update(array('DEE_procesado' => 1));
 
+			$pase = Pase::find($folio);
+ 			$pase->PAS_procQ = 2;
+ 			$pase->save();
+
  		}
 
  		//se toman los que no para poderlos actualizar en la tabla pase
@@ -40,7 +45,7 @@ class QualitasController extends BaseController {
  		$respuesta = array('respuesta' => 'Datos procesados Correctamente','faltantes' => $foliosNoprocesados);
 
  		return Response::json($respuesta);
-
+ 		
 	}
 
 	public function consulta($folio){
@@ -88,8 +93,7 @@ class QualitasController extends BaseController {
 		}
 
 		return $data;
-	
-	
+		
 	}
 
 	public function invalidos(){
@@ -198,7 +202,7 @@ class QualitasController extends BaseController {
 		$peso = 0;
 		$pesofolio = 0;
 		$maximofolios = 50;//maximo de folios por archivo
-		$folio = 0;
+		$cuentaFolio = 0;
 
 		//verificamos folio x folio para ver si cumople con 
 		foreach ($datos as $dato) {
@@ -259,9 +263,9 @@ class QualitasController extends BaseController {
 			if (File::exists($archivo1) && File::exists($archivo2) && File::exists($archivo3)) {
 
 
-				if ($peso < $pesototal ) {
+				if ($cuentaFolio < $maximofolios) {
 
-					if ($folio <= $maximofolios) {
+					if ($peso < $pesototal ) {
 						
 						$pesoarchivo1 = filesize($archivo1);
 						$pesoarchivo2 = filesize($archivo2);
@@ -278,7 +282,7 @@ class QualitasController extends BaseController {
 
 					    array_push($archivos, $dato);
 
-					    $folio = $folio + 1;
+					    $cuentaFolio = $cuentaFolio + 1;
 
 					}
 
@@ -301,6 +305,83 @@ class QualitasController extends BaseController {
 
  		return Response::json($resultado);
 	
+	}
+
+	public function general(){
+
+ 		$fechaini =  Input::get('fechaini'); 
+	    $fechafin =  Input::get('fechafin'); 
+		
+		$datos =  DB::select("EXEC MVQualitasWSgeneral @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		$data = array();
+
+		foreach ($datos as $dato) {
+			
+            $valor5 = $dato->claveprestador;
+			$valor6 = $dato->Siniestro;
+            $valor7 = $dato->Reporte;
+            $valor10 = $dato->Cobertura;
+            $valor18 = $dato->Unidad;
+
+            if ($valor6 != $valor7) {
+
+            	if ($valor10 != 99) {
+
+            		if ($valor5 == '07370' && $valor18 == 33 ) {
+
+            			$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+
+            		}else{
+
+						$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+            			
+            		}
+
+            	}
+            }
+
+
+		}
+
+		return $data;
+
 	}
 
 	public function principal(){
@@ -381,6 +462,50 @@ class QualitasController extends BaseController {
  		}
 
  		return Response::json(array('respuesta' => 'Datos procesados Correctamente'));
+
+	}
+
+	public function reporte($reporte){
+
+		$wsdl = "http://201.151.239.105:8070/wsProveedores/siniestros?wsdl";
+	    $username = '07370';
+	    $password = '535466';
+
+
+        try {
+
+		    $client = new SoapClient($wsdl,array('trace' => 1));
+
+	        $wsse_header = new WsseAuthHeader($username, $password);
+	        $client->__setSoapHeaders(array($wsse_header));
+	        $param = array('reporte' => $reporte);
+	        $respuesta = $client->getSiniestroByReporte($param);
+		    
+	        foreach ($respuesta as $key => $value) {
+
+	        	$data = array(
+	                    'reporte' => $reporte,
+	                    'siniestro' => $value->numeroSiniestro,
+	                    'poliza' => $value->numeroPoliza,
+	                    'causa' => $value->causa
+				);
+
+	        	// echo $reporte . '<br>';
+	        	// echo $value->numeroSiniestro.  '<br>';
+	        	// echo $value->numeroPoliza . '<br>';
+	        	// echo $value->causa.  '<br>';
+
+
+
+       		}
+
+		} catch (Exception $e) {
+	        $data = array('respuesta' => 'Reporte invalido');
+	        // echo 'error';
+		}
+
+		return $data;
+        // print_r($data);
 
 	}
 
@@ -507,6 +632,28 @@ class QualitasController extends BaseController {
 	
 	}
 
+	public function renombrar(){
+
+ 		$datos =  Input::all(); 
+ 		$detalle = array();
+	   	
+		foreach ($datos as $dato){
+
+			$folio = $dato['folioSistema'];
+			$fecha = $dato['FechaCaptura'];
+
+			$nombreEsperado = $this->nombreArchivo($folio);
+			$renombres = $this->archivoRenombra($folio,$fecha,$nombreEsperado);
+
+			$detalle[] = $renombres;
+
+		}
+
+		return $detalle;
+	
+	
+	}
+
 	//funciones privadas
 	private function generar_clave(){ 
 
@@ -526,6 +673,7 @@ class QualitasController extends BaseController {
 		}
 
 		return $nombre;
+
 	}
 
 	private function archivos($folio, $fecha, $nombre){
@@ -696,6 +844,230 @@ class QualitasController extends BaseController {
 			$encontrados['ME024'] = 0;
 			$encontrados['ME02'] = 0;
 			$encontrados['GN19'] = 0;
+			$encontrados['nombreActual'] = 'No existe carpeta';
+		}
+
+		return $encontrados;
+
+	}
+
+	private function archivoRenombra($folio, $fecha, $nombreEsperado){
+
+		$MesNro = date('m', strtotime($fecha));
+		$DiaNro = date('d', strtotime($fecha));
+		$AnyoNro = date('Y', strtotime($fecha));
+		
+
+		if($MesNro=='01'){ 
+			$MesNro="1"; 
+		} 
+
+		if($MesNro=='02'){ 
+			$MesNro="2"; 
+		} 
+
+		if($MesNro=='03'){ 
+			$MesNro="3"; 
+		} 
+
+		if($MesNro=='04'){ 
+			$MesNro="4"; 
+		} 
+
+		if($MesNro=='05'){ 
+			$MesNro="5"; 
+		} 
+
+		if($MesNro=='06'){ 
+			$MesNro="6"; 
+		} 
+
+		if($MesNro=='07'){ 
+			$MesNro="7"; 
+		} 
+
+		if($MesNro=='08'){ 
+			$MesNro="8"; 
+		} 
+
+		if($MesNro=='09'){ 
+			$MesNro="9"; 
+		} 
+
+		//$ruta = "C:\\Users\\salcala.MEDICAVIAL\\Desktop\\MV\\QUALITAS\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+		//ruta en producción
+		$ruta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+
+		$rutaRenombre = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio . "\\";
+
+		$encontrados = array();
+
+		$encontrados['folio'] = $folio;
+		$encontrados['Fecha_Captura'] = $fecha;
+		$encontrados['nombreNuevo'] = '';
+    	$encontrados['nombreAnterior'] = '';
+
+		$encontrados['QS_07'] = 0;
+		$encontrados['ME_024'] = 0;
+		$encontrados['ME_023'] = 0;
+		$encontrados['ME_022'] = 0;
+		$encontrados['ME_021'] = 0;
+		$encontrados['GN_19'] = 0;
+		$encontrados['QS07']  = 0;
+		$encontrados['ME021'] = 0;
+		$encontrados['ME022'] = 0;
+		$encontrados['ME023'] = 0;
+		$encontrados['ME024'] = 0;
+		$encontrados['ME02'] = 0;
+		$encontrados['GN19'] = 0;
+
+		$encontrados['QS_07/Renombrado'] = 0;
+		$encontrados['ME_024/Renombrado'] = 0;
+		$encontrados['ME_023/Renombrado'] = 0;
+		$encontrados['ME_022/Renombrado'] = 0;
+		$encontrados['ME_021/Renombrado'] = 0;
+		$encontrados['GN_19/Renombrado'] = 0;
+		$encontrados['QS07/Renombrado']  = 0;
+		$encontrados['ME021/Renombrado'] = 0;
+		$encontrados['ME022/Renombrado'] = 0;
+		$encontrados['ME023/Renombrado'] = 0;
+		$encontrados['ME024/Renombrado'] = 0;
+		$encontrados['ME02/Renombrado'] = 0;
+		$encontrados['GN19/Renombrado'] = 0;
+
+
+		$encontrados['nombreAnterior'] = '';
+
+		//verifica 
+		if (file_exists($ruta)){
+
+			$directorio = opendir($ruta); //ruta actual
+
+
+			while ($archivo = readdir($directorio)) //obtenemos un archivo y luego otro sucesivamente
+			{
+			    if (!is_dir($archivo))//verificamos si es o no un directorio
+			    {	
+			    	//originales
+			    	$archivoNuevo = $rutaRenombre . $nombreEsperado;
+			    	$encontrados['nombreNuevo'] = $nombreEsperado;
+			    	$encontrados['nombreAnterior'] = $archivo;
+
+			    	if (preg_match('/QS_07.jpg/' , $archivo)) {
+			    		$encontrados['QS_07'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+							$encontrados['QS_07/Renombrado'] = 1;
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'QS_07.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME_024.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_024'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME_024/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME_024.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME_023.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_023'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME_023/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME_023.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME_022.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_022'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME_022/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME_022.jpg');
+			    		}
+			    	}
+
+
+			    	if (preg_match('/ME_021.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME_021'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME_021/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME_021.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/GN_19.jpg/' , $archivo) == 1) {
+			    		$encontrados['GN_19'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['GN_19/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'GN_19.jpg');
+			    		}
+			    	}
+
+			    	//comprimidas
+
+			    	if (preg_match('/QS07.jpg/' , $archivo) == 1) {
+			    		$encontrados['QS07'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['QS07/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'QS07.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME021.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME021'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME021/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME021.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME022.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME022'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME022/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME022.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME023.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME023'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME023/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME023.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match('/ME024.jpg/' , $archivo) == 1) {
+			    		$encontrados['ME024'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME024/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME024.jpg');
+			    		}
+			    	}
+
+
+			    	if (preg_match('/GN19.jpg/' , $archivo) == 1) {
+			    		$encontrados['GN19'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['GN19/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'GN19.jpg');
+			    		}
+			    	}
+
+			    	if (preg_match( '/ME02.pdf/' , $archivo) == 1) {
+			    		$encontrados['ME02'] = 1;
+			    		if ($archivo != $nombreEsperado) {
+			    			$encontrados['ME02/Renombrado'] = 1;	
+			    			rename ($rutaRenombre . $archivo, $archivoNuevo . 'ME02.pdf');
+			    		}
+			    	}
+
+			    }
+
+
+			}
+
+		}else{
+
 			$encontrados['nombreActual'] = 'No existe carpeta';
 		}
 

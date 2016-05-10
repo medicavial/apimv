@@ -17,7 +17,49 @@ Route::group(array('prefix' => 'api'), function()
 {
 	Route::get('/', function()
 	{
+		$datosCentrales =  DB::select(" EXEC MV_REW_Captura_folio  @folio='PEMV035563' " )[0];
+
+		$registro = new ExpedienteInfo;
+		$registro->EXP_folio = $datosCentrales->Folio;
+		$registro->EXP_lesionado = $datosCentrales->Lesionado;
+		$registro->CIA_clave = $datosCentrales->ClienteWeb;
+		$registro->UNI_clave = $datosCentrales->UnidadWeb;
+		$registro->EXP_fechaExpedicion = $datosCentrales->FExpedicion;
+		$registro->EXP_fechaCaptura = $datosCentrales->FCaptura;
+		$registro->EXP_fechaAtencion = $datosCentrales->FAtencion;
+		$registro->EXP_poliza = $datosCentrales->Poliza;
+		$registro->EXP_siniestro = $datosCentrales->Siniestro;
+		$registro->EXP_reporte = $datosCentrales->Reporte;
+		$registro->EXP_orden = $datosCentrales->NoOrden;
+		$registro->POS_claveint = $datosCentrales->PosicionWeb;
+		$registro->RIE_claveint = $datosCentrales->RiesgoWeb;
+		$registro->EXP_ajustador = $datosCentrales->Ajustador;
+		$registro->EXP_medico = $datosCentrales->Medico;
+		$registro->EXP_obsAjustador = $datosCentrales->LesionesA;
+		$registro->LES_primaria = $datosCentrales->LPrimaria;
+		$registro->LES_empresa = $datosCentrales->LEmpresa;
+		$registro->EXP_diagnostico = $datosCentrales->DescMedica;
+		$registro->FAC_folioFiscal = $datosCentrales->FolFiscal;
+		$registro->FAC_serie = $datosCentrales->Serie;
+		$registro->FAC_folio = $datosCentrales->Factura;
+		$registro->FAC_fecha = $datosCentrales->FFactura;
+		$registro->FAC_importe = $datosCentrales->Importe;
+		$registro->FAC_iva = $datosCentrales->IVA;
+		$registro->FAC_total = $datosCentrales->Total;
+		$registro->FAC_saldo = $datosCentrales->Saldo;
+		$registro->FAC_pagada = $datosCentrales->Pagada;
+		$registro->FAC_fechaPago = $datosCentrales->FPagoFac;
+		$registro->FAC_ultimaAplicacion = $datosCentrales->FUltApl;
+		$registro->EXP_fechaRegWeb = $datosCentrales->FExp;
+		$registro->EXP_costoEmpresa = $datosCentrales->CostoEmpresa;
+
+		$registro->save();
+
 		return View::make('hello');
+	});
+
+	Route::get('/monitor', function(){
+		return DB::select("EXEC MVMonitorCaptura");
 	});
 
     Route::post('login', array('uses' => 'UserController@login'));
@@ -30,6 +72,7 @@ Route::group(array('prefix' => 'api'), function()
     //movimiento que cambia un bit para que sea reconocido como folio para "no pagar hasta cobrar"
     Route::post('insertanpc', array('uses' => 'FlujoController@insertanpc'));
     Route::post('eliminanpc', array('uses' => 'FlujoController@eliminanpc'));
+    Route::post('posiblenp', array('uses' => 'FlujoController@posiblenp'));
 
     //busquedas de control de documentos
 	Route::group(array('prefix' => 'controldocumentos'), function()
@@ -71,6 +114,9 @@ Route::group(array('prefix' => 'api'), function()
 	Route::group(array('prefix' => 'consulta'), function()
 	{
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
+		Route::get('ajustadores/{cliente}', array('uses' => 'BusquedaController@ajustador'));
+		Route::get('buscador/{consulta}/{tipo}', array('uses' => 'BusquedaController@buscador'));
+		Route::get('editaDatos/{folio}', array('uses' => 'BusquedaController@editaDatos'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 		Route::get('empresasweb', array('uses' => 'BusquedaController@empresasweb'));
 	    Route::get('escolaridad', array('uses' => 'BusquedaController@escolaridad'));
@@ -82,11 +128,17 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('productos', array('uses' => 'BusquedaController@productos'));
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
+	    Route::get('riesgos', array('uses' => 'BusquedaController@riesgos'));
+	    Route::get('subsecuencia/{folio}/{entrega}', array('uses' => 'BusquedaController@subsecuencia'));
+	    Route::get('tipoLesion/{tipo}', array('uses' => 'BusquedaController@tipoLesion'));
+	    Route::get('triage', array('uses' => 'BusquedaController@triage'));
 	    Route::get('usuarios/{area}', array('uses' => 'BusquedaController@usuariosarea'));
 	    Route::get('usuariostodos/{area}', array('uses' => 'BusquedaController@usuariostodosarea'));
 	    Route::get('usuariosweb', array('uses' => 'BusquedaController@usuariosweb'));
 	    Route::get('unidades', array('uses' => 'BusquedaController@unidades'));
 	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));
+	    Route::get('lesiones/{tipoLes}', 'BusquedaController@lesiones');
+	    Route::get('lesionweb', 'BusquedaController@lesionWeb');
 	    Route::get('verificaetapaentrega/{folio}/{etapa}', array('uses' => 'BusquedaController@verificaetapaentrega'));
 	    Route::get('verificafolio/{folio}/{etapa}', array('uses' => 'BusquedaController@verificafolio'));
 	    Route::get('verificafoliopase/{folio}', array('uses' => 'BusquedaController@verificafoliopase'));
@@ -124,9 +176,14 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'flujopagos'), function()
 	{
-		Route::post('general', array('uses' => 'FlujopagosController@general'));
+		Route::get('general', array('uses' => 'FlujopagosController@general'));
 		Route::post('fecharecepcion', array('uses' => 'FlujopagosController@fecharecepcion'));
 		Route::post('fechapagos', array('uses' => 'FlujopagosController@fechapagos'));
+	});
+
+	Route::group(array('prefix' => 'operacion'), function()
+	{
+		Route::post('editaDatos', array('uses' => 'HomeController@editaDatos'));
 	});
 
 	Route::group(array('prefix' => 'qualitas'), function()
@@ -136,10 +193,13 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('envios', array('uses' => 'QualitasController@envios'));
 		Route::get('envios/{envio}', array('uses' => 'QualitasController@envio'));
     	Route::post('genera', array('uses' => 'QualitasController@generaArchivos'));
+    	Route::post('general', array('uses' => 'QualitasController@general'));
     	Route::post('principal', array('uses' => 'QualitasController@principal'));
     	Route::get('procesado/{envio}', array('uses' => 'QualitasController@procesado'));
     	Route::post('procesa', array('uses' => 'QualitasController@procesa'));
     	Route::post('rechazos', array('uses' => 'QualitasController@rechazos'));
+    	Route::get('reporte/{reporte}', array('uses' => 'QualitasController@reporte'));
+    	Route::post('renombrar', array('uses' => 'QualitasController@renombrar'));
     	Route::post('sinarchivo', array('uses' => 'QualitasController@sinarchivo'));
     	Route::post('sinprocesar', array('uses' => 'QualitasController@sinprocesar'));
     	Route::post('incompletos', array('uses' => 'QualitasController@incompletos'));
@@ -150,17 +210,49 @@ Route::group(array('prefix' => 'api'), function()
 	{
     	Route::post('controldocumentos', array('uses' => 'ReportesController@control'));
     	Route::get('descargar/{archivo}', array('uses' => 'ReportesController@descargar'))->where('archivo', '[A-Za-z0-9\-\_\.]+');
+    	Route::post('facturas', array('uses' => 'ReportesController@facturas'));
+    	Route::post('pago/unidades', array('uses' => 'ReportesController@pagoUnidad'));
     	Route::get('tickets', array('uses' => 'ReportesController@tickets'));
     	Route::get('ticketsdia', array('uses' => 'ReportesController@ticketsdia'));
     	Route::post('ticketsdia', array('uses' => 'ReportesController@ticketsdiaespecifico'));
+	});
+
+	Route::group(array('prefix' => 'facturacionExpress'), function()
+	{
+    	Route::post('autorizados', array('uses' => 'FacturacionExpressController@autorizados'));
+    	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressController@actualizaFolio'));
+    	Route::post('captura', array('uses' => 'FacturacionExpressController@captura'));
+    	Route::post('capturaCuestionario', array('uses' => 'FacturacionExpressController@capturaCuestionario'));
+    	Route::post('capturaAjustador', array('uses' => 'FacturacionExpressController@capturaAjustador'));
+		Route::get('detalleFolio/{folio}', array('uses' => 'FacturacionExpressController@detalleFolio'));
+    	Route::post('pendientes', array('uses' => 'FacturacionExpressController@pendientes'));
+    	Route::post('rechazados', array('uses' => 'FacturacionExpressController@rechazados'));
+    	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
+    	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
+    	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
 	});
 
 });
 
 
 Route::get('/', array('uses' => 'HomeController@index'));
+Route::get('/procesos', array('uses' => 'HomeController@procesos'));
+Route::get('/et1', array('uses' => 'HomeController@subeEt1'));
+Route::get('/et2', array('uses' => 'HomeController@subeEt2'));
+Route::get('/et3', array('uses' => 'HomeController@subeEt3'));
 
+Route::get('/et1Especial', array('uses' => 'HomeController@subeEt1Especial'));
+Route::get('/et2Especial', array('uses' => 'HomeController@subeEt2Especial'));
+Route::get('/et3Especial', array('uses' => 'HomeController@subeEt3Especial'));
 
+Route::get('/especial', array('uses' => 'HomeController@subePagoCobreEspecial'));
+
+Route::get('/documento', array('uses' => 'HomeController@SubeDocumento'));
+
+Route::get('/info', function()
+{
+	phpinfo();
+});
 
 	// $fechaini = '01/01/2015';
 	// $fechafin = '01/04/2015';

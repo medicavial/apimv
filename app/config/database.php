@@ -86,10 +86,10 @@ return array(
 
 		'test' => array(
 			'driver'   => 'sqlsrv',
-			'host'     => 'SISTEMAS4',
+			'host'     => 'GEN',
 			'database' => 'MV2',
-			'username' => 'sa',
-			'password' => 'ACc3soMv',
+			'username' => '',
+			'password' => '',
 			'prefix'   => '',
 		),
 
@@ -101,6 +101,17 @@ return array(
 			'username' => '',
 			'password' => '',
 			'prefix'   => '',
+		),
+
+		'mysqllocal' => array(
+			'driver'    => 'mysql',
+			'host'      => 'localhost',
+			'database'  => 'medica_registro',
+			'username'  => 'root',
+			'password'  => 'root',
+			'charset'   => 'utf8',
+			'collation' => 'utf8_unicode_ci',
+			'prefix'    => '',
 		),
 
 	),

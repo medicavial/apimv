@@ -190,14 +190,6 @@ class TicketController extends BaseController {
 			array_push($observaciones,'CRUCE ZIMA-MV');
 		};
 
-		if (Input::get('cedulaT')) {
-			array_push($observaciones,'CÉDULA EN TRAMITE');
-		};
-
-		if (Input::get('cedulaI')) {
-			array_push($observaciones,'CÉDULA INVALIDA');
-		};
-
 		$observaciones=implode(",",$observaciones);
 
 
@@ -275,7 +267,20 @@ class TicketController extends BaseController {
 		$fechaini =  DateTime::createFromFormat('d/m/Y', Input::get('fechaini') )->format('Y-m-d') . ' 00:00:00';
 		$fechafin =  DateTime::createFromFormat('d/m/Y', Input::get('fechafin') )->format('Y-m-d') . ' 23:59:59';
 
-		$tickets = Tickets::fecha($fechaini,$fechafin);
+		$tickets = Tickets::leftJoin('TicketCat', 'TicketCat.TCat_clave', '=', 'TicketSeguimiento.TCat_clave')
+				->leftJoin('TicketSubcat',  'TicketSubcat.TSub_clave', '=', 'TicketSeguimiento.TSub_clave')
+				->leftJoin('TicketStatus', 'TicketStatus.TStatus_clave', '=', 'TicketSeguimiento.TStatus_clave')
+				->leftJoin('Expediente', 'Expediente.Exp_folio', '=', 'TicketSeguimiento.Exp_folio')
+				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
+				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketSeguimiento.Cia_clave')
+				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketSeguimiento.Usu_registro')
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketSeguimiento.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
+									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
+									TicketSeguimiento.Cia_clave, Usuario.Usu_login, TicketSeguimiento.Uni_clave,TicketSeguimiento.TStatus_clave'))
+				->whereBetween('TSeg_fechareg', array($fechaini, $fechafin))
+				->orderBy('TSeg_clave')
+				->get();
 
 		return $tickets;
 
@@ -307,7 +312,19 @@ class TicketController extends BaseController {
 
 	public function folio($folio){
 
-		$tickets = Tickets::folio($folio);
+		$tickets = Tickets::leftJoin('TicketCat', 'TicketCat.TCat_clave', '=', 'TicketSeguimiento.TCat_clave')
+				->leftJoin('TicketSubcat',  'TicketSubcat.TSub_clave', '=', 'TicketSeguimiento.TSub_clave')
+				->leftJoin('TicketStatus', 'TicketStatus.TStatus_clave', '=', 'TicketSeguimiento.TStatus_clave')
+				->leftJoin('Expediente', 'Expediente.Exp_folio', '=', 'TicketSeguimiento.Exp_folio')
+				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
+				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketSeguimiento.Cia_clave')
+				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketSeguimiento.Usu_registro')
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketSeguimiento.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
+									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
+									TicketSeguimiento.Cia_clave, Usuario.Usu_login, TicketSeguimiento.Uni_clave,TicketSeguimiento.TStatus_clave'))
+				->where('TicketSeguimiento.Exp_folio', $folio)
+				->get();
 
 		return $tickets;
 
@@ -315,7 +332,19 @@ class TicketController extends BaseController {
 
 	public function foliointerno($folio){
 		
-		$tickets = Tickets::interno($folio);
+		$tickets = Tickets::leftJoin('TicketCat', 'TicketCat.TCat_clave', '=', 'TicketSeguimiento.TCat_clave')
+				->leftJoin('TicketSubcat',  'TicketSubcat.TSub_clave', '=', 'TicketSeguimiento.TSub_clave')
+				->leftJoin('TicketStatus', 'TicketStatus.TStatus_clave', '=', 'TicketSeguimiento.TStatus_clave')
+				->leftJoin('Expediente', 'Expediente.Exp_folio', '=', 'TicketSeguimiento.Exp_folio')
+				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
+				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketSeguimiento.Cia_clave')
+				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketSeguimiento.Usu_registro')
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketSeguimiento.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
+									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
+									TicketSeguimiento.Cia_clave, Usuario.Usu_login, TicketSeguimiento.Uni_clave,TicketSeguimiento.TStatus_clave'))
+				->where('TSeg_clave',$folio)
+				->get();
 
 		return $tickets;
 
@@ -334,7 +363,10 @@ class TicketController extends BaseController {
 							->get();
 
 	}
-	
+
+
+
+
 	/// tickets de pagos aqui 
 
 
@@ -353,8 +385,6 @@ class TicketController extends BaseController {
 		$fechacomunica  = Input::get('fechacomunica');
 		$usuario  = Input::get('usuario');
 		$usuariomv  = Input::get('usuariomv');
-		$entrega  = Input::get('entrega');
-		$factura = Input::get('factura');
 
 		$fechaasignado =  date('Y-m-d', strtotime(str_replace('/', '-', $fechaasignado))) . '00:00:00';
 		$fechacomunica =  date('Y-m-d', strtotime(str_replace('/', '-', $fechacomunica))) . '00:00:00';
@@ -368,8 +398,6 @@ class TicketController extends BaseController {
 		$ticket->TSeg_asignadofecha = $fechaasignado;
 		$ticket->TSeg_fechaactualizacion = date('Y-m-d H:i:s');
 		$ticket->Usu_actualiza = $usuario;
-		$ticket->TSeg_entrega = $entrega;
-		$ticket->FAC_claveint = $factura;
 
 		$ticket->save();
 
@@ -400,7 +428,6 @@ class TicketController extends BaseController {
 		$cliente  = Input::get('cliente');
 		$unidad  = Input::get('unidad');
 		$etapa  = Input::get('etapa');
-		$entrega  = Input::get('entrega');
 		$categoria  = Input::get('categoria');
 		$subcategoria  = Input::get('subcategoria');
 		$status  = Input::get('statusa');
@@ -412,7 +439,6 @@ class TicketController extends BaseController {
 		$usuario  = Input::get('usuario');
 		$usuariomv  = Input::get('usuariomv');
 		$observaciones = Input::get('observaciones');
-		$factura = Input::get('factura');
 
 		$fecha=date('Y-m-d H:i:s');
 
@@ -423,7 +449,6 @@ class TicketController extends BaseController {
 
 		$ticket->Exp_folio = $folioweb;
 		$ticket->TSeg_etapa = $etapa;
-		$ticket->TSeg_entrega = $entrega;
 		$ticket->TCat_clave = $categoria;
 		$ticket->TSub_clave = $subcategoria;
 		$ticket->TSeg_obs = $observaciones;
@@ -436,7 +461,6 @@ class TicketController extends BaseController {
 		$ticket->TSeg_fechaactualizacion = date('Y-m-d H:i:s');
 		$ticket->Usu_registro = $usuario;
 		$ticket->Usu_actualiza = $usuario;
-		$ticket->FAC_claveint = $factura;
 
 		$ticket->save();
 
@@ -488,7 +512,7 @@ class TicketController extends BaseController {
 				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
 				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketPagos.Cia_clave')
 				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketPagos.Usu_registro')
-				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa,TSeg_entrega as Entrega, FAC_claveint as Factura, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
 									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
 									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
 									TicketPagos.Cia_clave, Usuario.Usu_login, TicketPagos.Uni_clave,TicketPagos.TStatus_clave'))
@@ -532,7 +556,7 @@ class TicketController extends BaseController {
 				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
 				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketPagos.Cia_clave')
 				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketPagos.Usu_registro')
-				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa,TSeg_entrega as Entrega, FAC_claveint as Factura, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
 									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
 									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
 									TicketPagos.Cia_clave, Usuario.Usu_login, TicketPagos.Uni_clave,TicketPagos.TStatus_clave'))
@@ -552,7 +576,7 @@ class TicketController extends BaseController {
 				->leftJoin('Unidad', 'Unidad.Uni_clave', '=', 'Expediente.Uni_clave')
 				->leftJoin('Compania', 'Compania.Cia_clave', '=', 'TicketPagos.Cia_clave')
 				->leftJoin('Usuario', 'Usuario.Usu_login', '=', 'TicketPagos.Usu_registro')
-				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa,TSeg_entrega as Entrega, FAC_claveint as Factura, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
+				->select(DB::raw('TSeg_clave as Folio_Interno, TicketPagos.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
 									TStatus_nombre as Status, TSeg_obs as Observaciones, Uni_nombre as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
 									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
 									TicketPagos.Cia_clave, Usuario.Usu_login, TicketPagos.Uni_clave,TicketPagos.TStatus_clave'))

@@ -20,4 +20,6 @@ class ControlController extends BaseController {
 		return DB::select("MV_DCU_ListadoDocumentosXFecha  @fechaIni='$fechaini', @fechaFin='$fechafin'");
 	}
 
+	
+
 }

@@ -14,7 +14,7 @@ class ReportesController extends BaseController {
 
 				    });
 
-				})->store('xls', false, true);
+				})->store('xls', public_path('exports'),true);
 
 		return $datos;
 	}
@@ -34,6 +34,24 @@ class ReportesController extends BaseController {
 	    }
 
 	}
+
+	public function facturas(){
+
+		$fechaini =  Input::get('fechaini'); 
+	    $fechafin =  Input::get('fechafin'); 
+
+		return DB::select("EXEC MV_LIS_FacturaXRecepcion  @fechaIni='$fechaini', @fechaFin='$fechafin 23:59:58.999'");
+	}
+
+	public function pagoUnidad(){
+
+		$fechaini =  Input::get('fechaini'); 
+	    $fechafin =  Input::get('fechafin');
+
+		return DB::select("EXEC MV_PAG_Listado  @fechaini='$fechaini', @fechafin='$fechafin 23:59:58.999'");
+	}
+
+	
 
 	public function tickets(){
 

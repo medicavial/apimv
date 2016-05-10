@@ -6,7 +6,6 @@ include(app_path() . '/classes/Historiales.php');
 
 class FlujoController extends BaseController {
 
-
 	//Se crea una nueva por que es para facturacion
 	public function alta(){
 		
@@ -44,7 +43,7 @@ class FlujoController extends BaseController {
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
 
 	}
-
+		
 	//alta de entregas de un area a otra se actualiza en el flujo
 	public function actualiza(){
 		
@@ -92,7 +91,9 @@ class FlujoController extends BaseController {
 
 	public function activos($usuario){
 
+		DB::disableQueryLog();
 		return DB::select("EXEC MV_FLU_ListaGralXUsu @usuario=$usuario");
+
 	}
 
 	public function altaoriginal(){
@@ -111,47 +112,104 @@ class FlujoController extends BaseController {
 	    $numentrega = Input::get('numentrega');
 	    $totalfactura = Input::get('totalfactura');
 	    $factura = Input::get('factura');
-
-		$documento = new documento;
-
-		$documento->DOC_folio = $folio;
-		$documento->DOC_etapa = $etapa;
-		$documento->DOC_lesionado = $lesionado;                                
-		$documento->UNI_claveint = $unidad;
-		$documento->DOC_ambulancia = 0;
-		$documento->DOC_fechapago = NULL; 
-		$documento->DOC_original = 1; 
-		$documento->DOC_originalfecha = $fecha; 
-		$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
-		$documento->EMP_claveint = $empresa; 
-		$documento->USU_original = $usuario; 
-		$documento->DOC_remesa = $remesa; 
-		$documento->DOC_numeroentrega = $numentrega;              
-		$documento->PRO_claveint = $producto; 
-		$documento->DOC_factura = $factura; 
-		$documento->DOC_totalFac = $totalfactura; 
-		$documento->ESC_claveint = $escolaridad; 
-
-		$documento->save();
+	    $propia = Input::has('propia') ? Input::get('propia') : 0;
 
 
-		$clave = $documento->DOC_claveint;
-
-		$flujo = new Flujo;
-
-		$flujo->FLD_formaRecep = 'O'; 
-	    $flujo->FLD_AROrec = 1; 		  
-	    $flujo->USU_rec = $usuario;
-	    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
-        $flujo->USU_activo = $usuario;
-        $flujo->DOC_claveint = $clave; 
-
-        $flujo->save();
-
-		Historial::altaOriginal($folio,$etapa,$numentrega);
+		if ( $usuario == '' || $usuario == null ) {
+			
+			return Response::json(array('respuesta' => 'Usuario no detectado, vuelve a loguearte para restablecer los valores de tu usuario'), 500); 	
 		
-		return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 
-		
+		}else{
+
+			//verificamos que no este capturado el documento
+			$existencia = documento::where('DOC_folio',$folio)
+									 ->where('DOC_etapa',$etapa)
+									 ->where('DOC_numeroentrega',$numentrega)
+									 ->count();
+
+			if ($existencia == 0) {
+
+
+				//guardamos en tabla documento
+				$documento = new documento;
+
+				$documento->DOC_folio = $folio;
+				$documento->DOC_etapa = $etapa;
+				$documento->DOC_lesionado = $lesionado;                                
+				$documento->UNI_claveint = $unidad;
+				$documento->DOC_ambulancia = 0;
+				$documento->DOC_fechapago = NULL; 
+				$documento->DOC_original = 1; 
+				$documento->DOC_originalfecha = $fecha; 
+				$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
+				$documento->EMP_claveint = $empresa; 
+				$documento->USU_original = $usuario; 
+				$documento->DOC_remesa = $remesa; 
+				$documento->DOC_numeroentrega = $numentrega;              
+				$documento->PRO_claveint = $producto; 
+				$documento->DOC_factura = $factura; 
+				$documento->DOC_totalFac = $totalfactura; 
+				$documento->ESC_claveint = $escolaridad; 
+
+				$documento->save();
+
+
+				$clave = $documento->DOC_claveint;
+
+				//guardamos en flujo de documentos
+				$flujo = new Flujo;
+
+				$flujo->FLD_formaRecep = 'O'; 
+			    $flujo->FLD_AROrec = 1; 		  
+			    $flujo->USU_rec = $usuario;
+			    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
+		        $flujo->USU_activo = $usuario;
+		        $flujo->DOC_claveint = $clave; 
+
+		        if (Input::has('npc')) {
+		        	$flujo->FLD_envNPC = Input::get('npc');
+		        }
+
+		        $flujo->save();
+
+		        // capturamos en caso de ser segunda etapa y unidad propia
+		        if ($propia == 1 && $etapa == 2) {
+
+		        	$fecha = Input::get('captura')['fecha'];
+		        	$hora = Input::get('captura')['hora'];
+		        	$medico = Input::get('captura')['medico'];
+
+
+		        	$fechaSub = date('d/m/Y', strtotime(str_replace('-', '/', $fecha ))) . ' '. $hora;
+
+		        	//captura el pase de segunda solo unidad propia
+					$sql = "EXEC MV_GenerarSuministrosEt2  
+							@fechadocs = '$fechaSub',
+							@observaciones = '',
+							@consultas = 1,
+							@usuario = $usuario,
+							@folio = '$folio',
+							@docClave = $clave,
+							@medicoTratante = $medico,
+							@interconsulta = 0,
+							@EN2Clave = 0
+						";
+
+					DB::statement($sql);
+		        }
+
+				Historial::altaOriginal($folio,$etapa,$numentrega);
+				
+				return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 	
+			
+			}else{
+
+				return Response::json(array('respuesta' => 'Esta etapa con esta entrega ya fue capturada verificalo en Control de Documentos','entrega' => $existencia), 500); 	
+
+			}
+
+			
+		}
 
 	}
 
@@ -210,7 +268,6 @@ class FlujoController extends BaseController {
 		// $stmt->bindParam('originalfecha',$fecha);
 
 		return Response::json(array('respuesta' => 'Folio Actualizado Correctamente')); 
-
 
 	}
 
@@ -289,6 +346,23 @@ class FlujoController extends BaseController {
 
 	}
 
+	public function posiblenp(){
+		
+		$folios =  Input::all(); 
+
+	    foreach ($folios as $foliodato) {
+
+	    	$clave = $foliodato['FLD_claveint'];
+			$flujo = Flujo::find($clave);
+			$flujo->FLD_envNPC = 2;
+			$flujo->save();
+
+		}
+
+		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
+
+	}
+
 	public function recepcion($usuario){
 		return DB::select("EXEC MV_FLU_ListaRecepcionXUsu @usuario=$usuario");
 	}
@@ -300,7 +374,6 @@ class FlujoController extends BaseController {
 	public function npc($usuario){
 		return DB::select("EXEC MV_FLU_ListaGralXUsuNPC @usuario=$usuario");
 	}
-
 
 	public function consulta($usuario){
 
@@ -314,8 +387,7 @@ class FlujoController extends BaseController {
 
 		return $respuesta;
 
-	}
-
+	}	
 
 	public function activosarea($area){
 		return DB::select("EXEC MV_FLU_ListaGralXArea @area=$area");
