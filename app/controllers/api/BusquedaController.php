@@ -288,6 +288,10 @@ class BusquedaController extends BaseController {
 		return Triage::all();
 	}
 
+	public function usuarios(){
+		return User::all();
+	}
+
 
 	public function usuariosarea($area){
 

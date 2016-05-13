@@ -306,7 +306,7 @@ class HomeController extends BaseController {
 	public function subeEt1(){
 
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt1ConClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt1ConClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -331,7 +331,7 @@ class HomeController extends BaseController {
 	public function subeEt1Especial(){
 
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt1SinClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt1SinClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -356,7 +356,7 @@ class HomeController extends BaseController {
 
 	public function subeEt2(){
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt2ConClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt2ConClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -381,7 +381,7 @@ class HomeController extends BaseController {
 	public function subeEt2Especial(){
 
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt2SinClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt2SinClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -408,7 +408,7 @@ class HomeController extends BaseController {
 
 	public function subeEt3(){
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt3ConClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt3ConClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -433,7 +433,7 @@ class HomeController extends BaseController {
 	public function subeEt3Especial(){
 
 
-		$datos =  DB::select("EXEC MV_REW_PagosEt3SinClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosEt3SinClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -460,7 +460,7 @@ class HomeController extends BaseController {
 	public function subePagoCobreEspecial(){
 
 
-		$datos =  DB::select("EXEC MV_REW_PagosPCEConClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_PagosPCEConClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -480,7 +480,7 @@ class HomeController extends BaseController {
 
 		return "Listo =) registros: ". count($datos) . '</br>';
 
-		$datosSinClave =  DB::select("EXEC MV_REW_PagosPCESinClave  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datosSinClave =  DB::select("EXEC MV_REW_PagosPCESinClave  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datosSinClave as $datosin) {
 
@@ -506,7 +506,7 @@ class HomeController extends BaseController {
 
 	public function SubeDocumento(){
 
-		$datos =  DB::select("EXEC MV_REW_InsertaDocWeb  @fechaini='01/01/2014 00:00:00', @fechafin='24/04/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_InsertaDocWeb  @fechaini='01/01/2016 00:00:00', @fechafin='10/05/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato ){
 			

@@ -62,6 +62,10 @@ Route::group(array('prefix' => 'api'), function()
 		return DB::select("EXEC MVMonitorCaptura");
 	});
 
+	Route::get('/multiasistencia', function(){
+		return DB::select("EXEC MV_MON_Multiasistencia");
+	});
+
     Route::post('login', array('uses' => 'UserController@login'));
     Route::get('logout', array('uses' => 'UserController@logout'));
 
@@ -132,6 +136,7 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('subsecuencia/{folio}/{entrega}', array('uses' => 'BusquedaController@subsecuencia'));
 	    Route::get('tipoLesion/{tipo}', array('uses' => 'BusquedaController@tipoLesion'));
 	    Route::get('triage', array('uses' => 'BusquedaController@triage'));
+	    Route::get('usuarios', array('uses' => 'BusquedaController@usuarios'));
 	    Route::get('usuarios/{area}', array('uses' => 'BusquedaController@usuariosarea'));
 	    Route::get('usuariostodos/{area}', array('uses' => 'BusquedaController@usuariostodosarea'));
 	    Route::get('usuariosweb', array('uses' => 'BusquedaController@usuariosweb'));
