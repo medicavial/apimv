@@ -134,6 +134,7 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
 	    Route::get('riesgos', array('uses' => 'BusquedaController@riesgos'));
 	    Route::get('subsecuencia/{folio}/{entrega}', array('uses' => 'BusquedaController@subsecuencia'));
+	    Route::get('rehabilitacion/{folio}/{entrega}', array('uses' => 'BusquedaController@rehabilitacion'));
 	    Route::get('tipoLesion/{tipo}', array('uses' => 'BusquedaController@tipoLesion'));
 	    Route::get('triage', array('uses' => 'BusquedaController@triage'));
 	    Route::get('usuarios', array('uses' => 'BusquedaController@usuarios'));
@@ -141,6 +142,7 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('usuariostodos/{area}', array('uses' => 'BusquedaController@usuariostodosarea'));
 	    Route::get('usuariosweb', array('uses' => 'BusquedaController@usuariosweb'));
 	    Route::get('unidades', array('uses' => 'BusquedaController@unidades'));
+	    Route::get('unidades/red', array('uses' => 'BusquedaController@unidadesRed'));
 	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));
 	    Route::get('lesiones/{tipoLes}', 'BusquedaController@lesiones');
 	    Route::get('lesionweb', 'BusquedaController@lesionWeb');
@@ -189,6 +191,8 @@ Route::group(array('prefix' => 'api'), function()
 	Route::group(array('prefix' => 'operacion'), function()
 	{
 		Route::post('editaDatos', array('uses' => 'HomeController@editaDatos'));
+		Route::post('usuarios', array('uses' => 'HomeController@guardaUsuario'));
+		Route::put('usuarios', array('uses' => 'HomeController@editaUsuario'));
 	});
 
 	Route::group(array('prefix' => 'qualitas'), function()
@@ -235,6 +239,12 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
     	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
+	});
+
+    	Route::group(array('prefix' => 'relacion'), function()
+	{
+		Route::post('editaDatos', array('uses' => 'PagosController@entrega'));
+
 	});
 
 });

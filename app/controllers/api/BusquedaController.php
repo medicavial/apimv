@@ -256,6 +256,33 @@ class BusquedaController extends BaseController {
 		return Riesgo::all();
 	}
 
+	public function rehabilitacion($folio,$entrega){
+
+		//verificamos que no este capturado el documento
+		$existencia = documento::where('DOC_folio',$folio)
+								 ->where('DOC_etapa',3)
+								 ->where('DOC_numeroentrega',$entrega)
+								 ->count();
+
+		if ($existencia == 0) {
+			# code...
+			return Rehabilitacion::join('Expediente','Expediente.Exp_folio','=','Rehabilitacion.Exp_folio')
+							   ->join('Unidad','Unidad.Uni_clave','=','Rehabilitacion.Uni_clave')
+							   ->join('Rehabilitador', function($join) {
+								   $join->on('Rehabilitador.Usu_login', '=', 'Rehabilitacion.Usu_registro');
+								   $join->on('Rehabilitador.Uni_clave', '=', 'Rehabilitacion.Uni_clave');
+								})
+							   ->select('Uni_nombrecorto AS Unidad', 'Uni_claveMV AS unidad','Reh_claveMV AS rehabilitador','UNI_propia as propia','Rehab_fecha as fecha','Rehab_obs as observaciones','Rehab_dolor as escalaDolor','Rehab_mejoria as escalaMejoria','Rehab_tipo as tipoRehabilitacion')
+							   ->where('Rehabilitacion.Exp_folio',$folio)
+							   ->where('Rehab_cons',$entrega)
+							   ->first();
+		}else{
+
+			return Response::json(array('respuesta' => 'Esta etapa con esta entrega ya fue capturada verificalo en Control de Documentos'), 500);
+		}
+
+	}
+
 	public function subsecuencia($folio,$entrega){
 
 		//verificamos que no este capturado el documento
@@ -267,7 +294,7 @@ class BusquedaController extends BaseController {
 		if ($existencia == 0) {
 			# code...
 			return Subsecuencia::join('Expediente','Subsecuencia.Exp_folio','=','Expediente.Exp_folio')
-							   ->join('Unidad','Expediente.Uni_clave','=','Unidad.Uni_clave')
+							   ->join('Unidad','Subsecuencia.Uni_clave','=','Unidad.Uni_clave')
 							   ->join('Medico','Subsecuencia.Usu_registro','=','Medico.Usu_login')
 							   ->select('Uni_nombrecorto AS Unidad', 'Unidad.Uni_claveMV AS unidad','Med_claveMV AS medico','UNI_propia as propia','Sub_fecha as fecha','Sub_hora as hora')
 							   ->where('Expediente.Exp_folio',$folio)
@@ -330,7 +357,16 @@ class BusquedaController extends BaseController {
 
 	public function unidades(){
 		return Unidad::where('uni_activa','=', 0)
-				->select('uni_claveint as id','uni_nombrecorto as nombre')
+				->select('uni_claveint as id','uni_nombrecorto as nombre','UNI_propia as propia')
+				->orderBy('uni_nombrecorto')
+				->get();
+	}
+
+	public function unidadesRed(){
+		return Unidad::join('Localidad','Localidad.LOC_claveint','=','Unidad.LOC_claveint')
+				->join('Estado','Estado.EST_clave','=','Localidad.EST_claveint')
+				->where(array('uni_activa' => 0,'UNI_propia' => 0))
+				->select('uni_claveint as id','uni_nombrecorto as nombreCorto','uni_nombre as nombre','UNI_rfc as rfc','EST_nombre as estado','LOC_nombre as localidad','UNI_razonsocial as razonSocial','UNI_callenum as direccion')
 				->orderBy('uni_nombrecorto')
 				->get();
 	}
@@ -360,7 +396,7 @@ class BusquedaController extends BaseController {
 		$documento = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
 					->where('DOC_folio ', '=', $folio)
 					->where( 'DOC_etapa', '=', $etapa)
-					->select('DOC_original as original','DOC_claveint as clave','DOC_fax as fax','DOC_faxfecha as fechafax','DOC_FE as fe','DOC_FEFecha as fefecha','DOC_lesionado as lesionado','Unidad.UNI_claveint as unidad','UNI_propia as propia','EMP_claveint as empresa','PRO_claveint as producto','ESC_claveint as escuela')
+					->select('DOC_original as original','DOC_claveint as clave','DOC_fax as fax','DOC_faxfecha as fechafax','DOC_FE as fe','DOC_FEFecha as fefecha','DOC_lesionado as lesionado','Unidad.UNI_claveint as unidad','UNI_propia as propia','EMP_claveint as empresa','PRO_claveint as producto','ESC_claveint as escuela','DOC_situacionoriginal as capturado')
 					->get();
 				
 		return $documento;
