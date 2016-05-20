@@ -277,6 +277,27 @@ class HomeController extends BaseController {
 
 	}
 
+	public function estatusUnidad($unidad,$bit){
+
+		$unidadWeb = Unidad::find($unidad)->UNI_claveWeb;
+
+		$datosUnidad = Unidad::find($unidad);
+		$datosUnidad->UNI_activa = $bit;
+		$datosUnidad->save();
+
+		$datosUnidadWeb = UnidadWeb::find($unidadWeb);
+		if ($bit == 0) {
+			$bitWeb = 'S';
+		}else{
+			$bitWeb = 'N';
+		}
+		$datosUnidadWeb->Uni_activa = $bitWeb;
+		$datosUnidadWeb->save();
+
+		return Response::json(array('respuesta' => 'Cambio con exito'));
+
+	}
+
 	public function guardaUsuario(){
 		return Input::all();
 	}

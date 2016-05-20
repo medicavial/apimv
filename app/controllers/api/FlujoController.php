@@ -198,6 +198,40 @@ class FlujoController extends BaseController {
 					DB::statement($sql);
 		        }
 
+		        //capturamos la tercera etapa
+		        if ($propia == 1 && $etapa == 3) {
+
+		        	$fecha = Input::get('captura')['fecha'];
+		        	$medico = Input::get('captura')['medico'];
+		        	$escalaDolor = Input::get('captura')['escalaDolor'];
+		        	$escalaMejoria = Input::get('captura')['escalaMejoria'];
+		        	$tipoRehabilitacion = Input::get('captura')['tipoRehabilitacion'];
+		        	$observaciones = Input::get('captura')['observaciones'];
+
+		        	$fechaReh = date('d/m/Y', strtotime(str_replace('-', '/', $fecha )));
+
+		        	//captura el pase de segunda solo unidad propia
+					$sql = "EXEC MV_GenerarRehabilitacion  
+							@folio = '$folio',
+							@firdoc = 1,
+							@fechadocs = '$fechaReh',
+							@medreh = $medico,
+							@presenta = '$observaciones',
+							@sesiones = 1,
+							@ffirres = 1,
+							@fechafirres = '$fechaReh',
+							@ffirreh = 1,
+							@fechafirreh = '$fechaReh',
+							@usuario = $usuario,
+							@docClave = $clave,
+							@tipoTerapia = '$tipoRehabilitacion',
+							@escalaMejoria = '$escalaMejoria',
+							@escalaDolor = '$escalaDolor'
+						";
+
+					DB::statement($sql);
+		        }
+
 				Historial::altaOriginal($folio,$etapa,$numentrega);
 				
 				return Response::json(array('respuesta' => 'Folio Guardado Correctamente')); 	

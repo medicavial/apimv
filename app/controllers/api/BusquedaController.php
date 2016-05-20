@@ -258,52 +258,31 @@ class BusquedaController extends BaseController {
 
 	public function rehabilitacion($folio,$entrega){
 
-		//verificamos que no este capturado el documento
-		$existencia = documento::where('DOC_folio',$folio)
-								 ->where('DOC_etapa',3)
-								 ->where('DOC_numeroentrega',$entrega)
-								 ->count();
-
-		if ($existencia == 0) {
-			# code...
-			return Rehabilitacion::join('Expediente','Expediente.Exp_folio','=','Rehabilitacion.Exp_folio')
-							   ->join('Unidad','Unidad.Uni_clave','=','Rehabilitacion.Uni_clave')
-							   ->join('Rehabilitador', function($join) {
-								   $join->on('Rehabilitador.Usu_login', '=', 'Rehabilitacion.Usu_registro');
-								   $join->on('Rehabilitador.Uni_clave', '=', 'Rehabilitacion.Uni_clave');
-								})
-							   ->select('Uni_nombrecorto AS Unidad', 'Uni_claveMV AS unidad','Reh_claveMV AS rehabilitador','UNI_propia as propia','Rehab_fecha as fecha','Rehab_obs as observaciones','Rehab_dolor as escalaDolor','Rehab_mejoria as escalaMejoria','Rehab_tipo as tipoRehabilitacion')
-							   ->where('Rehabilitacion.Exp_folio',$folio)
-							   ->where('Rehab_cons',$entrega)
-							   ->first();
-		}else{
-
-			return Response::json(array('respuesta' => 'Esta etapa con esta entrega ya fue capturada verificalo en Control de Documentos'), 500);
-		}
+		//verificamos rehabilitacion en web
+		return Rehabilitacion::join('Expediente','Expediente.Exp_folio','=','Rehabilitacion.Exp_folio')
+						   ->join('Unidad','Unidad.Uni_clave','=','Rehabilitacion.Uni_clave')
+						   ->join('Rehabilitador', function($join) {
+							   $join->on('Rehabilitador.Usu_login', '=', 'Rehabilitacion.Usu_registro');
+							   $join->on('Rehabilitador.Uni_clave', '=', 'Rehabilitacion.Uni_clave');
+							})
+						   ->select('Uni_nombrecorto AS Unidad', 'Uni_claveMV AS unidad','Reh_claveMV AS rehabilitador','UNI_propia as propia','Rehab_fecha as fecha','Rehab_obs as observaciones','Rehab_dolor as escalaDolor','Rehab_mejoria as escalaMejoria','Rehab_tipo as tipoRehabilitacion')
+						   ->where('Rehabilitacion.Exp_folio',$folio)
+						   ->where('Rehab_cons',$entrega)
+						   ->first();
 
 	}
 
 	public function subsecuencia($folio,$entrega){
 
-		//verificamos que no este capturado el documento
-		$existencia = documento::where('DOC_folio',$folio)
-								 ->where('DOC_etapa',2)
-								 ->where('DOC_numeroentrega',$entrega)
-								 ->count();
+		//subsecuencia en web
+		return Subsecuencia::join('Expediente','Subsecuencia.Exp_folio','=','Expediente.Exp_folio')
+						   ->join('Unidad','Subsecuencia.Uni_clave','=','Unidad.Uni_clave')
+						   ->join('Medico','Subsecuencia.Usu_registro','=','Medico.Usu_login')
+						   ->select('Uni_nombrecorto AS Unidad', 'Unidad.Uni_claveMV AS unidad','Med_claveMV AS medico','UNI_propia as propia','Sub_fecha as fecha','Sub_hora as hora')
+						   ->where('Expediente.Exp_folio',$folio)
+						   ->where('Sub_cons',$entrega)
+						   ->first();
 
-		if ($existencia == 0) {
-			# code...
-			return Subsecuencia::join('Expediente','Subsecuencia.Exp_folio','=','Expediente.Exp_folio')
-							   ->join('Unidad','Subsecuencia.Uni_clave','=','Unidad.Uni_clave')
-							   ->join('Medico','Subsecuencia.Usu_registro','=','Medico.Usu_login')
-							   ->select('Uni_nombrecorto AS Unidad', 'Unidad.Uni_claveMV AS unidad','Med_claveMV AS medico','UNI_propia as propia','Sub_fecha as fecha','Sub_hora as hora')
-							   ->where('Expediente.Exp_folio',$folio)
-							   ->where('Sub_cons',$entrega)
-							   ->first();
-		}else{
-
-			return Response::json(array('respuesta' => 'Esta etapa con esta entrega ya fue capturada verificalo en Control de Documentos'), 500);
-		}
 
 	}
 
@@ -365,8 +344,8 @@ class BusquedaController extends BaseController {
 	public function unidadesRed(){
 		return Unidad::join('Localidad','Localidad.LOC_claveint','=','Unidad.LOC_claveint')
 				->join('Estado','Estado.EST_clave','=','Localidad.EST_claveint')
-				->where(array('uni_activa' => 0,'UNI_propia' => 0))
-				->select('uni_claveint as id','uni_nombrecorto as nombreCorto','uni_nombre as nombre','UNI_rfc as rfc','EST_nombre as estado','LOC_nombre as localidad','UNI_razonsocial as razonSocial','UNI_callenum as direccion')
+				->where(array('UNI_propia' => 0))
+				->select('uni_claveint as id','uni_nombrecorto as nombreCorto','uni_nombre as nombre','UNI_rfc as rfc','EST_nombre as estado','LOC_nombre as localidad','UNI_razonsocial as razonSocial','UNI_callenum as direccion','Uni_activa as activa')
 				->orderBy('uni_nombrecorto')
 				->get();
 	}

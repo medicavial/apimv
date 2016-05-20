@@ -4,7 +4,6 @@ include(app_path() . '/classes/Historiales.php');
 
 class EntregasController extends BaseController {
 
-
 	//Se crea una nueva por que es para facturacion
 	public function acepta(){
 
