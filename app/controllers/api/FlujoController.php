@@ -391,6 +391,8 @@ class FlujoController extends BaseController {
 			$flujo->FLD_envNPC = 2;
 			$flujo->save();
 
+			Historial::altaNPC($clave);
+
 		}
 
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));

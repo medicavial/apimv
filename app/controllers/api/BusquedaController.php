@@ -157,6 +157,7 @@ class BusquedaController extends BaseController {
 				->where('His_folio', '=', $folio)
 				->where('His_etapa', '=', $etapa)
 				->where('his_entrega', '=', $entrega)
+				->orderBy('his_fecha')
 				->get();
 
 		$historial = array();
