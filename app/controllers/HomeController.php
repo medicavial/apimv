@@ -179,7 +179,7 @@ class HomeController extends BaseController {
 		//guardamos el log de cambios por cada campo que se modifico en caso de existir modificación
 		if ($polizaAntes != $poliza){
 
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'EXP_poliza';
@@ -191,7 +191,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($reporteAntes != $reporte){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'EXP_reporte';
@@ -203,7 +203,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($siniestroAntes != $siniestro){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'EXP_siniestro';
@@ -215,7 +215,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($riesgoAntes != $riesgo->RIE_claveWeb){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'RIE_clave';
@@ -228,7 +228,7 @@ class HomeController extends BaseController {
 
 
 		if ($productoAntes != $producto->PRO_claveWeb){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'Pro_clave';
@@ -240,7 +240,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($clienteAntes != $cliente->EMP_claveWeb){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'Cia_clave';
@@ -252,7 +252,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($lesionadoAntes != $lesionado){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'EXP_completo';
@@ -264,7 +264,7 @@ class HomeController extends BaseController {
 		}
 
 		if ($fechaNacimientoAntes != $fechaNacimiento){
-			$bitacora = new Bitacora;
+			$bitacora = new BitacoraWeb;
 			$bitacora->EXP_folio = $folio;
 			$bitacora->BIT_tabla = 'Expediente';
 			$bitacora->BIT_campo = 'Exp_fechaNac2';
@@ -277,22 +277,47 @@ class HomeController extends BaseController {
 
 	}
 
-	public function estatusUnidad($unidad,$bit){
+	public function estatusUnidad($unidad,$bit,$usuario){
 
-		$unidadWeb = Unidad::find($unidad)->UNI_claveWeb;
-
+		//datos de sql server
 		$datosUnidad = Unidad::find($unidad);
 		$datosUnidad->UNI_activa = $bit;
 		$datosUnidad->save();
 
+		$bitacora = new Bitacora;
+		$bitacora->PAS_folio = $unidad;
+		$bitacora->BIT_tabla = 'Unidad';
+		$bitacora->BIT_campo = 'UNI_activa';
+		$bitacora->BIT_anterior = $bit == 0 ? 1:0;
+		$bitacora->BIT_nuevo = $bit;
+		$bitacora->BIT_fecha = date('d/m/Y H:i:s');
+		$bitacora->USU_cambio = $usuario;
+		$bitacora->save();
+
+		// datos de web
+		$usuarioWeb = User::find($usuario)->USU_usuarioWeb;
+		$unidadWeb = Unidad::find($unidad)->UNI_claveWeb;
+
 		$datosUnidadWeb = UnidadWeb::find($unidadWeb);
 		if ($bit == 0) {
+			$bitWebAnterior = 'N';
 			$bitWeb = 'S';
 		}else{
+			$bitWebAnterior = 'S';
 			$bitWeb = 'N';
 		}
 		$datosUnidadWeb->Uni_activa = $bitWeb;
 		$datosUnidadWeb->save();
+
+		$bitacoraWeb = new BitacoraWeb;
+		$bitacoraWeb->EXP_folio = $unidadWeb;
+		$bitacoraWeb->BIT_tabla = 'Unidad';
+		$bitacoraWeb->BIT_campo = 'Uni_activa';
+		$bitacoraWeb->BIT_anterior = $bitWebAnterior;
+		$bitacoraWeb->BIT_nuevo = $bitWeb;
+		$bitacoraWeb->BIT_fecha = date('Y-m-d H:i:s');
+		$bitacoraWeb->USU_login = $usuarioWeb;
+		$bitacoraWeb->save();
 
 		return Response::json(array('respuesta' => 'Cambio con exito'));
 

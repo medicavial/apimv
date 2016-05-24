@@ -344,11 +344,11 @@ class BusquedaController extends BaseController {
 
 	public function unidadesRed(){
 		return Unidad::join('Localidad','Localidad.LOC_claveint','=','Unidad.LOC_claveint')
-				->join('Estado','Estado.EST_clave','=','Localidad.EST_claveint')
-				->where(array('UNI_propia' => 0))
-				->select('uni_claveint as id','uni_nombrecorto as nombreCorto','uni_nombre as nombre','UNI_rfc as rfc','EST_nombre as estado','LOC_nombre as localidad','UNI_razonsocial as razonSocial','UNI_callenum as direccion','Uni_activa as activa')
-				->orderBy('uni_nombrecorto')
-				->get();
+					->join('Estado','Estado.EST_clave','=','Localidad.EST_claveint')
+					->where(array('UNI_propia' => 0))
+					->select('uni_claveint as id','uni_nombrecorto as nombreCorto','uni_nombre as nombre','UNI_rfc as rfc','EST_nombre as estado','LOC_nombre as localidad','UNI_razonsocial as razonSocial','UNI_callenum as direccion','Uni_activa as activa','Uni_ref as referencia')
+					->orderBy('uni_nombrecorto')
+					->get();
 	}
 
 

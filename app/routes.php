@@ -192,7 +192,7 @@ Route::group(array('prefix' => 'api'), function()
 	{
 		Route::post('editaDatos', array('uses' => 'HomeController@editaDatos'));
 		Route::post('usuarios', array('uses' => 'HomeController@guardaUsuario'));
-		Route::get('estatusUnidad/{unidad}/{bit}', array('uses' => 'HomeController@estatusUnidad'));
+		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'HomeController@estatusUnidad'));
 		Route::put('usuarios', array('uses' => 'HomeController@editaUsuario'));
 	});
 
@@ -249,7 +249,6 @@ Route::group(array('prefix' => 'api'), function()
 	});
 
 });
-
 
 Route::get('/', array('uses' => 'HomeController@index'));
 Route::get('/procesos', array('uses' => 'HomeController@procesos'));

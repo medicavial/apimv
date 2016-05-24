@@ -9,7 +9,7 @@ class EntregasController extends BaseController {
 
 		$folios =  Input::all(); 
 
-	    foreach ($folios as $foliodato) {
+	    foreach ($folios as $foliodato){
 
 		    $usuarioentrega =  $foliodato['USU_ent']; 
 		    $areaentrega =  $foliodato['FLD_AROent']; 
