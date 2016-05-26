@@ -129,6 +129,8 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('flujo/{folio}', array('uses' => 'BusquedaController@flujo'));
 	    Route::get('historial/{folio}/{etapa}/{entrega}', array('uses' => 'BusquedaController@historial'));
 	    Route::get('lesionado/{lesionado}', array('uses' => 'BusquedaController@lesionado'));
+	    Route::get('medicos/{unidad}', array('uses' => 'BusquedaController@medicos'));
+	    Route::get('posiciones', array('uses' => 'BusquedaController@posiciones'));
 	    Route::get('productos', array('uses' => 'BusquedaController@productos'));
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
@@ -244,7 +246,7 @@ Route::group(array('prefix' => 'api'), function()
 
     	Route::group(array('prefix' => 'relacion'), function()
 	{
-		Route::post('entrega', array('uses' => 'PagosController@entrega'));
+		Route::post('entrega/{folios}', array('uses' => 'PagosController@entrega'));
 
 	});
 
@@ -266,7 +268,12 @@ Route::get('/documento', array('uses' => 'HomeController@SubeDocumento'));
 
 Route::get('/info', function()
 {
-	phpinfo();
+	// phpinfo();
+	if (!extension_loaded('openssl')) {
+	    echo "No hay OPENSSL";
+	}else{
+		echo "hay OPENSSL";
+	}
 });
 
 	// $fechaini = '01/01/2015';

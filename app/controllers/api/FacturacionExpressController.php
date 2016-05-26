@@ -24,7 +24,7 @@ class FacturacionExpressController extends BaseController {
                 left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
                 left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
                 left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Unidad.Uni_clave in (1,2,3,4,5,6,7,86,184,186) and Exp_FE = 1 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
+            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Unidad.Uni_clave in (1,2,3,4,5,6,7,67,86,184,186) and Exp_FE = 1 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
 
         //conteo general
 	    $sqlAnalisis = "SELECT  
@@ -40,7 +40,7 @@ class FacturacionExpressController extends BaseController {
 	            SUM( IF(Exp_cancelado = 1,1,0) ) as Cancelados
 	            FROM Expediente
 	            LEFT JOIN ExpedienteInfo ON ExpedienteInfo.Exp_folio = Expediente.Exp_folio 
-	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Expediente.Cia_clave in ($id) and Expediente.Uni_clave in (1,2,3,4,5,6,7,86,184,186) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 and Expediente.Exp_FE = 1 ";
+	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Expediente.Cia_clave in ($id) and Expediente.Uni_clave in (1,2,3,4,5,6,7,67,86,184,186) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 and Expediente.Exp_FE = 1 ";
 
 
 
@@ -334,7 +334,6 @@ class FacturacionExpressController extends BaseController {
 
 		$fecha = date('d/m/Y');
 
-
 		///captura el pase 
 		$sql = "EXEC MV_CAP_GuardaCapturaWeb  
 			@folio = '$folio',
@@ -409,54 +408,60 @@ class FacturacionExpressController extends BaseController {
 
 		DB::statement($sql);
 
+		//verificamos que sea unidad propia para captura de suministros
+		$unidadpropia = Unidad::find($unidad)->UNI_propia;
 
-		//obtenemos la clave de suministro aplicado
-		$claveSuministro = Pase::join('Etapa1','Etapa1.PAS_folio','=','Pase.PAS_folio')
-							   ->where('Pase.PAS_folio',$folio)
-							   ->first();
-
-
-		foreach ($datosSuministros as $suministro) {
+		if ($unidadpropia == 1) {
 			
-			$tipoSuministro = $suministro['Tipo'];
-			
-			//radiografias
-			if ($tipoSuministro == 1) {
-				DB::table('Sum1Rad')->insert(
-				    array( 
-				    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
-				    	'Rad_claveint' => 4,
-				    	'S1R_cantidad' => $suministro['Cantidad'],
-				    	'S1R_descripcion' => $suministro['Nombre']
-				    )
-				);
-			
-			//medicamentos	
-			}elseif ($tipoSuministro == 2) {
-				# code...
-				DB::table('Sum1MDI')->insert(
-				    array( 
-				    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
-				    	'MDI_claveint' => 5,
-				    	'S1M_cantidad' => $suministro['Cantidad'],
-				    	'S1M_descripcion' => $suministro['Nombre']
-				    )
-				);
+			//obtenemos la clave de suministro aplicado
+			$claveSuministro = Pase::join('Etapa1','Etapa1.PAS_folio','=','Pase.PAS_folio')
+								   ->where('Pase.PAS_folio',$folio)
+								   ->first();
 
-			//ortesis
-			}elseif ($tipoSuministro == 3) {
+
+			foreach ($datosSuministros as $suministro) {
 				
-				DB::table('Sum1Ort')->insert(
-				    array( 
-				    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
-				    	'ORT_claveint' => 4,
-				    	'S1O_Nombre' => $suministro['Nombre'],
-				    	'S1O_descripcion' => ''
-				    )
-				);
+				$tipoSuministro = $suministro['Tipo'];
+				
+				//radiografias
+				if ($tipoSuministro == 1) {
+					DB::table('Sum1Rad')->insert(
+					    array( 
+					    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
+					    	'Rad_claveint' => 4,
+					    	'S1R_cantidad' => $suministro['Cantidad'],
+					    	'S1R_descripcion' => $suministro['Nombre']
+					    )
+					);
+				
+				//medicamentos	
+				}elseif ($tipoSuministro == 2) {
+					# code...
+					DB::table('Sum1MDI')->insert(
+					    array( 
+					    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
+					    	'MDI_claveint' => 5,
+					    	'S1M_cantidad' => $suministro['Cantidad'],
+					    	'S1M_descripcion' => $suministro['Nombre']
+					    )
+					);
 
+				//ortesis
+				}elseif ($tipoSuministro == 3) {
+					
+					DB::table('Sum1Ort')->insert(
+					    array( 
+					    	'SE1_claveint' => $claveSuministro->SE1_claveint, 
+					    	'ORT_claveint' => 4,
+					    	'S1O_Nombre' => $suministro['Nombre'],
+					    	'S1O_descripcion' => ''
+					    )
+					);
+
+				}
+			
 			}
-		
+
 		}
 
 
@@ -541,7 +546,7 @@ class FacturacionExpressController extends BaseController {
 	                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
 	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
 	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) AND  Unidad.Uni_clave in (1,2,3,4,5,6,7,86,184,186) and Exp_FE = 1   AND EXP_autorizado = 0 AND Exp_solicitado = 1 AND Exp_rechazado = 1  and Exp_cancelado = 0";
+	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) AND  Unidad.Uni_clave in (1,2,3,4,5,6,7,67,86,184,186) and Exp_FE = 1   AND EXP_autorizado = 0 AND Exp_solicitado = 1 AND Exp_rechazado = 1  and Exp_cancelado = 0";
 
 	    return DB::connection('mysql')->select($sqlRechazado);
 	}
@@ -564,7 +569,7 @@ class FacturacionExpressController extends BaseController {
 	                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
 	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
 	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) AND  Unidad.Uni_clave in (1,2,3,4,5,6,7,86,184,186) and Exp_FE = 1   AND EXP_autorizado = 0 AND Exp_solicitado = 1 AND Exp_rechazado = 0  and EXP_cancelado = 0  AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00'" ;
+	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) AND  Unidad.Uni_clave in (1,2,3,4,5,6,7,67,86,184,186) and Exp_FE = 1   AND EXP_autorizado = 0 AND Exp_solicitado = 1 AND Exp_rechazado = 0  and EXP_cancelado = 0  AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00'" ;
 
 	    return DB::connection('mysql')->select($sqlXAutorizar);
 	}
@@ -585,7 +590,7 @@ class FacturacionExpressController extends BaseController {
 	                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave
 	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
 	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) and Unidad.Uni_clave in (1,2,3,4,5,6,7,86,184,186) and Exp_FE = 1  and Exp_autorizado = 1  and EXP_cancelado = 0 " ;
+	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id) and Unidad.Uni_clave in (1,2,3,4,5,6,7,67,86,184,186) and Exp_FE = 1  and Exp_autorizado = 1  and EXP_cancelado = 0 " ;
 
 	    return DB::connection('mysql')->select($sqlAutorizadoNoFac);
 

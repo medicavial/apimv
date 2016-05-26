@@ -232,6 +232,10 @@ class BusquedaController extends BaseController {
 		
 	}
 
+	public function medicos($unidad){
+		return Medico::where(array('UNI_claveint'=>$unidad, 'MED_activo' => 1))->get();
+	}
+
 	public function productos(){
 		return Producto::select('PRO_claveint as id','PRO_nombre as nombre')->get();
 	}
@@ -244,6 +248,10 @@ class BusquedaController extends BaseController {
 		->where('EPR_activo','=', 1)
 		->get();
 		return $productos;
+	}
+
+	public function posiciones(){
+		return Posicion::all();
 	}
 
 	public function referencia($unidad){
