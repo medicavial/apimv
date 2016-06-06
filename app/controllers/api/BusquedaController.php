@@ -304,7 +304,7 @@ class BusquedaController extends BaseController {
 	}
 
 	public function usuarios(){
-		return User::all();
+		return User::join('UsuarioArea', 'Usuario.USU_claveint', '=', 'UsuarioArea.USU_claveint')->get();
 	}
 
 
