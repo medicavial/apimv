@@ -185,9 +185,11 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'flujopagos'), function()
 	{
+
 		Route::get('general', array('uses' => 'FlujopagosController@general'));
 		Route::post('fecharecepcion', array('uses' => 'FlujopagosController@fecharecepcion'));
 		Route::post('fechapagos', array('uses' => 'FlujopagosController@fechapagos'));
+
 	});
 
 	Route::group(array('prefix' => 'operacion'), function()
@@ -246,7 +248,7 @@ Route::group(array('prefix' => 'api'), function()
 
     	Route::group(array('prefix' => 'relacion'), function()
 	{
-		Route::post('entrega/{folios}', array('uses' => 'PagosController@entrega'));
+		Route::post('entrega', array('uses' => 'PagosController@entrega'));
 
 	});
 
@@ -268,12 +270,7 @@ Route::get('/documento', array('uses' => 'HomeController@SubeDocumento'));
 
 Route::get('/info', function()
 {
-	// phpinfo();
-	if (!extension_loaded('openssl')) {
-	    echo "No hay OPENSSL";
-	}else{
-		echo "hay OPENSSL";
-	}
+	phpinfo();
 });
 
 	// $fechaini = '01/01/2015';

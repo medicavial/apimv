@@ -4,24 +4,21 @@ class HomeController extends BaseController {
 
 	public function index(){
 		// funcion que nos permite agregar folio en el flujo de documentos
-		// $clave = 730220;
-		// $folio = 'SASC000507';
+		// $clave = 606331;
+		// $folio = 'MZMA001341';
 
 		// $flujo = new Flujo;
 
 		// $flujo->FLD_formaRecep = 'O'; 
 	 //    $flujo->FLD_AROrec = 8; 		  
 	 //    //aqui va el id del usuario que debe tener el folio
-	 //    $flujo->USU_rec = 180;
+	 //    $flujo->USU_rec = 228;
 	 //    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
   //       //aqui va el id del usuario que debe tener el folio
-  //       $flujo->USU_activo = 180;
+  //       $flujo->USU_activo = 228;
   //       $flujo->DOC_claveint = $clave; 
 
   //       $flujo->save();
-
-
-		Historial::altaOriginal($folio,1,1);
 	}
 
 	public function procesos(){
@@ -297,19 +294,19 @@ class HomeController extends BaseController {
 	public function estatusUnidad($unidad,$bit,$usuario){
 
 		//datos de sql server
-		$datosUnidad = Unidad::find($unidad);
-		$datosUnidad->UNI_activa = $bit;
-		$datosUnidad->save();
+		// $datosUnidad = Unidad::find($unidad);
+		// $datosUnidad->UNI_activa = $bit;
+		// $datosUnidad->save();
 
-		$bitacora = new Bitacora;
-		$bitacora->PAS_folio = $unidad;
-		$bitacora->BIT_tabla = 'Unidad';
-		$bitacora->BIT_campo = 'UNI_activa';
-		$bitacora->BIT_anterior = $bit == 0 ? 1:0;
-		$bitacora->BIT_nuevo = $bit;
-		$bitacora->BIT_fecha = date('d/m/Y H:i:s');
-		$bitacora->USU_cambio = $usuario;
-		$bitacora->save();
+		// $bitacora = new Bitacora;
+		// $bitacora->PAS_folio = $unidad;
+		// $bitacora->BIT_tabla = 'Unidad';
+		// $bitacora->BIT_campo = 'UNI_activa';
+		// $bitacora->BIT_anterior = $bit == 0 ? 1:0;
+		// $bitacora->BIT_nuevo = $bit;
+		// $bitacora->BIT_fecha = date('d/m/Y H:i:s');
+		// $bitacora->USU_cambio = $usuario;
+		// $bitacora->save();
 
 		// datos de web
 		$usuarioWeb = User::find($usuario)->USU_usuarioWeb;
