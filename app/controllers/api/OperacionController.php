@@ -268,5 +268,9 @@ class OperacionController extends BaseController {
 		return Input::all();
 	}
 
+	public function prueba(){
+		return "Si funciono";
+	}
+
 
 }

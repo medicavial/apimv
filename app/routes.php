@@ -200,6 +200,8 @@ Route::group(array('prefix' => 'api'), function()
 		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
 		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
 		Route::put('usuarios', array('uses' => 'OperacionController@editaUsuario'));
+		Route::get('prueba', array('uses' => 'OperacionController@prueba'));
+
 	});
 
 	Route::group(array('prefix' => 'qualitas'), function()
