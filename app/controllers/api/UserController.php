@@ -10,10 +10,12 @@ class UserController extends BaseController {
 					->select('Usuario.USU_claveint as clave', 'USU_Nombre as nombre', 'ARO_claveint as area', 'USU_login as usuario', 'USU_usuarioWeb as usuarioweb','Usuario.*')
 					->where('USU_login','=',$user)
 					->where('USU_password','=',$psw)
+					->where('USU_activo',1)
 					->get(0);
 
 		$usuarioCuenta = User::where('USU_login','=',$user)
 					->where('USU_password','=',$psw)
+					->where('USU_activo',1)
 					->count();
 
 		if ($usuarioCuenta > 0) {

@@ -4,7 +4,24 @@ class HomeController extends BaseController {
 
 	public function index(){
 		// funcion que nos permite agregar folio en el flujo de documentos
-		return ClasificacionLesWeb::find(3527);
+		// $clave = 730220;
+		// $folio = 'SASC000507';
+
+		// $flujo = new Flujo;
+
+		// $flujo->FLD_formaRecep = 'O'; 
+	 //    $flujo->FLD_AROrec = 8; 		  
+	 //    //aqui va el id del usuario que debe tener el folio
+	 //    $flujo->USU_rec = 180;
+	 //    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
+  //       //aqui va el id del usuario que debe tener el folio
+  //       $flujo->USU_activo = 180;
+  //       $flujo->DOC_claveint = $clave; 
+
+  //       $flujo->save();
+
+
+		Historial::altaOriginal($folio,1,1);
 	}
 
 	public function procesos(){
