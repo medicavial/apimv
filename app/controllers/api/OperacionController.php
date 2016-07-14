@@ -211,8 +211,39 @@ class OperacionController extends BaseController {
 	}
 
 	//edita informacion del usuario en flujo
-	public function editaUsuario(){
-		return Input::all();
+	public function editaUsuario($id){
+
+		$editaPass = Input::get('editaPassword');
+
+		$usuario = User::find($id);
+
+
+		if ($editaPass == true ){
+
+			$usuario->USU_password = md5(Input::get('password'));
+		}
+
+		$usuario->USU_nombre = Input::get('nombre');
+		$usuario->USU_login = Input::get('login');
+	    $usuario->USU_usuarioWeb = Input::get('userweb');
+	    $usuario->USU_factivo = Input::get('usuactivo');
+	    $usuario->USU_fcaptura = Input::get('captura');
+	    $usuario->USU_fcontrolDocumentos = Input::get('controldoc');
+	    $usuario->USU_fconsultaIndividual = Input::get('consulindiv');
+	    $usuario->USU_ftickets = Input::get('tickets');
+	    $usuario->USU_fmanual = Input::get('flujomanual');
+	    $usuario->USU_fqualitas = Input::get('qualitas');
+	    $usuario->USU_freportes = Input::get('reportes');
+	    $usuario->USU_fpagos = Input::get('flujopagos');
+	    $usuario->USU_fdocumentos = Input::get('flujodoc');
+	    $usuario->USU_fusuarios = Input::get('usuarios');
+	    $usuario->USU_fticketPagos = Input::get('ticketspagos');
+	    $usuario->USU_fexpress = Input::get('facexpress');
+	    $usuario->save();
+
+	    $areaUsuario = UsuarioArea::where('USU_claveint', '=', $id )->update(array('ARO_claveint'=>Input::get('areaOp')));
+	
+			return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
 	}
 
 
@@ -265,11 +296,43 @@ class OperacionController extends BaseController {
 
 	//funcion para guardar usuario nuevo en flujo
 	public function guardaUsuario(){
-		return Input::all();
+		$usuario = new User;
+
+		$usuario->USU_password = md5(Input::get('password'));
+
+		$usuario->USU_nombre = Input::get('nombre');
+		$usuario->USU_login = Input::get('login');
+	    $usuario->USU_usuarioWeb = Input::get('userweb');
+	    $usuario->USU_factivo = Input::get('usuactivo');
+	    $usuario->USU_fcaptura = Input::get('captura');
+	    $usuario->USU_fcontrolDocumentos = Input::get('controldoc');
+	    $usuario->USU_fconsultaIndividual = Input::get('consulindiv');
+	    $usuario->USU_ftickets = Input::get('tickets');
+	    $usuario->USU_fmanual = Input::get('flujomanual');
+	    $usuario->USU_fqualitas = Input::get('qualitas');
+	    $usuario->USU_freportes = Input::get('reportes');
+	    $usuario->USU_fpagos = Input::get('flujopagos');
+	    $usuario->USU_fdocumentos = Input::get('flujodoc');
+	    $usuario->USU_fusuarios = Input::get('usuarios');
+	    $usuario->USU_fticketPagos = Input::get('ticketspagos');
+	    $usuario->USU_fexpress = Input::get('facexpress');
+	    $usuario->save();
+
+	    $claveUsuario = $usuario->USU_claveint;	
+
+	    $areaUsuario = new UsuarioArea;
+
+	    $areaUsuario->USU_claveint = $claveUsuario;
+	    $areaUsuario->ARO_claveint = Input::get('areaOp');
+	    $areaUsuario->save();
+
+
+	    return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
 	}
 
 	public function prueba(){
-		return "Si funciono";
+		return UsuarioArea::all();
+								
 	}
 
 

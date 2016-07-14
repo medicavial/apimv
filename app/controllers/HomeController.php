@@ -19,6 +19,7 @@ class HomeController extends BaseController {
   //       $flujo->DOC_claveint = $clave; 
 
   //       $flujo->save();
+		return View::make('hello');
 	}
 
 	public function procesos(){
