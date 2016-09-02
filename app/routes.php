@@ -250,6 +250,21 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
 	});
 
+	Route::group(array('prefix' => 'saceco'), function()
+	{
+    	Route::post('autorizados', array('uses' => 'SacecoController@autorizados'));
+    	Route::put('actualizaFolio', array('uses' => 'SacecoController@actualizaFolio'));
+    	Route::post('captura', array('uses' => 'SacecoController@captura'));
+    	Route::post('capturaCuestionario', array('uses' => 'SacecoController@capturaCuestionario'));
+    	Route::post('capturaAjustador', array('uses' => 'SacecoController@capturaAjustador'));
+		Route::get('detalleFolio/{folio}', array('uses' => 'SacecoController@detalleFolio'));
+    	Route::post('pendientes', array('uses' => 'SacecoController@pendientes'));
+    	Route::post('rechazados', array('uses' => 'SacecoController@rechazados'));
+    	Route::post('solicitarAutorizacion', array('uses' => 'SacecoController@solicitarAutorizacion'));
+    	Route::post('solicitarAutorizacionRechazos', array('uses' => 'SacecoController@solicitarAutorizacionRechazos'));
+    	Route::post('solicitados', array('uses' => 'SacecoController@solicitados'));
+	});
+
     	Route::group(array('prefix' => 'relacion'), function()
 	{
 		Route::post('entrega', array('uses' => 'PagosController@entrega'));
