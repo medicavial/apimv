@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'default' => 'production',
+	'default' => 'sqlsrv',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -106,9 +106,9 @@ return array(
 		'mysqllocal' => array(
 			'driver'    => 'mysql',
 			'host'      => 'localhost',
-			'database'  => 'medica_registromv',
+			'database'  => 'medica_registro',
 			'username'  => 'root',
-			'password'  => '',
+			'password'  => 'root',
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
