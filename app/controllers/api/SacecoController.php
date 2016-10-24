@@ -11,7 +11,7 @@ class SacecoController extends BaseController {
 
 		$resultado = array();
 
-		$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
+		/*$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
 	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
 	            Exp_completo, Exp_fecreg, Cia_nombrecorto, RIE_nombre,
 	            CASE WHEN Expediente.Exp_folio in (SELECT REG_folio FROM DocumentosDigitales where REG_folio = Expediente.Exp_folio) THEN 'DIGITALIZADO' ELSE 'SIN DIGITALIZAR' END as DocumentosDigitales,
@@ -24,9 +24,25 @@ class SacecoController extends BaseController {
 	                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
 	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
 	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-	            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Exp_FE = 1 and Unidad.Uni_clave <> 8 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
+	            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Exp_FE = 1 and Unidad.Uni_clave <> 8 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";*/
 
-		
+	     $sql="SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
+            Expediente.Exp_siniestro,Expediente.Exp_reporte,
+            Exp_completo, Exp_fecreg , ATN_fecreg, Cia_nombrecorto, RIE_nombre,
+            'DIGITAL',
+            'FECHA_CAPTURA', 'COSTO_EMPRESA','TRIAGE NOMBRE',UNI_propia,
+            'FECHA EXPEDICION', ATN_clave, TIA_nombre
+            FROM Expediente
+                inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave
+                inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
+                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave                
+                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
+                inner join Atenciones on Expediente.Exp_folio = Atenciones.Exp_folio 
+                inner join TipoAtencion on Atenciones.TIA_clave=TipoAtencion.TIA_clave               
+            WHERE ATN_fecreg BETWEEN '$fechaini' and '".$fechafin." 23:59:59'  and Exp_cancelado = 0  AND Expediente.Exp_fecreg >= 
+            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1  ORDER BY Exp_fecreg DESC";       
+
+
 
 		/*$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
 	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
@@ -69,7 +85,7 @@ class SacecoController extends BaseController {
 	
 	}
 
-	public function detalleFolio($folio){
+	public function detalleFolio($folio,$atencion){
 
 		$resultado = array();
 
@@ -81,7 +97,8 @@ class SacecoController extends BaseController {
                     EXP_diagnostico as descripcion, FAC_folioFiscal as sat, CONCAT(FAC_serie,FAC_folio) as foliointerno,
                     FAC_fecha as fechafactura, FAC_importe as importe, FAC_iva as iva, FAC_total as total, Cia_rfc as rfc,
                     Cia_nombrecorto as empresa, Compania.Cia_clave  as claveEmpresa,Exp_telefono as telefono,Exp_mail as mail,
-                    EXP_costoEmpresa as costo
+                    EXP_costoEmpresa as costo,
+                    Pro_clave as producto
             FROM Expediente
                 inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave 
                 inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
@@ -93,9 +110,51 @@ class SacecoController extends BaseController {
                 left join Posicion on Posicion.POS_clave = PosicionAcc.POS_claveMV
                 left join LesionMV on LesionMV.LES_clave = ExpedienteInfo.LES_empresa
                 left join TipoLesion on TipoLesion.TLE_claveint = LesionMV.TLE_claveint 
-            WHERE Unidad.Uni_clave <> 8 and Expediente.EXP_folio = '$folio' and EXP_cancelado = 0";
+            WHERE  Expediente.EXP_folio = '$folio' and EXP_cancelado = 0";
 
         $resultado['expediente'] = DB::connection('mysql')->select($sql)[0];
+
+        $productoCve = $resultado['expediente'];                
+        foreach ($productoCve as $key => $value) {
+        	if($key='producto'){
+        		$prodCve=$value;
+        	}
+        }
+		
+        $sql="SELECT Distinct atn.TID_clave, Atenciones.ATN_clave, Exp_folio, atn.TIA_clave, ATN_cons, ATN_estatus, ATN_fecreg, Producto.Pro_clave,  TID_nombre,Arc_cons, Arc_clave, Arc_archivo, Arc_tipo, ATD_requerido, ATD_estatus, ATD_motivo, Arc_estatus, Arc_motivo, Arc_motivoCat, Arc_autorizado from Atenciones
+				inner join AtencionDocumento atn on Atenciones.TIA_clave = atn.TIA_clave
+				inner join TipoDocumento on TipoDocumento.TID_claveint = atn.TID_clave
+				inner join Producto on Producto.Pro_clave = atn.Pro_clave
+				inner join AtencionTipoDocumento on Atenciones.ATN_clave=AtencionTipoDocumento.ATN_clave and TipoDocumento.TID_claveint=AtencionTipoDocumento.TID_clave
+				
+				left join DocumentosDigitales DIG  on Atenciones.ATN_clave= DIG.ATN_clave and  atn.TID_clave=DIG.Arc_tipo
+				where Atenciones.ATN_clave=".$atencion." and Producto.Pro_clave=".$prodCve;
+
+		$resultado['documentos'] = DB::connection('mysql')->select($sql);
+
+		$sql="SELECT REQ_valor, ANT_valor FROM Anotaciones
+				 inner join Requisitos on Anotaciones.REQ_clave = Requisitos.REQ_clave
+				 WHERE ATN_clave=".$atencion;
+		$resultado['anotaciones'] = DB::connection('mysql')->select($sql);
+
+		$sqlCat="SELECT MRE_CVE, MRE_nombre FROM MotivoRechazo";
+		$resultado['motivoRechazo'] = DB::connection('mysql')->select($sqlCat);
+
+		$sqlCat="SELECT TIA_nombre FROM Atenciones
+				 INNER JOIN TipoAtencion ON Atenciones.TIA_clave=TipoAtencion.TIA_clave
+				 WHERE ATN_clave=".$atencion;
+		$resultado['atencion'] = DB::connection('mysql')->select($sqlCat)[0];
+
+		/*$resultado['documentos'] = DB::connection('mysql')->table('Atenciones')
+				->join('AtencionDocumento','Atenciones.TIA_clave','=','AtencionDocumento.TIA_clave')
+				->join('TipoDocumento', 'TipoDocumento.TID_claveint', '=', 'AtencionDocumento.TID_clave')
+				->join('Producto', 'Producto.Pro_clave', '=', 'AtencionDocumento.Pro_clave')
+				->leftjoin('DocumentosDigitales','Atenciones.ATN_clave','=','DocumentosDigitales.ATN_clave')
+				->leftjoin('DocumentosDigitales','TipoDocumento.TID_claveint','=','DocumentosDigitales.Arc_tipo')
+				//->leftjoin('DocumentosDigitales', 'AtencionDocumento.Tia_clave', '=', 'AtencionDocumento.Pro_clave')				
+				->where('Atenciones.ATN_clave','=', $atencion)
+				->get();
+		*/
 
         //preparo los archivos disponibles
 	    $notaMedica = array();
@@ -231,10 +290,104 @@ class SacecoController extends BaseController {
 
 	    $resultado['archivos'] = $archivos;
 
-
+	   
 	    return $resultado;
 
 
+
+	}
+
+	public function doctosValidados(){
+
+		$listDoctosValidados 	= Input::get('doctos');	
+		$usr 					= Input::get('user');	
+		$usr = str_replace('"','',$usr);		
+
+		$titulo 		= 'Validacion de documentos digitales';
+		$descripcion 	= '';
+		$atencionEstatus= 2;
+		$atencion=0;
+		$miFolio = array();
+		
+		try{
+			foreach ($listDoctosValidados as $dato) {
+				$atencion=$dato['ATN_clave'];
+				if($dato['Arc_estatus']!=''){
+					if($dato['ATD_estatus']==1){
+						$dato['Arc_estatus']=1;
+						$dato['Arc_motivo']='';
+						$dato['ATD_motivo']='';						
+					}
+					if($dato['Arc_estatus']==1)  $dato['Arc_motivoCat']=0;
+					$sqlDoctos="UPDATE DocumentosDigitales SET Arc_estatus = ".$dato['Arc_estatus'].", Arc_motivo ='".$dato['Arc_motivo']."', Arc_motivoCat=".$dato['Arc_motivoCat'].", Arc_autorizado=1, USU_autorizo='".$usr."' WHERE ATN_clave=".$dato['ATN_clave']." AND Arc_tipo=".$dato['TID_clave']." and Arc_clave='".$dato['Arc_clave']."'";
+						$archivos = DB::connection('mysql')->update($sqlDoctos);
+					if ($dato['ATD_estatus']>0) {							
+						$sqlDoctosAtn="UPDATE AtencionTipoDocumento SET ATD_estatus = ".$dato['ATD_estatus'].", ATD_motivo ='".$dato['ATD_motivo']."' WHERE ATN_clave=".$dato['ATN_clave']." AND TID_clave=".$dato['TID_clave'];
+						$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
+					}
+					if($dato['ATD_requerido']==1){
+						if($dato['ATD_estatus']==2||$dato['ATD_estatus']==0) $atencionEstatus=3;
+						//elseif($dato['ATD_estatus']==1)$atencionEstatus=1;					
+					}
+					$estatus='';
+					if($dato['Arc_estatus']==1) {
+						$descripcion ='Documento aprobado: '.$dato['TID_nombre'];
+						$estatus='aprobado';
+					}
+					elseif($dato['Arc_estatus']==2){
+						$descripcion ='Documento rechazado: '.$dato['TID_nombre'].' Motivo: '.$dato['Arc_motivo'];
+						$estatus='rechazado';
+					}
+					$titulo= 'Documento '.$estatus.': '.$dato['TID_nombre'];
+					if($dato['Arc_autorizado']==0){
+						$descripcion ='Documento '.$estatus.': '.$dato['TID_nombre'].' Motivo: '.$dato['Arc_motivo'];
+						$historial = new Historial;
+						$historial->titulo=$titulo;
+						$historial->descripcion = $descripcion;
+						$historial->folio = $dato['Exp_folio'];
+						$historial->usuario = $usr;
+						$historial->etapa = 1;
+						$historial->entrega = 1;
+						$historial->guardar();
+					}
+				}				
+			}	
+			$sqlDoctosAtn="UPDATE Atenciones SET ATN_estatus = ".$atencionEstatus." WHERE ATN_clave=".$atencion;
+			$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
+
+			if($atencionEstatus==3){
+			 	/*$sqlFolio = "SELECT Exp_folio FROM Atenciones	                    
+	                    		WHERE ATN_clave=".$atencion;
+	    		$datos= DB::connection('mysql')->select($sqlFolio)[0];
+	    		$folio= $datos['Exp_folio'];
+	    		$fecha = date('Y-m-d H:i');
+				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$folio."'";
+				$archivos = DB::connection('mysql')->update($qry);	*/
+			}elseif ($atencionEstatus==2) {
+				 /*$sqlArchivos ="SELECT Exp_folio FROM Atenciones	                    
+	                    		WHERE ATN_clave=".$atencion;
+				 $miFolio['folio']= DB::connection('mysql')->select($sqlArchivos);				*/
+				 //$resultado['expediente'] = DB::connection('mysql')->select($sql)[0];
+
+		        /*$productoCve = $miFolio['folio'];                
+		        foreach ($productoCve as $key => $value) {
+		        	if($key=='Exp_folio'){
+		        		$prodCve=$value;
+		        	}
+		        }
+		        echo $prodCve;	    		*/
+	    		/*$folio= $datos['Exp_folio'];
+
+				$fecha = date('Y-m-d H:i');*/
+				/*$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$folio."'";
+				$archivos = DB::connection('mysql')->update($qry);*/
+			}
+
+			$respuesta = array('respuesta' => 'exito'); 		
+	 	}catch(Exception $e){
+	 		$respuesta = array('respuesta' => $e->getmessage());	
+	 	}
+ 	return Response::json($respuesta);
 	}
 
 	public function solicitarAutorizacion(){

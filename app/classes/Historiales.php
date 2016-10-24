@@ -5,7 +5,7 @@ class Historial {
 
 	//parametros iniciales
 	public $titulo;
-	public $descricion;
+	public $descripcion;
 	public $folio;
 	public $usuario;
 	public $etapa;

@@ -264,10 +264,11 @@ Route::group(array('prefix' => 'api'), function()
 	{
     	Route::post('autorizados', array('uses' => 'SacecoController@autorizados'));
     	Route::put('actualizaFolio', array('uses' => 'SacecoController@actualizaFolio'));
+    	Route::post('doctosValidados', array('uses' => 'SacecoController@doctosValidados'));
     	Route::post('captura', array('uses' => 'SacecoController@captura'));
     	Route::post('capturaCuestionario', array('uses' => 'SacecoController@capturaCuestionario'));
     	Route::post('capturaAjustador', array('uses' => 'SacecoController@capturaAjustador'));
-		Route::get('detalleFolio/{folio}', array('uses' => 'SacecoController@detalleFolio'));
+		Route::get('detalleFolio/{folio}/{atencion}', array('uses' => 'SacecoController@detalleFolio'));
     	Route::post('pendientes', array('uses' => 'SacecoController@pendientes'));
     	Route::post('rechazados', array('uses' => 'SacecoController@rechazados'));
     	Route::post('solicitarAutorizacion', array('uses' => 'SacecoController@solicitarAutorizacion'));

@@ -142,6 +142,17 @@ class BusquedaController extends BaseController {
 		return $folioweb;
 	}
 
+	public function detalleMiFolio($folio){
+		$folioweb = DB::connection('mysql')->table('Expediente')
+				->join('Compania', 'Compania.CIA_clave', '=', 'Expediente.CIA_clave')
+				->join('Unidad', 'Unidad.UNI_clave', '=', 'Expediente.UNI_clave')
+				->leftjoin('Producto', 'Producto.Pro_clave', '=', 'Expediente.Pro_clave')
+				->leftjoin('Escolaridad', 'Escolaridad.ESC_clave', '=', 'Expediente.ESC_clave')
+				->where('Exp_folio','=', $folio)
+				->get();
+		return $folioweb;
+	}
+
 	public function flujo($folio){
 		return DB::select("EXEC MV_FLU_BuscaDocumento  @folio='$folio'");
 	}

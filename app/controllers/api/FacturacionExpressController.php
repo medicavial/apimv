@@ -203,6 +203,19 @@ class FacturacionExpressController extends BaseController {
 
 	    }
 
+
+	    $sqlFolio = "SELECT * FROM Expediente where Exp_folio = '$folio' ";
+
+
+	    $detFolio = DB::connection('mysql')->select($sqlFolio);
+
+	    print_r($detFolio);
+
+	    $resultado['miFolio'] = $detFolio;
+
+
+	    
+
 	    $archivos['notaMedica'] = $notaMedica;
 	    $archivos['hisotriaClinica'] = $historiaClinica;
 	    $archivos['cuestionario'] = $cuestionario;
@@ -213,6 +226,12 @@ class FacturacionExpressController extends BaseController {
 	    $archivos['todos'] = $todos;
 
 	    $resultado['archivos'] = $archivos;
+	    
+
+
+	    
+
+		
 
 
 	    return $resultado;
