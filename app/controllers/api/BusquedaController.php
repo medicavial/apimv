@@ -305,6 +305,19 @@ class BusquedaController extends BaseController {
 
 	}
 
+	public function solicitudes(){
+
+		// muestra las solicitudes de cancelacion
+		return  FolioWeb::join('Compania', 'Compania.CIA_clave', '=', 'Expediente.CIA_clave')
+				->join('Unidad', 'Unidad.UNI_clave', '=', 'Expediente.UNI_clave')
+				->join('RiesgoAfectado', 'RiesgoAfectado.RIE_clave', '=', 'Expediente.RIE_clave')
+				->join('Producto', 'Producto.Pro_clave', '=', 'Expediente.Pro_clave')
+				->where('Exp_solCancela',1)
+				->get();
+
+
+	}
+
 	public function tipoLesion($tipo){
 		return DB::select("EXEC MV_CAP_ListaTipoLesion  @setTipoLes=$tipo" );
 	}

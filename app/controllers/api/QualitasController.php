@@ -654,6 +654,13 @@ class QualitasController extends BaseController {
 	
 	}
 
+	public function test($folio){
+		$fecha = Pase::where('PAS_folio',$folio)->first()->PAS_fechaCaptura;
+		$nombre = $this->nombreArchivo($folio);
+
+		return $this->archivos($folio, $fecha, $nombre);
+	}
+
 	//funciones privadas
 	private function generar_clave(){ 
 

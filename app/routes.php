@@ -139,6 +139,7 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
 	    Route::get('riesgos', array('uses' => 'BusquedaController@riesgos'));
 	    Route::get('subsecuencia/{folio}/{entrega}', array('uses' => 'BusquedaController@subsecuencia'));
+	    Route::get('solicitudes', array('uses' => 'BusquedaController@solicitudes'));
 	    Route::get('rehabilitacion/{folio}/{entrega}', array('uses' => 'BusquedaController@rehabilitacion'));
 	    Route::get('tipoLesion/{tipo}', array('uses' => 'BusquedaController@tipoLesion'));
 	    Route::get('triage', array('uses' => 'BusquedaController@triage'));
@@ -226,6 +227,7 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('renombrar', array('uses' => 'QualitasController@renombrar'));
     	Route::post('sinarchivo', array('uses' => 'QualitasController@sinarchivo'));
     	Route::post('sinprocesar', array('uses' => 'QualitasController@sinprocesar'));
+    	Route::get('test/{folio}', array('uses' => 'QualitasController@test'));
     	Route::post('incompletos', array('uses' => 'QualitasController@incompletos'));
     	Route::post('invalidos', array('uses' => 'QualitasController@invalidos'));
 	});
