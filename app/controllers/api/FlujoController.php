@@ -337,7 +337,6 @@ class FlujoController extends BaseController {
 			$flujo = Flujo::find($clave);
 			$flujo->FLD_envNPC = 1;
 			$flujo->save();
-
 			Historial::altaNPC($clave);
 
 		}

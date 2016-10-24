@@ -120,6 +120,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('ajustadores/{cliente}', array('uses' => 'BusquedaController@ajustador'));
 		Route::get('buscador/{consulta}/{tipo}', array('uses' => 'BusquedaController@buscador'));
+		Route::get('concepto', array('uses' => 'BusquedaController@concepto'));
 		Route::get('editaDatos/{folio}', array('uses' => 'BusquedaController@editaDatos'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 		Route::get('empresasweb', array('uses' => 'BusquedaController@empresasweb'));
@@ -146,11 +147,15 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));
 	    Route::get('lesiones/{tipoLes}', 'BusquedaController@lesiones');
 	    Route::get('lesionweb', 'BusquedaController@lesionWeb');
+	    Route::get('tipotramite', 'BusquedaController@tipotramite');
 	    Route::get('verificaetapaentrega/{folio}/{etapa}', array('uses' => 'BusquedaController@verificaetapaentrega'));
 	    Route::get('verificafolio/{folio}/{etapa}', array('uses' => 'BusquedaController@verificafolio'));
 	    Route::get('verificafoliopase/{folio}', array('uses' => 'BusquedaController@verificafoliopase'));
 	    Route::get('verificaprefijo/{prefijo}/{empresa}', array('uses' => 'BusquedaController@verificaprefijo'));
-	    
+	    Route::get('impuestos', array('uses' => 'BusquedaController@impuestos'));
+	    Route::get('impuestovalor/{id}', array('uses' => 'BusquedaController@impuestovalor'));
+	    Route::get('unidadesref/{clave}', array('uses' => 'BusquedaController@unidadesref'));
+
 	    
 	});
 
@@ -158,6 +163,7 @@ Route::group(array('prefix' => 'api'), function()
 	{
     	Route::post('acepta', array('uses' => 'EntregasController@acepta'));
     	Route::post('rechaza', array('uses' => 'EntregasController@rechaza'));
+    	
 	});
 
 
@@ -226,8 +232,10 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('ticketsdia', array('uses' => 'ReportesController@ticketsdiaespecifico'));
 	});
 
+
 	Route::group(array('prefix' => 'facturacionExpress'), function()
 	{
+
     	Route::post('autorizados', array('uses' => 'FacturacionExpressController@autorizados'));
     	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressController@actualizaFolio'));
     	Route::post('captura', array('uses' => 'FacturacionExpressController@captura'));
@@ -239,13 +247,64 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
     	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
+
 	});
 
-    	Route::group(array('prefix' => 'relacion'), function()
+    Route::group(array('prefix' => 'RelacionPagos'), function()
 	{
-		Route::post('editaDatos', array('uses' => 'PagosController@entrega'));
+        // Route::post('fechaEntrega', array('uses' => 'RelacionController@relacionFechaEnt'));
+        Route::post('buscaxProveedor/{id}', array('uses' => 'RelacionController@buscaxProveedor'));
+        Route::post('insertaRelacion/{usuario}', array('uses' => 'RelacionController@insertaRelacion'));
+        Route::post('insertaRelacionGlo/{usuario}', array('uses' => 'RelacionController@insertaRelacionGlo'));
+        Route::post('upload/{idx}', array('uses' => 'RelacionController@upload'));
+        Route::post('eliminaxml', array('uses' => 'RelacionController@eliminaxml'));
+        Route::post('eliminaxmlInd/{idx}', array('uses' => 'RelacionController@eliminaxmlInd'));
 
-	});
+    });
+
+        Route::group(array('prefix' => 'RelacionNP'), function()
+	{
+        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
+
+    });
+
+    Route::group(array('prefix' => 'detalleRelacion'), function()
+	{
+        Route::get('detalle/{relacion}', array('uses' => 'DetalleRelacionController@detalle'));
+        
+
+    });
+
+ //    Route::group(array('prefix' => 'consulta'), function()
+	// {
+		// Route::post('globales', array('uses' => 'PagosController@globales'));
+		
+
+	    // Route::post('upload', function(){
+
+	    // 	   $file = Input::file("filename");
+	    // 	   return Response::json(array('respuesta' => $file));
+
+
+
+
+	// });
+
+		Route::get('/xml', function(){
+
+			// $app = new Illuminate\Container\Container;
+			// $document = new Orchestra\Parser\Xml\Document($app);
+			// $reader = new Orchestra\Parser\Xml\Reader($document);
+			$xml = $reader->load('/archivo.xml');
+			// $user = $xml->parse([
+			//     'id' => ['uses' => 'user.id'],
+			//     'email' => ['uses' => 'user.email'],
+			//     'followers' => ['uses' => 'user::followers'],
+			// ]);
+			return $xml;
+			print_r($xml);
+
+	    });
 
 });
 

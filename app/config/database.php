@@ -83,7 +83,6 @@ return array(
 			'prefix'   => '',
 		),
 
-
 		'test' => array(
 			'driver'   => 'sqlsrv',
 			'host'     => 'GEN',
@@ -92,7 +91,6 @@ return array(
 			'password' => '',
 			'prefix'   => '',
 		),
-
 
 		'production' => array(
 			'driver'   => 'sqlsrv',

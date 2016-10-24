@@ -1,8 +1,6 @@
 <?php
 
-
 class FlujopagosController extends BaseController {
-
 
 	//Consulta de flujo de pagos
 	public function general(){

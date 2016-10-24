@@ -13,7 +13,6 @@ class BusquedaController extends BaseController {
 		return Ajustador::where('EMP_claveint',$cliente)->orderBy('AJU_nombre')->get();
 	}
 
-
 	public function buscador($consulta,$tipo){
 		if ($tipo == 'lesionado') {
 			$consulta = '%'.$consulta.'%';
@@ -354,10 +353,9 @@ class BusquedaController extends BaseController {
 	}
 
 
-
 	public function unidades(){
 		return Unidad::where('uni_activa','=', 0)
-				->select('uni_claveint as id','uni_nombrecorto as nombre','UNI_propia as propia')
+				->select('uni_claveint as id','uni_nombrecorto as nombre','UNI_propia as propia', 'UNI_ref as referencia')
 				->orderBy('uni_nombrecorto')
 				->get();
 	}
@@ -411,7 +409,43 @@ class BusquedaController extends BaseController {
 	}
 
 	public function verificaprefijo($prefijo , $empresa){
+
 		return DB::select("EXEC MV_DCU_ValidaPrefijoFolio  @prefijo='$prefijo', @empresa='$empresa'");
+	}
+
+	public function concepto(){
+
+		return conceptoTramite::where('TCO_activo','=', 1)
+				->select('TCO_clave as id','TCO_concepto as nombre')
+				->get();
+	}
+
+	public function tipotramite(){
+
+		return TramiteTipo::where('TII_activo','=', 1)
+				->select('TII_clave as id','TII_tipo as tipo')
+				->get();
+	}
+
+	public function impuestos(){
+
+		return Impuestos::where('IMP_activo','=', 1)
+				->select('IMP_clave as id','IMP_nombre as nombre', 'IMP_valor as valor' )
+				->get();
+	}
+
+	public function impuestovalor($id){
+
+		return Impuestos::where('IMP_clave','=', $id)
+				->select('IMP_clave as id','IMP_nombre as nombre', 'IMP_valor as valor' )
+				->get();
+	}
+
+	public function unidadesref($clave){
+		return Unidad::where('UNI_claveint','=', $clave)
+				->select('uni_claveint as id','uni_nombrecorto as nombre','UNI_propia as propia', 'UNI_ref as ref')
+				->orderBy('uni_nombrecorto')
+				->get();
 	}
 
 }

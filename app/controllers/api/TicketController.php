@@ -501,7 +501,6 @@ class TicketController extends BaseController {
 	}
 
 	public function detallepagos($foliointerno,$folio){
-
 		$datos = array();
 		
 		$ticket = Ticketpagos::find($foliointerno);
@@ -520,7 +519,6 @@ class TicketController extends BaseController {
         $datos['notas'] = $notas;
 
         return $datos;
-
 	}
 
 	public function foliopagos($folio){
@@ -540,7 +538,6 @@ class TicketController extends BaseController {
 				->get();
 
 		return $tickets;
-
 	}
 
 	public function foliointernopagos($folio){
