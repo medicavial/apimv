@@ -17,45 +17,47 @@ Route::group(array('prefix' => 'api'), function()
 {
 	Route::get('/', function()
 	{
-		$datosCentrales =  DB::select(" EXEC MV_REW_Captura_folio  @folio='PEMV035563' " )[0];
+		// $datosCentrales =  DB::select(" EXEC MV_REW_Captura_folio  @folio='PEMV035563' " )[0];
 
-		$registro = new ExpedienteInfo;
-		$registro->EXP_folio = $datosCentrales->Folio;
-		$registro->EXP_lesionado = $datosCentrales->Lesionado;
-		$registro->CIA_clave = $datosCentrales->ClienteWeb;
-		$registro->UNI_clave = $datosCentrales->UnidadWeb;
-		$registro->EXP_fechaExpedicion = $datosCentrales->FExpedicion;
-		$registro->EXP_fechaCaptura = $datosCentrales->FCaptura;
-		$registro->EXP_fechaAtencion = $datosCentrales->FAtencion;
-		$registro->EXP_poliza = $datosCentrales->Poliza;
-		$registro->EXP_siniestro = $datosCentrales->Siniestro;
-		$registro->EXP_reporte = $datosCentrales->Reporte;
-		$registro->EXP_orden = $datosCentrales->NoOrden;
-		$registro->POS_claveint = $datosCentrales->PosicionWeb;
-		$registro->RIE_claveint = $datosCentrales->RiesgoWeb;
-		$registro->EXP_ajustador = $datosCentrales->Ajustador;
-		$registro->EXP_medico = $datosCentrales->Medico;
-		$registro->EXP_obsAjustador = $datosCentrales->LesionesA;
-		$registro->LES_primaria = $datosCentrales->LPrimaria;
-		$registro->LES_empresa = $datosCentrales->LEmpresa;
-		$registro->EXP_diagnostico = $datosCentrales->DescMedica;
-		$registro->FAC_folioFiscal = $datosCentrales->FolFiscal;
-		$registro->FAC_serie = $datosCentrales->Serie;
-		$registro->FAC_folio = $datosCentrales->Factura;
-		$registro->FAC_fecha = $datosCentrales->FFactura;
-		$registro->FAC_importe = $datosCentrales->Importe;
-		$registro->FAC_iva = $datosCentrales->IVA;
-		$registro->FAC_total = $datosCentrales->Total;
-		$registro->FAC_saldo = $datosCentrales->Saldo;
-		$registro->FAC_pagada = $datosCentrales->Pagada;
-		$registro->FAC_fechaPago = $datosCentrales->FPagoFac;
-		$registro->FAC_ultimaAplicacion = $datosCentrales->FUltApl;
-		$registro->EXP_fechaRegWeb = $datosCentrales->FExp;
-		$registro->EXP_costoEmpresa = $datosCentrales->CostoEmpresa;
+		// $registro = new ExpedienteInfo;
+		// $registro->EXP_folio = $datosCentrales->Folio;
+		// $registro->EXP_lesionado = $datosCentrales->Lesionado;
+		// $registro->CIA_clave = $datosCentrales->ClienteWeb;
+		// $registro->UNI_clave = $datosCentrales->UnidadWeb;
+		// $registro->EXP_fechaExpedicion = $datosCentrales->FExpedicion;
+		// $registro->EXP_fechaCaptura = $datosCentrales->FCaptura;
+		// $registro->EXP_fechaAtencion = $datosCentrales->FAtencion;
+		// $registro->EXP_poliza = $datosCentrales->Poliza;
+		// $registro->EXP_siniestro = $datosCentrales->Siniestro;
+		// $registro->EXP_reporte = $datosCentrales->Reporte;
+		// $registro->EXP_orden = $datosCentrales->NoOrden;
+		// $registro->POS_claveint = $datosCentrales->PosicionWeb;
+		// $registro->RIE_claveint = $datosCentrales->RiesgoWeb;
+		// $registro->EXP_ajustador = $datosCentrales->Ajustador;
+		// $registro->EXP_medico = $datosCentrales->Medico;
+		// $registro->EXP_obsAjustador = $datosCentrales->LesionesA;
+		// $registro->LES_primaria = $datosCentrales->LPrimaria;
+		// $registro->LES_empresa = $datosCentrales->LEmpresa;
+		// $registro->EXP_diagnostico = $datosCentrales->DescMedica;
+		// $registro->FAC_folioFiscal = $datosCentrales->FolFiscal;
+		// $registro->FAC_serie = $datosCentrales->Serie;
+		// $registro->FAC_folio = $datosCentrales->Factura;
+		// $registro->FAC_fecha = $datosCentrales->FFactura;
+		// $registro->FAC_importe = $datosCentrales->Importe;
+		// $registro->FAC_iva = $datosCentrales->IVA;
+		// $registro->FAC_total = $datosCentrales->Total;
+		// $registro->FAC_saldo = $datosCentrales->Saldo;
+		// $registro->FAC_pagada = $datosCentrales->Pagada;
+		// $registro->FAC_fechaPago = $datosCentrales->FPagoFac;
+		// $registro->FAC_ultimaAplicacion = $datosCentrales->FUltApl;
+		// $registro->EXP_fechaRegWeb = $datosCentrales->FExp;
+		// $registro->EXP_costoEmpresa = $datosCentrales->CostoEmpresa;
 
-		$registro->save();
+		// $registro->save();
 
-		return View::make('hello');
+		// return View::make('hello');
+
+		return User::all();
 	});
 
 	Route::get('/monitor', function(){
@@ -130,6 +132,8 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('flujo/{folio}', array('uses' => 'BusquedaController@flujo'));
 	    Route::get('historial/{folio}/{etapa}/{entrega}', array('uses' => 'BusquedaController@historial'));
 	    Route::get('lesionado/{lesionado}', array('uses' => 'BusquedaController@lesionado'));
+	    Route::get('medicos/{unidad}', array('uses' => 'BusquedaController@medicos'));
+	    Route::get('posiciones', array('uses' => 'BusquedaController@posiciones'));
 	    Route::get('productos', array('uses' => 'BusquedaController@productos'));
 	    Route::get('productos/{empresa}', array('uses' => 'BusquedaController@productosEmp'));
 	    Route::get('referencia/{unidad}', array('uses' => 'BusquedaController@referencia'));
@@ -189,16 +193,21 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'flujopagos'), function()
 	{
+
 		Route::get('general', array('uses' => 'FlujopagosController@general'));
 		Route::post('fecharecepcion', array('uses' => 'FlujopagosController@fecharecepcion'));
 		Route::post('fechapagos', array('uses' => 'FlujopagosController@fechapagos'));
+
 	});
 
 	Route::group(array('prefix' => 'operacion'), function()
 	{
-		Route::post('editaDatos', array('uses' => 'HomeController@editaDatos'));
-		Route::post('usuarios', array('uses' => 'HomeController@guardaUsuario'));
-		Route::put('usuarios', array('uses' => 'HomeController@editaUsuario'));
+		Route::post('editaDatos', array('uses' => 'OperacionController@editaDatos'));
+		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
+		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
+		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
+		Route::get('prueba', array('uses' => 'OperacionController@prueba'));
+
 	});
 
 	Route::group(array('prefix' => 'qualitas'), function()
@@ -250,6 +259,22 @@ Route::group(array('prefix' => 'api'), function()
 
 	});
 
+
+	Route::group(array('prefix' => 'saceco'), function()
+	{
+    	Route::post('autorizados', array('uses' => 'SacecoController@autorizados'));
+    	Route::put('actualizaFolio', array('uses' => 'SacecoController@actualizaFolio'));
+    	Route::post('captura', array('uses' => 'SacecoController@captura'));
+    	Route::post('capturaCuestionario', array('uses' => 'SacecoController@capturaCuestionario'));
+    	Route::post('capturaAjustador', array('uses' => 'SacecoController@capturaAjustador'));
+		Route::get('detalleFolio/{folio}', array('uses' => 'SacecoController@detalleFolio'));
+    	Route::post('pendientes', array('uses' => 'SacecoController@pendientes'));
+    	Route::post('rechazados', array('uses' => 'SacecoController@rechazados'));
+    	Route::post('solicitarAutorizacion', array('uses' => 'SacecoController@solicitarAutorizacion'));
+    	Route::post('solicitarAutorizacionRechazos', array('uses' => 'SacecoController@solicitarAutorizacionRechazos'));
+    	Route::post('solicitados', array('uses' => 'SacecoController@solicitados'));
+	});
+
     Route::group(array('prefix' => 'RelacionPagos'), function()
 	{
         // Route::post('fechaEntrega', array('uses' => 'RelacionController@relacionFechaEnt'));
@@ -260,35 +285,29 @@ Route::group(array('prefix' => 'api'), function()
         Route::post('eliminaxml', array('uses' => 'RelacionController@eliminaxml'));
         Route::post('eliminaxmlInd/{idx}', array('uses' => 'RelacionController@eliminaxmlInd'));
 
-    });
-
-        Route::group(array('prefix' => 'RelacionNP'), function()
-	{
-        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
-
-    });
-
-    Route::group(array('prefix' => 'detalleRelacion'), function()
-	{
-        Route::get('detalle/{relacion}', array('uses' => 'DetalleRelacionController@detalle'));
-        
-
-    });
-
- //    Route::group(array('prefix' => 'consulta'), function()
-	// {
-		// Route::post('globales', array('uses' => 'PagosController@globales'));
 		
 
-	    // Route::post('upload', function(){
-
-	    // 	   $file = Input::file("filename");
-	    // 	   return Response::json(array('respuesta' => $file));
-
+    	Route::group(array('prefix' => 'relacion'), function()
+		{
+			Route::post('entrega', array('uses' => 'PagosController@entrega'));
 
 
+	    });
 
-	// });
+        Route::group(array('prefix' => 'RelacionNP'), function()
+		{
+	        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
+
+	    });
+
+	    Route::group(array('prefix' => 'detalleRelacion'), function()
+		{
+	        Route::get('detalle/{relacion}', array('uses' => 'DetalleRelacionController@detalle'));
+	        
+
+	    });
+
+
 
 		Route::get('/xml', function(){
 
@@ -306,8 +325,9 @@ Route::group(array('prefix' => 'api'), function()
 
 	    });
 
-});
+	});
 
+});
 
 Route::get('/', array('uses' => 'HomeController@index'));
 Route::get('/procesos', array('uses' => 'HomeController@procesos'));
@@ -328,71 +348,5 @@ Route::get('/info', function()
 	phpinfo();
 });
 
-	// $fechaini = '01/01/2015';
-	// $fechafin = '01/04/2015';
-	// $result = DB::select("EXEC MV_DOC_ListadoDocumentosXFecha  @fechaIni='$fechaini', @fechaFin='$fechafin'");
 
-	// foreach ($result as $dato){
-
-	//     $data[] = array(
-	//         "folio"=> $dato->Folio,
-	//         "etapa" => $dato->Etapa,
-	//         "fax"=> $dato->Fax,
-	//         "original"=> $dato->Original,
-	//         "facExp"=> $dato->FacExp,
-	//         "situacion"=> $dato->Situacion,
-	//         "unidad"=> $dato->Unidad,
-	//         "fechacaptura"=> $dato->FechaCaptura,
-	//     );
-	// }
-
-	// Excel::create('Filename', function($excel) use($data) {
-
-	//     $excel->sheet('Sheetname', function($sheet) use($data) {
-
-	//         $sheet->fromArray($data);
-
-	//     });
-
-	// })->export('xls');
-
-
-	// $datos = DB::select("EXEC MVImgs_Datos @folio = 'ROMV000005'");
-
-	// foreach ($datos as $dato) {
-	// 	$nombre = $dato->Archivo;
-	// }
-	// $envios = DB::select("SELECT EnviosQualitas.ENQ_claveint, ENQ_fechaenvio,ENQ_procesado, (SELECT COUNT(*) from DetalleEnvio where DetalleEnvio.ENQ_claveint = EnviosQualitas.ENQ_claveint) as Cuenta
-	// 			FROM EnviosQualitas  WHERE ENQ_fechaenvio BETWEEN '01/04/2015' and '22/04/2015' ");
-
-	// return $envios;
-	// $folio = 'ROMV000005';
-	// $etapa = 1;
-	// $entrega = 1;
-
-	// $datos = Documento::where('DOC_folio',$folio)->where('DOC_etapa',$etapa)->where('DOC_numeroEntrega',$entrega)->get();
-
-	// foreach ($datos as $dato) {
-	// 	$documento = $dato['DOC_claveint'];
-	// }
-
-	// $datos = Documento::find(516030)->DOC_folio;
-
-	// $reportes = '04140615280';
-
-	
- //    $wsdl = "http://201.151.239.105:8081/wsProveedores/siniestros?wsdl";
- //    $username = '11555';
- //    $password = '2WXH59';
-
- //    $client = new SoapClient($wsdl,array('trace' => 1));
-
- //    $wsse_header = new WsseAuthHeader($username, $password);
- //    $client->__setSoapHeaders(array($wsse_header));
- //    $param = array('reporte' => $reporte);
- //    $respuesta = $client->getSiniestroByReporte($param);
-
-	// $reportes
-
-	// return  $datos;
 

@@ -3,8 +3,7 @@
 class Bitacora extends Eloquent {
 	
 	public $timestamps = false;
-	protected $connection = 'mysql';
-	protected $primaryKey ='BIT_clave';
+	protected $primaryKey ='BIT_claveint';
     protected $table = 'BitacoraCambio';
 
 }		

@@ -4,13 +4,12 @@ include(app_path() . '/classes/Historiales.php');
 
 class EntregasController extends BaseController {
 
-
 	//Se crea una nueva por que es para facturacion
 	public function acepta(){
 
 		$folios =  Input::all(); 
 
-	    foreach ($folios as $foliodato) {
+	    foreach ($folios as $foliodato){
 
 		    $usuarioentrega =  $foliodato['USU_ent']; 
 		    $areaentrega =  $foliodato['FLD_AROent']; 

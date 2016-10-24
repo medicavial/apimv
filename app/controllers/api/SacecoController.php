@@ -1,7 +1,7 @@
 <?php
 
 
-class FacturacionExpressController extends BaseController {
+class SacecoController extends BaseController {
 
 	public function pendientes(){
 
@@ -12,20 +12,37 @@ class FacturacionExpressController extends BaseController {
 		$resultado = array();
 
 		$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
-            Expediente.Exp_siniestro,Expediente.Exp_reporte,
-            Exp_completo, Exp_fecreg, Cia_nombrecorto, RIE_nombre,
-            CASE WHEN Expediente.Exp_folio in (SELECT REG_folio FROM DocumentosDigitales where REG_folio = Expediente.Exp_folio) THEN 'DIGITALIZADO' ELSE 'SIN DIGITALIZAR' END as DocumentosDigitales,
-            EXP_fechaCaptura,EXP_costoEmpresa,Triage_nombre,UNI_propia,
-            CASE WHEN DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  = '00-00-0000' THEN NULL ELSE DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  END as FExpedicion
-            FROM Expediente
-                inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave
-                inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
-                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave
-                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
-                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
-                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
-            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Exp_FE = 1 and Unidad.Uni_clave <> 8 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
+	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
+	            Exp_completo, Exp_fecreg, Cia_nombrecorto, RIE_nombre,
+	            CASE WHEN Expediente.Exp_folio in (SELECT REG_folio FROM DocumentosDigitales where REG_folio = Expediente.Exp_folio) THEN 'DIGITALIZADO' ELSE 'SIN DIGITALIZAR' END as DocumentosDigitales,
+	            EXP_fechaCaptura,EXP_costoEmpresa,Triage_nombre,UNI_propia,
+	            CASE WHEN DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  = '00-00-0000' THEN NULL ELSE DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  END as FExpedicion
+	            FROM Expediente
+	                inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave
+	                inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
+	                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave
+	                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
+	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
+	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
+	            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Exp_FE = 1 and Unidad.Uni_clave <> 8 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
 
+		
+
+		/*$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
+	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
+	            Exp_completo, Exp_fecreg, Cia_nombrecorto, RIE_nombre,
+	            CASE WHEN Expediente.Exp_folio in (SELECT REG_folio FROM DocumentosDigitales where REG_folio = Expediente.Exp_folio) THEN 'DIGITALIZADO' ELSE 'SIN DIGITALIZAR' END as DocumentosDigitales,
+	            EXP_fechaCaptura,EXP_costoEmpresa,Triage_nombre,UNI_propia,
+	            CASE WHEN DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  = '00-00-0000' THEN NULL ELSE DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  END as FExpedicion
+	            FROM Expediente
+	                inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave
+	                inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
+	                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave
+	                left join TriageAutorizacion on TriageAutorizacion.Triage_id = Expediente.Exp_triageActual
+	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
+	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
+	            WHERE Exp_fecreg BETWEEN '$fechaini' and '$fechafin' and Compania.Cia_clave in ($id) and Exp_FE = 1 and Unidad.Uni_clave <> 8 and Exp_cancelado = 0  AND Exp_solicitado = 0 AND Exp_autorizado = 0 AND ( FAC_folio = 0 OR FAC_folio IS NULL ) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 ORDER BY Exp_fecreg DESC";
+*/
         //conteo general
 	    $sqlAnalisis = "SELECT  
 	            count(*) as Total,
