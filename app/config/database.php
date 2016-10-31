@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'default' => 'test',
+	'default' => 'production',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -103,10 +103,10 @@ return array(
 
 		'mysqllocal' => array(
 			'driver'    => 'mysql',
-			'host'      => 'www.medicavial.net',
-			'database'  => 'medica_registromv',
-			'username'  => 'medica_webusr',
-			'password'  => 'tosnav50',
+			'host'      => 'localhost',
+			'database'  => 'medica_registro',
+			'username'  => 'root',
+			'password'  => '',
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
