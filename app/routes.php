@@ -122,7 +122,6 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('ajustadores/{cliente}', array('uses' => 'BusquedaController@ajustador'));
 		Route::get('buscador/{consulta}/{tipo}', array('uses' => 'BusquedaController@buscador'));
-		Route::get('concepto', array('uses' => 'BusquedaController@concepto'));
 		Route::get('editaDatos/{folio}', array('uses' => 'BusquedaController@editaDatos'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 		Route::get('empresasweb', array('uses' => 'BusquedaController@empresasweb'));
@@ -152,15 +151,11 @@ Route::group(array('prefix' => 'api'), function()
 	    Route::get('unidadesweb', array('uses' => 'BusquedaController@unidadesweb'));
 	    Route::get('lesiones/{tipoLes}', 'BusquedaController@lesiones');
 	    Route::get('lesionweb', 'BusquedaController@lesionWeb');
-	    Route::get('tipotramite', 'BusquedaController@tipotramite');
 	    Route::get('verificaetapaentrega/{folio}/{etapa}', array('uses' => 'BusquedaController@verificaetapaentrega'));
 	    Route::get('verificafolio/{folio}/{etapa}', array('uses' => 'BusquedaController@verificafolio'));
 	    Route::get('verificafoliopase/{folio}', array('uses' => 'BusquedaController@verificafoliopase'));
 	    Route::get('verificaprefijo/{prefijo}/{empresa}', array('uses' => 'BusquedaController@verificaprefijo'));
-	    Route::get('impuestos', array('uses' => 'BusquedaController@impuestos'));
-	    Route::get('impuestovalor/{id}', array('uses' => 'BusquedaController@impuestovalor'));
-	    Route::get('unidadesref/{clave}', array('uses' => 'BusquedaController@unidadesref'));
-
+	    
 	    
 	});
 
@@ -168,7 +163,6 @@ Route::group(array('prefix' => 'api'), function()
 	{
     	Route::post('acepta', array('uses' => 'EntregasController@acepta'));
     	Route::post('rechaza', array('uses' => 'EntregasController@rechaza'));
-    	
 	});
 
 
@@ -177,6 +171,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('consulta/{usuario}', array('uses' => 'FlujoController@consulta'));
 
 		Route::post('alta', array('uses' => 'FlujoController@alta'));
+		Route::get('altaManualJF', array('uses' => 'FlujoController@altaManualJF'));
 		Route::post('actualiza', array('uses' => 'FlujoController@actualiza'));
 		Route::get('activos/{usuario}', array('uses' => 'FlujoController@activos'));
 		Route::post('elimina', array('uses' => 'FlujoController@elimina'));
@@ -243,10 +238,8 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('ticketsdia', array('uses' => 'ReportesController@ticketsdiaespecifico'));
 	});
 
-
 	Route::group(array('prefix' => 'facturacionExpress'), function()
 	{
-
     	Route::post('autorizados', array('uses' => 'FacturacionExpressController@autorizados'));
     	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressController@actualizaFolio'));
     	Route::post('captura', array('uses' => 'FacturacionExpressController@captura'));
@@ -258,75 +251,11 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
     	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
-
 	});
-
-
-	Route::group(array('prefix' => 'saceco'), function()
-	{
-    	Route::post('autorizados', array('uses' => 'SacecoController@autorizados'));
-    	Route::put('actualizaFolio', array('uses' => 'SacecoController@actualizaFolio'));
-    	Route::post('doctosValidados', array('uses' => 'SacecoController@doctosValidados'));
-    	Route::post('captura', array('uses' => 'SacecoController@captura'));
-    	Route::post('capturaCuestionario', array('uses' => 'SacecoController@capturaCuestionario'));
-    	Route::post('capturaAjustador', array('uses' => 'SacecoController@capturaAjustador'));
-		Route::get('detalleFolio/{folio}/{atencion}', array('uses' => 'SacecoController@detalleFolio'));
-    	Route::post('pendientes', array('uses' => 'SacecoController@pendientes'));
-    	Route::post('rechazados', array('uses' => 'SacecoController@rechazados'));
-    	Route::post('solicitarAutorizacion', array('uses' => 'SacecoController@solicitarAutorizacion'));
-    	Route::post('solicitarAutorizacionRechazos', array('uses' => 'SacecoController@solicitarAutorizacionRechazos'));
-    	Route::post('solicitados', array('uses' => 'SacecoController@solicitados'));
-	});
-
-    Route::group(array('prefix' => 'RelacionPagos'), function()
-	{
-        // Route::post('fechaEntrega', array('uses' => 'RelacionController@relacionFechaEnt'));
-        Route::post('buscaxProveedor/{id}', array('uses' => 'RelacionController@buscaxProveedor'));
-        Route::post('insertaRelacion/{usuario}', array('uses' => 'RelacionController@insertaRelacion'));
-        Route::post('insertaRelacionGlo/{usuario}', array('uses' => 'RelacionController@insertaRelacionGlo'));
-        Route::post('upload/{idx}', array('uses' => 'RelacionController@upload'));
-        Route::post('eliminaxml', array('uses' => 'RelacionController@eliminaxml'));
-        Route::post('eliminaxmlInd/{idx}', array('uses' => 'RelacionController@eliminaxmlInd'));
-
-		
 
     	Route::group(array('prefix' => 'relacion'), function()
-		{
-			Route::post('entrega', array('uses' => 'PagosController@entrega'));
-
-
-	    });
-
-        Route::group(array('prefix' => 'RelacionNP'), function()
-		{
-	        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
-
-	    });
-
-	    Route::group(array('prefix' => 'detalleRelacion'), function()
-		{
-	        Route::get('detalle/{relacion}', array('uses' => 'DetalleRelacionController@detalle'));
-	        
-
-	    });
-
-
-
-		Route::get('/xml', function(){
-
-			// $app = new Illuminate\Container\Container;
-			// $document = new Orchestra\Parser\Xml\Document($app);
-			// $reader = new Orchestra\Parser\Xml\Reader($document);
-			$xml = $reader->load('/archivo.xml');
-			// $user = $xml->parse([
-			//     'id' => ['uses' => 'user.id'],
-			//     'email' => ['uses' => 'user.email'],
-			//     'followers' => ['uses' => 'user::followers'],
-			// ]);
-			return $xml;
-			print_r($xml);
-
-	    });
+	{
+		Route::post('entrega', array('uses' => 'PagosController@entrega'));
 
 	});
 
@@ -351,5 +280,71 @@ Route::get('/info', function()
 	phpinfo();
 });
 
+	// $fechaini = '01/01/2015';
+	// $fechafin = '01/04/2015';
+	// $result = DB::select("EXEC MV_DOC_ListadoDocumentosXFecha  @fechaIni='$fechaini', @fechaFin='$fechafin'");
 
+	// foreach ($result as $dato){
+
+	//     $data[] = array(
+	//         "folio"=> $dato->Folio,
+	//         "etapa" => $dato->Etapa,
+	//         "fax"=> $dato->Fax,
+	//         "original"=> $dato->Original,
+	//         "facExp"=> $dato->FacExp,
+	//         "situacion"=> $dato->Situacion,
+	//         "unidad"=> $dato->Unidad,
+	//         "fechacaptura"=> $dato->FechaCaptura,
+	//     );
+	// }
+
+	// Excel::create('Filename', function($excel) use($data) {
+
+	//     $excel->sheet('Sheetname', function($sheet) use($data) {
+
+	//         $sheet->fromArray($data);
+
+	//     });
+
+	// })->export('xls');
+
+
+	// $datos = DB::select("EXEC MVImgs_Datos @folio = 'ROMV000005'");
+
+	// foreach ($datos as $dato) {
+	// 	$nombre = $dato->Archivo;
+	// }
+	// $envios = DB::select("SELECT EnviosQualitas.ENQ_claveint, ENQ_fechaenvio,ENQ_procesado, (SELECT COUNT(*) from DetalleEnvio where DetalleEnvio.ENQ_claveint = EnviosQualitas.ENQ_claveint) as Cuenta
+	// 			FROM EnviosQualitas  WHERE ENQ_fechaenvio BETWEEN '01/04/2015' and '22/04/2015' ");
+
+	// return $envios;
+	// $folio = 'ROMV000005';
+	// $etapa = 1;
+	// $entrega = 1;
+
+	// $datos = Documento::where('DOC_folio',$folio)->where('DOC_etapa',$etapa)->where('DOC_numeroEntrega',$entrega)->get();
+
+	// foreach ($datos as $dato) {
+	// 	$documento = $dato['DOC_claveint'];
+	// }
+
+	// $datos = Documento::find(516030)->DOC_folio;
+
+	// $reportes = '04140615280';
+
+	
+ //    $wsdl = "http://201.151.239.105:8081/wsProveedores/siniestros?wsdl";
+ //    $username = '11555';
+ //    $password = '2WXH59';
+
+ //    $client = new SoapClient($wsdl,array('trace' => 1));
+
+ //    $wsse_header = new WsseAuthHeader($username, $password);
+ //    $client->__setSoapHeaders(array($wsse_header));
+ //    $param = array('reporte' => $reporte);
+ //    $respuesta = $client->getSiniestroByReporte($param);
+
+	// $reportes
+
+	// return  $datos;
 
