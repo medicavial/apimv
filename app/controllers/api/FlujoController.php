@@ -43,6 +43,33 @@ class FlujoController extends BaseController {
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
 
 	}
+
+	//alta manual de juego de faturacion
+	public function altaManualJF(){
+
+		$flujo = new Flujo;
+
+		$flujo->FLD_formaRecep = 'JF'; 
+		$flujo->USU_ent = 16;
+		$flujo->FLD_fechaent = date('d/m/Y H:i:s');  
+		$flujo->USU_activo =  16;
+		$flujo->ARO_activa = 4;
+		$flujo->FLD_porRecibir = 1; 
+		$flujo->USU_recibe =  29;
+		$flujo->ARO_porRecibir =  5;
+		$flujo->DOC_claveint = 784555;
+		$flujo->FLD_AROent = 5;
+		$flujo->FLD_observaciones = 'Paso manual por sistema';
+
+		// $flujo->save();
+
+		$clave = $flujo->FLD_claveint;
+		// Historial::altaEntrega($clave);
+	
+
+		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
+
+	}
 		
 	//alta de entregas de un area a otra se actualiza en el flujo
 	public function actualiza(){
@@ -371,6 +398,7 @@ class FlujoController extends BaseController {
 			$flujo = Flujo::find($clave);
 			$flujo->FLD_envNPC = 1;
 			$flujo->save();
+
 			Historial::altaNPC($clave);
 
 		}

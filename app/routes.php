@@ -57,7 +57,8 @@ Route::group(array('prefix' => 'api'), function()
 
 		// return View::make('hello');
 
-		return User::all();
+		// return User::all();
+		return FacturaWeb::max('FAC_folio');
 	});
 
 	Route::get('/monitor', function(){
@@ -175,8 +176,8 @@ Route::group(array('prefix' => 'api'), function()
     Route::group(array('prefix' => 'flujo'), function()
 	{
 		Route::get('consulta/{usuario}', array('uses' => 'FlujoController@consulta'));
-
 		Route::post('alta', array('uses' => 'FlujoController@alta'));
+		Route::get('altaManualJF', array('uses' => 'FlujoController@altaManualJF'));
 		Route::post('actualiza', array('uses' => 'FlujoController@actualiza'));
 		Route::get('activos/{usuario}', array('uses' => 'FlujoController@activos'));
 		Route::post('elimina', array('uses' => 'FlujoController@elimina'));
