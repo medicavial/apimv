@@ -75,8 +75,6 @@ class SacecoController extends BaseController {
 	            LEFT JOIN ExpedienteInfo ON ExpedienteInfo.Exp_folio = Expediente.Exp_folio 
 	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Expediente.Cia_clave in ($id) AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00' and Expediente.Exp_triageActual NOT IN (4,5) and PRO_clave <> 13 and Expediente.Exp_FE = 1 and Expediente.Uni_clave <> 8 ";
 
-
-
 		$resultado['listado'] =  DB::connection('mysql')->select($sql);
 
 		$resultado['numeros'] =  DB::connection('mysql')->select($sqlAnalisis)[0];
@@ -89,7 +87,7 @@ class SacecoController extends BaseController {
 
 		$resultado = array();
 
-		$sql = "SELECT  Expediente.Exp_folio as folio,Exp_completo as lesionado, UNI_nombreMV as unidad, 
+		$sql = "SELECT  Expediente.Exp_folio as folio,Exp_completo as lesionado,Unidad.Uni_clave as UniClave, UNI_nombreMV as unidad, 
                     Expediente.Exp_poliza as poliza, Expediente.Exp_siniestro as siniestro ,Expediente.Exp_reporte as reporte,
                     Exp_fecreg as fechaatencion , Expediente.EXP_edad as edad, Expediente.EXP_sexo as sexo,EXP_fechaCaptura as fechacaptura,
                     ExpedienteInfo.EXP_fechaExpedicion as fechaexpedicion, Expediente.EXP_orden as orden,  RIE_nombre as riesgo, 
@@ -125,8 +123,7 @@ class SacecoController extends BaseController {
 				inner join AtencionDocumento atn on Atenciones.TIA_clave = atn.TIA_clave
 				inner join TipoDocumento on TipoDocumento.TID_claveint = atn.TID_clave
 				inner join Producto on Producto.Pro_clave = atn.Pro_clave
-				inner join AtencionTipoDocumento on Atenciones.ATN_clave=AtencionTipoDocumento.ATN_clave and TipoDocumento.TID_claveint=AtencionTipoDocumento.TID_clave
-				
+				inner join AtencionTipoDocumento on Atenciones.ATN_clave=AtencionTipoDocumento.ATN_clave and TipoDocumento.TID_claveint=AtencionTipoDocumento.TID_clave				
 				left join DocumentosDigitales DIG  on Atenciones.ATN_clave= DIG.ATN_clave and  atn.TID_clave=DIG.Arc_tipo
 				where Atenciones.ATN_clave=".$atencion." and Producto.Pro_clave=".$prodCve;
 
@@ -144,6 +141,21 @@ class SacecoController extends BaseController {
 				 INNER JOIN TipoAtencion ON Atenciones.TIA_clave=TipoAtencion.TIA_clave
 				 WHERE ATN_clave=".$atencion;
 		$resultado['atencion'] = DB::connection('mysql')->select($sqlCat)[0];
+
+		$cont = "SELECT count(*) as con FROM ExpedienteLesion WHERE Exp_folio='".$folio."'";
+		$con = DB::connection('mysql')->select($cont)[0];
+		if($con->con>0){
+			$sqlLes="SELECT LesE_clave, ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion  FROM ExpedienteLesion
+					 INNER JOIN LesionCodificada on ExpedienteLesion.LCO_cve = LesionCodificada.LCO_cve				 
+					 INNER JOIN CieOrtopedico on LesionCodificada.CIE_cve = CieOrtopedico.CIE_cve
+					 WHERE Exp_folio='".$folio."'";
+
+			$resultado['lesion'] = DB::connection('mysql')->select($sqlLes)[0];
+		}else{
+			$resultado['lesion']='sinLesion';
+		}
+
+
 
 		/*$resultado['documentos'] = DB::connection('mysql')->table('Atenciones')
 				->join('AtencionDocumento','Atenciones.TIA_clave','=','AtencionDocumento.TIA_clave')
@@ -290,17 +302,15 @@ class SacecoController extends BaseController {
 
 	    $resultado['archivos'] = $archivos;
 
-	   
 	    return $resultado;
-
-
 
 	}
 
 	public function doctosValidados(){
 
 		$listDoctosValidados 	= Input::get('doctos');	
-		$usr 					= Input::get('user');	
+		$usr 					= Input::get('user');
+		$datosExp				= Input::get('expediente');	
 		$usr = str_replace('"','',$usr);		
 
 		$titulo 		= 'Validacion de documentos digitales';
@@ -308,11 +318,13 @@ class SacecoController extends BaseController {
 		$atencionEstatus= 2;
 		$atencion=0;
 		$miFolio = array();
+		$mensaje='';
 		
+		$contTipoDoc=0;
 		try{
 			foreach ($listDoctosValidados as $dato) {
 				$atencion=$dato['ATN_clave'];
-				if($dato['Arc_estatus']!=''){
+				if($dato['Arc_estatus']!=''||$dato['Arc_estatus']!=null){
 					if($dato['ATD_estatus']==1){
 						$dato['Arc_estatus']=1;
 						$dato['Arc_motivo']='';
@@ -323,11 +335,71 @@ class SacecoController extends BaseController {
 						$archivos = DB::connection('mysql')->update($sqlDoctos);
 					if ($dato['ATD_estatus']>0) {							
 						$sqlDoctosAtn="UPDATE AtencionTipoDocumento SET ATD_estatus = ".$dato['ATD_estatus'].", ATD_motivo ='".$dato['ATD_motivo']."' WHERE ATN_clave=".$dato['ATN_clave']." AND TID_clave=".$dato['TID_clave'];
-						$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
+						$archivos = DB::connection('mysql')->update($sqlDoctosAtn);	
+
+						if($dato['ATD_estatus']==2){
+							/**********    modulo de creación de tickets ***************************/
+							switch ($dato['TID_clave']) {
+								case '1':
+									$subcategoria=1;
+									break;
+								case '18':
+									$subcategoria=2;
+									break;
+								case '15':
+									$subcategoria=3;
+									break;
+								case '16':
+									$subcategoria=4;
+									break;
+								default:
+									$subcategoria=5;
+									break;
+							}
+
+							$existe= Tickets::where('Exp_folio','=',$datosExp['folio'])
+							->where('TSub_clave','=',$subcategoria)
+							->select('TSub_clave')
+							->get();
+							$contTicket = count($existe);
+							if($contTicket==0){
+
+								$folioin  = Tickets::max('TSeg_clave');
+								$folioin++;
+								$ticket = new Tickets;
+
+								$ticket->TSeg_clave = $folioin;
+								$ticket->Exp_folio = $datosExp['folio'];
+								$ticket->TSeg_etapa = 1;
+								$ticket->TCat_clave = 1;
+								$ticket->TSub_clave = $subcategoria;
+								$ticket->TSeg_obs = $dato['ATD_motivo'];
+								$ticket->TStatus_clave = 1;
+								$ticket->Uni_clave = $datosExp['UniClave'];
+								$ticket->Cia_clave = $datosExp['claveEmpresa'];
+								$ticket->TSeg_asignado = '';
+								$ticket->TSeg_asignadofecha = '';
+								$ticket->TSeg_fechareg = date('Y-m-d H:i:s');
+								$ticket->TSeg_fechaactualizacion = date('Y-m-d H:i:s');
+								$ticket->Usu_registro = $usr;
+								$ticket->Usu_actualiza = $usr;
+
+								$ticket->save();
+									$nota = new Ticketnotas;
+						            $nota->TSeg_clave =  $folioin;
+						            $nota->Exp_folio =  $datosExp['folio'];
+						            $nota->TN_descripcion =  $dato['ATD_motivo'];
+						            $nota->TN_fechareg =  date('Y-m-d H:i:s');
+						            $nota->Usu_registro =  $usr;
+
+						            $nota->save();				            				        
+					        }
+							/************ fin de módulo de tickets    ******************************/
+						}
 					}
 					if($dato['ATD_requerido']==1){
 						if($dato['ATD_estatus']==2||$dato['ATD_estatus']==0) $atencionEstatus=3;
-						//elseif($dato['ATD_estatus']==1)$atencionEstatus=1;					
+						//elseif($dato['ATD_estatus']==1)$atencionEstatus=1;										
 					}
 					$estatus='';
 					if($dato['Arc_estatus']==1) {
@@ -336,7 +408,10 @@ class SacecoController extends BaseController {
 					}
 					elseif($dato['Arc_estatus']==2){
 						$descripcion ='Documento rechazado: '.$dato['TID_nombre'].' Motivo: '.$dato['Arc_motivo'];
-						$estatus='rechazado';
+						$estatus='rechazado';						
+					}else{
+						$atencionEstatus=3;
+						$mensaje='Faltan documentos requeridos';
 					}
 					$titulo= 'Documento '.$estatus.': '.$dato['TID_nombre'];
 					if($dato['Arc_autorizado']==0){
@@ -344,45 +419,83 @@ class SacecoController extends BaseController {
 						$historial = new Historial;
 						$historial->titulo=$titulo;
 						$historial->descripcion = $descripcion;
-						$historial->folio = $dato['Exp_folio'];
+						$historial->folio = $datosExp['folio'];
 						$historial->usuario = $usr;
 						$historial->etapa = 1;
 						$historial->entrega = 1;
 						$historial->guardar();
 					}
+				}else{
+					$atencionEstatus=3;
+					$mensaje='Faltan documentos requeridos';
 				}				
 			}	
-			$sqlDoctosAtn="UPDATE Atenciones SET ATN_estatus = ".$atencionEstatus." WHERE ATN_clave=".$atencion;
+			$sqlDoctosAtn="UPDATE Atenciones SET ATN_estatus = ".$atencionEstatus.", ATN_mensaje='".$mensaje."' WHERE ATN_clave=".$atencion;
 			$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
 
-			if($atencionEstatus==3){
-			 	/*$sqlFolio = "SELECT Exp_folio FROM Atenciones	                    
-	                    		WHERE ATN_clave=".$atencion;
-	    		$datos= DB::connection('mysql')->select($sqlFolio)[0];
-	    		$folio= $datos['Exp_folio'];
+			if($atencionEstatus==3){							 	
 	    		$fecha = date('Y-m-d H:i');
-				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$folio."'";
-				$archivos = DB::connection('mysql')->update($qry);	*/
-			}elseif ($atencionEstatus==2) {
-				 /*$sqlArchivos ="SELECT Exp_folio FROM Atenciones	                    
-	                    		WHERE ATN_clave=".$atencion;
-				 $miFolio['folio']= DB::connection('mysql')->select($sqlArchivos);				*/
-				 //$resultado['expediente'] = DB::connection('mysql')->select($sql)[0];
+				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
+				$archivos = DB::connection('mysql')->update($qry);
+			}elseif ($atencionEstatus==2) {	
 
-		        /*$productoCve = $miFolio['folio'];                
-		        foreach ($productoCve as $key => $value) {
-		        	if($key=='Exp_folio'){
-		        		$prodCve=$value;
-		        	}
-		        }
-		        echo $prodCve;	    		*/
-	    		/*$folio= $datos['Exp_folio'];
+				if($datosExp['claveEmpresa']==7){
+					$datos = FolioWeb::find($datosExp['folio']);
+					$datos->Exp_solicitado = 1;
+					$datos->USU_solicito = $usr;
+					$datos->Exp_fechaSolicitud = date('Y-m-d H:i');
+					$datos->save();
+				}else{	
+				$fecha = date('Y-m-d H:i');
+				$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
+				$archivos = DB::connection('mysql')->update($qry);
 
-				$fecha = date('Y-m-d H:i');*/
-				/*$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$folio."'";
-				$archivos = DB::connection('mysql')->update($qry);*/
+				$query = "SELECT IFNULL( MAX(FAC_folio) , 0) AS numero, MAX(FAC_fecha) as fecha FROM Factura";
+				$existe = DB::connection('mysql')->select($query)[0];				
+
+			 	$facFolio = $existe->numero + 1;
+  				$fechaIni = $existe->fecha;
+
+  				if ($fechaIni != null) {
+        
+			        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
+			        $ultimaHoraFac = date('H', strtotime( $fechaIni ) ) ;
+			        $ultimaSecFac = date('i', strtotime( $fechaIni ) )  + 1;
+			        $fechaActual = date('Y-m-d');
+
+			        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
+			          	$fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac . ":" . $ultimaSecFac;
+			        }else{
+			          	$fechaFactura = date('Y-m-d') . ' 21:00';
+			        }
+
+			      // si no reseteamos la fecha APARTIR DE las 9 de la noche 
+				}else{
+					$fechaFactura = date('Y-m-d') . ' 21:00';
+				}	 
+
+				$factura = new Factura;				
+				$factura ->CIA_clave  		= $datosExp['claveEmpresa'];
+				$factura ->FAC_serie  		= 'FW';
+				$factura ->FAC_folio  		= $facFolio;
+				$factura ->FAC_fecha  		= $fechaFactura;
+				$factura ->FAC_global 		= 0;
+				$factura ->FAC_importe		= 0;
+				$factura ->FAC_iva    		= 0;
+				$factura ->FAC_total  		= 0;
+				$factura ->FAC_saldo  	 	= 0;
+				$factura ->FAC_fechaReg		= $fecha;
+				$factura ->USU_registro		= $datosExp['usrMV'];
+				$factura ->save();
+
+				$noFactura  = Factura::max('FAC_clave');
+
+				$facExp = new FacturaExpediente;
+				$facExp ->Exp_folio 		= $datosExp['folio'];
+				$facExp ->FAC_clave 		= $noFactura;
+				$facExp ->save();
 			}
-
+		}
 			$respuesta = array('respuesta' => 'exito'); 		
 	 	}catch(Exception $e){
 	 		$respuesta = array('respuesta' => $e->getmessage());	
