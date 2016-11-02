@@ -203,6 +203,9 @@ class FacturacionExpressController extends BaseController {
 
 	    }
 
+	    //verificamos si tiene hospitalarios
+	    $hospitalario = HospitalarioWeb::where('EXP_folio',$folio)->get();
+
 	    $archivos['notaMedica'] = $notaMedica;
 	    $archivos['hisotriaClinica'] = $historiaClinica;
 	    $archivos['cuestionario'] = $cuestionario;
@@ -212,6 +215,7 @@ class FacturacionExpressController extends BaseController {
 	    $archivos['otros'] = $anexos;
 	    $archivos['todos'] = $todos;
 
+	    $resultado['hospitalario'] = $hospitalario;
 	    $resultado['archivos'] = $archivos;
 
 
@@ -387,7 +391,7 @@ class FacturacionExpressController extends BaseController {
 		$descmed = $datosCaptura['Dx'];
 		$lesionunidad = $datosCaptura['Dx'];
 		$triage = $datosCaptura['triage'];
-		$cedulaElectronica = $datosCaptura['cedulaElectronica'];
+		$cedulaElectronica = isset($datosCaptura['cedulaElectronica']) ? $datosCaptura['cedulaElectronica'] : '';
 
 		$tipo = $datosCaptura['Tipo'];//////falta agregar html formato o tiket
 		$pagoUnidad = $datosCaptura['pagoUnidad'];//////falta agregar html

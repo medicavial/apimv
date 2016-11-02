@@ -124,7 +124,7 @@ return array(
 		'Maatwebsite\Excel\ExcelServiceProvider',
 		'Barryvdh\Cors\CorsServiceProvider',
 		'Chumper\Zipper\ZipperServiceProvider',
-
+		'Anchu\Ftp\FtpServiceProvider',
 	),
 
 	/*

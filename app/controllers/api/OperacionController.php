@@ -330,8 +330,45 @@ class OperacionController extends BaseController {
 	    return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
 	}
 
-	public function prueba(){
-		return UsuarioArea::all();
+	public function expedienteInfo($folio){
+		
+		$datosCentrales =  DB::select(" EXEC MV_REW_Captura_folio  @folio='$folio' " )[0];
+
+		$registro = new ExpedienteInfo;
+		$registro->EXP_folio = $datosCentrales->Folio;
+		$registro->EXP_lesionado = $datosCentrales->Lesionado;
+		$registro->CIA_clave = $datosCentrales->ClienteWeb;
+		$registro->UNI_clave = $datosCentrales->UnidadWeb;
+		$registro->EXP_fechaExpedicion = $datosCentrales->FExpedicion;
+		$registro->EXP_fechaCaptura = $datosCentrales->FCaptura;
+		$registro->EXP_fechaAtencion = $datosCentrales->FAtencion;
+		$registro->EXP_poliza = $datosCentrales->Poliza;
+		$registro->EXP_siniestro = $datosCentrales->Siniestro;
+		$registro->EXP_reporte = $datosCentrales->Reporte;
+		$registro->EXP_orden = $datosCentrales->NoOrden;
+		$registro->POS_claveint = $datosCentrales->PosicionWeb;
+		$registro->RIE_claveint = $datosCentrales->RiesgoWeb;
+		$registro->EXP_ajustador = $datosCentrales->Ajustador;
+		$registro->EXP_medico = $datosCentrales->Medico;
+		$registro->EXP_obsAjustador = $datosCentrales->LesionesA;
+		$registro->LES_primaria = $datosCentrales->LPrimaria;
+		$registro->LES_empresa = $datosCentrales->LEmpresa;
+		$registro->EXP_diagnostico = $datosCentrales->DescMedica;
+		$registro->FAC_folioFiscal = $datosCentrales->FolFiscal;
+		$registro->FAC_serie = $datosCentrales->Serie;
+		$registro->FAC_folio = $datosCentrales->Factura;
+		$registro->FAC_fecha = $datosCentrales->FFactura;
+		$registro->FAC_importe = $datosCentrales->Importe;
+		$registro->FAC_iva = $datosCentrales->IVA;
+		$registro->FAC_total = $datosCentrales->Total;
+		$registro->FAC_saldo = $datosCentrales->Saldo;
+		$registro->FAC_pagada = $datosCentrales->Pagada;
+		$registro->FAC_fechaPago = $datosCentrales->FPagoFac;
+		$registro->FAC_ultimaAplicacion = $datosCentrales->FUltApl;
+		$registro->EXP_fechaRegWeb = $datosCentrales->FExp;
+		$registro->EXP_costoEmpresa = $datosCentrales->CostoEmpresa;
+
+		$registro->save();
 								
 	}
 

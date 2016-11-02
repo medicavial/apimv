@@ -57,8 +57,9 @@ Route::group(array('prefix' => 'api'), function()
 
 		// return View::make('hello');
 
-		// return User::all();
-		return FacturaWeb::max('FAC_folio');
+		return HospitalarioWeb::where('EXP_folio','ITMV003094')->get();
+		
+		// return FTP::connection()->getDirListing('/public_html/registro/Digitales');
 	});
 
 	Route::get('/monitor', function(){
@@ -208,7 +209,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
 		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
 		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
-		Route::get('prueba', array('uses' => 'OperacionController@prueba'));
+		Route::get('expedienteInfo/{folio}', array('uses' => 'OperacionController@expedienteInfo'));
 
 	});
 

@@ -10,7 +10,8 @@
 		"Chumper/Zipper": "0.5.*",
 		"anchu/ftp": "~1.0",
 		"orchestra/parser": "2.2.*",
-		"fuelphp/upload": "1.*"
+		"fuelphp/upload": "1.*",
+		"anchu/ftp": "1.0.0"
 	},
 	"autoload": {
 		"classmap": [
