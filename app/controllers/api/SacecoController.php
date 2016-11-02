@@ -297,6 +297,8 @@ class SacecoController extends BaseController {
 
 	    }
 
+	    $hospitalario = HospitalarioWeb::where('EXP_folio',$folio)->get();
+
 	    $archivos['notaMedica'] = $notaMedica;
 	    $archivos['hisotriaClinica'] = $historiaClinica;
 	    $archivos['cuestionario'] = $cuestionario;
@@ -306,6 +308,7 @@ class SacecoController extends BaseController {
 	    $archivos['otros'] = $anexos;
 	    $archivos['todos'] = $todos;
 
+	    $resultado['hospitalario'] = $hospitalario;
 	    $resultado['archivos'] = $archivos;
 
 	    return $resultado;
