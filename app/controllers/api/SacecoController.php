@@ -10,6 +10,11 @@ class SacecoController extends BaseController {
 		$fechafin = date('Y-m-d', strtotime(str_replace('/', '-', Input::get('fechafin') ))) . ' 23:59:59';
 
 		$resultado = array();
+		$porCompania = '';
+
+		if($id>0){
+			$porCompania = ' and Compania.Cia_clave='.$id;
+		}
 
 		/*$sql = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
 	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
@@ -40,7 +45,7 @@ class SacecoController extends BaseController {
                 inner join Atenciones on Expediente.Exp_folio = Atenciones.Exp_folio 
                 inner join TipoAtencion on Atenciones.TIA_clave=TipoAtencion.TIA_clave               
             WHERE ATN_fecreg BETWEEN '$fechaini' and '".$fechafin." 23:59:59'  and Exp_cancelado = 0  AND Expediente.Exp_fecreg >= 
-            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1  ORDER BY Exp_fecreg DESC";       
+            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania."  ORDER BY Exp_fecreg DESC";       
 
 
 
@@ -220,7 +225,8 @@ class SacecoController extends BaseController {
 						CASE WHEN Expediente.PRO_clave = 4 THEN (CASE Expediente.UNI_clave WHEN 1 THEN 9437 WHEN 2 THEN 9438 WHEN 3 THEN 9439 WHEN 4 THEN 9440 WHEN 5 THEN 9441 WHEN 6 THEN 9442 WHEN 7 THEN 9443 WHEN 86 THEN 9444 WHEN 184 THEN 9445 WHEN 186 THEN  9446  END)
 						WHEN ISNULL(MED_claveMV) THEN (CASE Expediente.UNI_clave WHEN 1 THEN 3138 WHEN 2 THEN 3145 WHEN 3 THEN 3140 WHEN 4 THEN 3139 WHEN 5 THEN 3146 WHEN 6 THEN 5082 WHEN 7 THEN 3141 WHEN 86 THEN 5373 WHEN 184 THEN 5343 WHEN 186 THEN  5417 END)                    
 						ELSE Med_claveMV END as MedicoMV,
-						TRI_claveMV as triage
+						TRI_claveMV as triage,
+						Compania.CIA_clave as cliente
 			FROM Expediente INNER JOIN Compania ON Compania.CIA_clave=Expediente.CIA_clave
 			                              INNER JOIN Unidad     ON  Unidad.UNI_clave=Expediente.UNI_clave
 			                              LEFT   JOIN RiesgoAfectado ON RiesgoAfectado.RIE_clave = Expediente.RIE_clave
@@ -438,6 +444,13 @@ class SacecoController extends BaseController {
 				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
 				$archivos = DB::connection('mysql')->update($qry);
 			}elseif ($atencionEstatus==2) {	
+				$tickets= Tickets::where('Exp_folio',$datosExp['folio'])->get();
+				foreach ($tickets as $dato) {
+		 			$no = $dato['PAS_folio'];
+		 			$pase = Tickets::find($folio);
+		 			$pase->PAS_procQ = 0;
+		 			$pase->save();
+		 		} 											
 
 				if($datosExp['claveEmpresa']==7){
 					$datos = FolioWeb::find($datosExp['folio']);
