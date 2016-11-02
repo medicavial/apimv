@@ -445,10 +445,15 @@ class SacecoController extends BaseController {
 					$datos->USU_solicito = $usr;
 					$datos->Exp_fechaSolicitud = date('Y-m-d H:i');
 					$datos->save();
-				}else{	
+				}elseif($datosExp['claveEmpresa']==19){	
 				$fecha = date('Y-m-d H:i');
 				$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
 				$archivos = DB::connection('mysql')->update($qry);
+
+
+				$importe = ExpedienteInfo::find($datosExp['folio'])->EXP_costoEmpresa;
+				$iva = round($importe * 0.16, 2);
+	    		$total = $importe  + $iva;
 
 				$query = "SELECT IFNULL( MAX(FAC_folio) , 0) AS numero, MAX(FAC_fecha) as fecha FROM Factura";
 				$existe = DB::connection('mysql')->select($query)[0];				
@@ -480,10 +485,10 @@ class SacecoController extends BaseController {
 				$factura ->FAC_folio  		= $facFolio;
 				$factura ->FAC_fecha  		= $fechaFactura;
 				$factura ->FAC_global 		= 0;
-				$factura ->FAC_importe		= 0;
-				$factura ->FAC_iva    		= 0;
-				$factura ->FAC_total  		= 0;
-				$factura ->FAC_saldo  	 	= 0;
+				$factura ->FAC_importe		= $importe;
+				$factura ->FAC_iva    		= $iva;
+				$factura ->FAC_total  		= $total;
+				$factura ->FAC_saldo  	 	= $total;
 				$factura ->FAC_fechaReg		= $fecha;
 				$factura ->USU_registro		= $datosExp['usrMV'];
 				$factura ->save();
