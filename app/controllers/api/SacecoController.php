@@ -448,12 +448,14 @@ class SacecoController extends BaseController {
 				$archivos = DB::connection('mysql')->update($qry);
 			}elseif ($atencionEstatus==2) {	
 				$tickets= Tickets::where('Exp_folio',$datosExp['folio'])->get();
-				foreach ($tickets as $dato) {
-		 			$no = $dato['PAS_folio'];
-		 			$pase = Tickets::find($folio);
-		 			$pase->PAS_procQ = 0;
-		 			$pase->save();
-		 		} 											
+				if($tickets){
+					foreach ($tickets as $dato) {
+			 			$nofol = $dato['TSeg_clave'];
+			 			$pase = Tickets::find($nofol);
+			 			$pase->TStatus_clave = 7;
+			 			$pase->save();
+			 		} 
+		 		}											
 
 				if($datosExp['claveEmpresa']==7){
 					$datos = FolioWeb::find($datosExp['folio']);
