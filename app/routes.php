@@ -57,9 +57,18 @@ Route::group(array('prefix' => 'api'), function()
 
 		// return View::make('hello');
 
-		return HospitalarioWeb::where('EXP_folio','ITMV003094')->get();
+		// return HospitalarioWeb::where('EXP_folio','ITMV003094')->get();
 		
-		// return FTP::connection()->getDirListing('/public_html/registro/Digitales');
+		$files =  FTP::connection()->getDirListing('/public_html/registro/Digitales/2016/November/SAMV033307');
+
+		foreach ($files as $file) {
+
+			if (strlen($file) > 3 ) {
+				FTP::connection()->downloadFile('/public_html/registro/Digitales/2016/November/SAMV033307/' . $file, 'imagenes/' . $file );
+			}
+		}
+
+		echo "Descargado exitoso";
 	});
 
 	Route::get('/monitor', function(){

@@ -243,6 +243,12 @@ class FacturacionExpressController extends BaseController {
 
 		}elseif($cliente == 19){
 
+			$datos = FolioWeb::find($folio);
+			$datos->Exp_autorizado = 1;
+			$datos->USU_solicito = $usuario;
+			$datos->Exp_fechaSolicitud = $fecha;
+			$datos->save();
+
 			$importe = ExpedienteInfo::find($folio)->EXP_costoEmpresa;
 			$iva = round($importe * 0.16, 2);
     		$total = $importe  + $iva;
