@@ -92,16 +92,16 @@ class SacecoController extends BaseController {
 
 		$resultado = array();
 
-		$sql = "SELECT  Expediente.Exp_folio as folio,Exp_completo as lesionado,Unidad.Uni_clave as UniClave, UNI_nombreMV as unidad, 
+		$sql = "SELECT  Expediente.Exp_folio as folio,Exp_completo as lesionado,Exp_cveAjustador as cveAjustador ,Unidad.Uni_clave as UniClave, UNI_nombreMV as unidad, 
                     Expediente.Exp_poliza as poliza, Expediente.Exp_siniestro as siniestro ,Expediente.Exp_reporte as reporte,
                     Exp_fecreg as fechaatencion , Expediente.EXP_edad as edad, Expediente.EXP_sexo as sexo,EXP_fechaCaptura as fechacaptura,
                     ExpedienteInfo.EXP_fechaExpedicion as fechaexpedicion, Expediente.EXP_orden as orden,  RIE_nombre as riesgo, 
-                    POS_nombre  as posicion, Expediente.Exp_ajustador as ajustador, EXP_obsAjustador as observaciones, TLE_nombre as lesion,
+                    POS_nombre  as posicion, Expediente.Exp_ajustador as ajustador, EXP_obsAjustador as observaciones, TLE_nombre as lesion, 
                     EXP_diagnostico as descripcion, FAC_folioFiscal as sat, CONCAT(FAC_serie,FAC_folio) as foliointerno,
                     FAC_fecha as fechafactura, FAC_importe as importe, FAC_iva as iva, FAC_total as total, Cia_rfc as rfc,
                     Cia_nombrecorto as empresa, Compania.Cia_clave  as claveEmpresa,Exp_telefono as telefono,Exp_mail as mail,
                     EXP_costoEmpresa as costo,
-                    Pro_clave as producto
+                    Pro_clave as producto             
             FROM Expediente
                 inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave 
                 inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
@@ -112,7 +112,7 @@ class SacecoController extends BaseController {
                 left join PosicionAcc on PosicionAcc.id = NotaMedica.Posicion_clave
                 left join Posicion on Posicion.POS_clave = PosicionAcc.POS_claveMV
                 left join LesionMV on LesionMV.LES_clave = ExpedienteInfo.LES_empresa
-                left join TipoLesion on TipoLesion.TLE_claveint = LesionMV.TLE_claveint 
+                left join TipoLesion on TipoLesion.TLE_claveint = LesionMV.TLE_claveint                
             WHERE  Expediente.EXP_folio = '$folio' and EXP_cancelado = 0";
 
         $resultado['expediente'] = DB::connection('mysql')->select($sql)[0];
@@ -150,9 +150,10 @@ class SacecoController extends BaseController {
 		$cont = "SELECT count(*) as con FROM ExpedienteLesion WHERE Exp_folio='".$folio."'";
 		$con = DB::connection('mysql')->select($cont)[0];
 		if($con->con>0){
-			$sqlLes="SELECT LesE_clave, ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion  FROM ExpedienteLesion
+			$sqlLes="SELECT LesE_clave, ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion, Clave_lesionCia as lesionCIA FROM ExpedienteLesion
 					 INNER JOIN LesionCodificada on ExpedienteLesion.LCO_cve = LesionCodificada.LCO_cve				 
 					 INNER JOIN CieOrtopedico on LesionCodificada.CIE_cve = CieOrtopedico.CIE_cve
+                     INNER JOIN LesionEquivalencia on ExpedienteLesion.LES_clave = LesionEquivalencia.Clave_lesionMV
 					 WHERE Exp_folio='".$folio."'";
 
 			$resultado['lesion'] = DB::connection('mysql')->select($sqlLes)[0];
