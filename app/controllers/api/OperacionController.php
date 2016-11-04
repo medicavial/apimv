@@ -328,6 +328,7 @@ class OperacionController extends BaseController {
 
 
 	    return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
+	
 	}
 
 	public function expedienteInfo($folio){
@@ -370,6 +371,50 @@ class OperacionController extends BaseController {
 
 		$registro->save();
 								
+	}
+
+	//funcion para importar imagenes del ftp
+	public function importaImagenes($folio){
+
+		//fecha de registro
+		$fechaRegistro = FolioWeb::find($folio)->Exp_fecreg;
+		//fecha de captura
+		$fechaCaptura = Pase::find($folio)->PAS_fechaCaptura;
+
+		// tomamos el mes y el año de cada fecha
+		$AnyoNro = date('Y',strtotime($fechaCaptura));
+		$MesNro = date('n',strtotime($fechaCaptura));
+
+		$AnioReg = date('Y',strtotime($fechaRegistro));
+		$MesReg = date('F',strtotime($fechaRegistro));
+
+		//armamos las rutas
+		$rutaLocal = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+		$rutaWeb = "/public_html/registro/Digitales/". $AnioReg . "/" . $MesReg . "/". $folio;
+
+		//conectamos al ftp del folio
+		$files =  FTP::connection()->getDirListing($rutaWeb);
+
+		//recorremos cada archivo que encuentra
+		foreach ($files as $file) {
+
+			//esta validacion es por que el ftp toma como puntos como un archivo y no deja pasar
+			if (strlen($file) > 3 ) {
+
+				// si no existe ruta la crea
+				if(!is_dir($rutaLocal)) mkdir($rutaLocal);
+
+				FTP::connection()->downloadFile( $rutaWeb . '/' . $file, $rutaLocal . '/' . $file );
+
+				// mandamos a llamar la accion del controlador para generar codigos
+		    	$nombreArchivo = App::make('QualitasController')->nombreArchivo($folio);
+
+		    	
+			}
+		}
+
+		return 'Importacion Exitosa';
+
 	}
 
 

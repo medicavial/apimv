@@ -17,58 +17,25 @@ Route::group(array('prefix' => 'api'), function()
 {
 	Route::get('/', function()
 	{
-		// $datosCentrales =  DB::select(" EXEC MV_REW_Captura_folio  @folio='PEMV035563' " )[0];
-
-		// $registro = new ExpedienteInfo;
-		// $registro->EXP_folio = $datosCentrales->Folio;
-		// $registro->EXP_lesionado = $datosCentrales->Lesionado;
-		// $registro->CIA_clave = $datosCentrales->ClienteWeb;
-		// $registro->UNI_clave = $datosCentrales->UnidadWeb;
-		// $registro->EXP_fechaExpedicion = $datosCentrales->FExpedicion;
-		// $registro->EXP_fechaCaptura = $datosCentrales->FCaptura;
-		// $registro->EXP_fechaAtencion = $datosCentrales->FAtencion;
-		// $registro->EXP_poliza = $datosCentrales->Poliza;
-		// $registro->EXP_siniestro = $datosCentrales->Siniestro;
-		// $registro->EXP_reporte = $datosCentrales->Reporte;
-		// $registro->EXP_orden = $datosCentrales->NoOrden;
-		// $registro->POS_claveint = $datosCentrales->PosicionWeb;
-		// $registro->RIE_claveint = $datosCentrales->RiesgoWeb;
-		// $registro->EXP_ajustador = $datosCentrales->Ajustador;
-		// $registro->EXP_medico = $datosCentrales->Medico;
-		// $registro->EXP_obsAjustador = $datosCentrales->LesionesA;
-		// $registro->LES_primaria = $datosCentrales->LPrimaria;
-		// $registro->LES_empresa = $datosCentrales->LEmpresa;
-		// $registro->EXP_diagnostico = $datosCentrales->DescMedica;
-		// $registro->FAC_folioFiscal = $datosCentrales->FolFiscal;
-		// $registro->FAC_serie = $datosCentrales->Serie;
-		// $registro->FAC_folio = $datosCentrales->Factura;
-		// $registro->FAC_fecha = $datosCentrales->FFactura;
-		// $registro->FAC_importe = $datosCentrales->Importe;
-		// $registro->FAC_iva = $datosCentrales->IVA;
-		// $registro->FAC_total = $datosCentrales->Total;
-		// $registro->FAC_saldo = $datosCentrales->Saldo;
-		// $registro->FAC_pagada = $datosCentrales->Pagada;
-		// $registro->FAC_fechaPago = $datosCentrales->FPagoFac;
-		// $registro->FAC_ultimaAplicacion = $datosCentrales->FUltApl;
-		// $registro->EXP_fechaRegWeb = $datosCentrales->FExp;
-		// $registro->EXP_costoEmpresa = $datosCentrales->CostoEmpresa;
-
-		// $registro->save();
-
 		// return View::make('hello');
 
 		// return HospitalarioWeb::where('EXP_folio','ITMV003094')->get();
 		
-		$files =  FTP::connection()->getDirListing('/public_html/registro/Digitales/2016/November/SAMV033307');
+		// $files =  FTP::connection()->getDirListing('/public_html/registro/Digitales/2016/November/SAMV033307');
 
-		foreach ($files as $file) {
+		// foreach ($files as $file) {
 
-			if (strlen($file) > 3 ) {
-				FTP::connection()->downloadFile('/public_html/registro/Digitales/2016/November/SAMV033307/' . $file, 'imagenes/' . $file );
-			}
-		}
+		// 	if (strlen($file) > 3 ) {
+		// 		FTP::connection()->downloadFile('/public_html/registro/Digitales/2016/November/SAMV033307/' . $file, 'imagenes/' . $file );
+		// 	}
+		// }
 
-		echo "Descargado exitoso";
+
+		// resizing an uploaded file
+		Image::make('imagenes/1_CA_SAMV033307.jpg')->save('imagenes/1_CA_SAMV033307.jpg', 50);
+
+		echo "Compression exitosa";
+
 	});
 
 	Route::get('/monitor', function(){
@@ -85,7 +52,7 @@ Route::group(array('prefix' => 'api'), function()
 	//movimientos dentro del flujo para el alta de un nuevo folio registrado
     Route::post('altaoriginal', array('uses' => 'FlujoController@altaoriginal'));
     //movimiento que se utiliza para actualizar de factrua express a original
-    Route::post('actializaoriginal', array('uses' => 'FlujoController@actializaoriginal'));
+    Route::post('actualizaoriginal', array('uses' => 'FlujoController@actualizaoriginal'));
     //movimiento que cambia un bit para que sea reconocido como folio para "no pagar hasta cobrar"
     Route::post('insertanpc', array('uses' => 'FlujoController@insertanpc'));
     Route::post('eliminanpc', array('uses' => 'FlujoController@eliminanpc'));
@@ -219,6 +186,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
 		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
 		Route::get('expedienteInfo/{folio}', array('uses' => 'OperacionController@expedienteInfo'));
+		Route::get('importaImagenes/{folio}', array('uses' => 'OperacionController@importaImagenes'));
 
 	});
 

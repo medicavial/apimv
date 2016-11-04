@@ -125,6 +125,7 @@ return array(
 		'Barryvdh\Cors\CorsServiceProvider',
 		'Chumper\Zipper\ZipperServiceProvider',
 		'Anchu\Ftp\FtpServiceProvider',
+		'Intervention\Image\ImageServiceProvider',
 	),
 
 	/*
@@ -193,6 +194,7 @@ return array(
 		'View'            => 'Illuminate\Support\Facades\View',
 		'Excel' 		  => 'Maatwebsite\Excel\Facades\Excel',
 		'Zipper' 		  => 'Chumper\Zipper\Zipper',
+		'Image' 		  => 'Intervention\Image\Facades\Image',
 
 	),
 

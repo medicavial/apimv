@@ -673,7 +673,8 @@ class QualitasController extends BaseController {
 
 	}
 
-	private function nombreArchivo($folio){
+	public function nombreArchivo($folio){
+		
 		$archivo = DB::select("EXEC MVImgs_Datos @folio = '$folio'");
 		foreach ($archivo as $data) {
 			$nombre = $data->Archivo;
