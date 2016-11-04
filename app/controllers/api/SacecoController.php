@@ -45,7 +45,7 @@ class SacecoController extends BaseController {
                 inner join Atenciones on Expediente.Exp_folio = Atenciones.Exp_folio 
                 inner join TipoAtencion on Atenciones.TIA_clave=TipoAtencion.TIA_clave               
             WHERE ATN_fecreg BETWEEN '$fechaini' and '".$fechafin." 23:59:59'  and Exp_cancelado = 0  AND Expediente.Exp_fecreg >= 
-            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania."  ORDER BY Exp_fecreg DESC";       
+            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania." and Expediente.Uni_clave<>185  ORDER BY Exp_fecreg DESC";       
 
 
 
