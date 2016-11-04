@@ -45,7 +45,7 @@ class SacecoController extends BaseController {
                 inner join Atenciones on Expediente.Exp_folio = Atenciones.Exp_folio 
                 inner join TipoAtencion on Atenciones.TIA_clave=TipoAtencion.TIA_clave               
             WHERE ATN_fecreg BETWEEN '$fechaini' and '".$fechafin." 23:59:59'  and Exp_cancelado = 0  AND Expediente.Exp_fecreg >= 
-            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania." and Expediente.Uni_clave<>185  ORDER BY Exp_fecreg DESC";       
+            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania."  ORDER BY Exp_fecreg DESC";       
 
 
 
@@ -150,7 +150,7 @@ class SacecoController extends BaseController {
 		$cont = "SELECT count(*) as con FROM ExpedienteLesion WHERE Exp_folio='".$folio."'";
 		$con = DB::connection('mysql')->select($cont)[0];
 		if($con->con>0){
-			$sqlLes="SELECT LesE_clave, ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion, Clave_lesionCia as lesionCIA FROM ExpedienteLesion
+			$sqlLes="SELECT  ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion, Clave_lesionCia as lesionCIA, LesE_clave FROM ExpedienteLesion
 					 INNER JOIN LesionCodificada on ExpedienteLesion.LCO_cve = LesionCodificada.LCO_cve				 
 					 INNER JOIN CieOrtopedico on LesionCodificada.CIE_cve = CieOrtopedico.CIE_cve
                      INNER JOIN LesionEquivalencia on ExpedienteLesion.LES_clave = LesionEquivalencia.Clave_lesionMV
