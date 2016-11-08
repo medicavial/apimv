@@ -126,6 +126,7 @@ return array(
 		'Chumper\Zipper\ZipperServiceProvider',
 		'Anchu\Ftp\FtpServiceProvider',
 		'Intervention\Image\ImageServiceProvider',
+		'Maxxscho\LaravelTcpdf\LaravelTcpdfServiceProvider',
 	),
 
 	/*

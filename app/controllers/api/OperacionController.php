@@ -378,6 +378,11 @@ class OperacionController extends BaseController {
 
 		//fecha de registro
 		$fechaRegistro = FolioWeb::find($folio)->Exp_fecreg;
+
+		$unidad = Documento::where(array('DOC_folio'=>$folio,'DOC_etapa' => 1))->first();
+
+		$propia = Unidad::find($unidad->UNI_claveint)->UNI_propia;
+
 		//fecha de captura
 		$fechaCaptura = Pase::find($folio)->PAS_fechaCaptura;
 
@@ -388,34 +393,57 @@ class OperacionController extends BaseController {
 		$AnioReg = date('Y',strtotime($fechaRegistro));
 		$MesReg = date('F',strtotime($fechaRegistro));
 
-		$rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
+
+		//armamos las rutas prueba
+		// $rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
+
+		// if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
+
+		// $rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
+
+		// if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
+
+		// $rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
+
+		//armamos las rutas produccion
+		$rutaLocalAnioCarpeta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro;
 
 		if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
 
-		$rutaLocalMesCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro . "\\" . $MesNro;
+		$rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
 
 		if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
 
 		$rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
 
-		//armamos las rutas
-		// $rutaLocal = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
-		$rutaWeb = "/public_html/registro/Digitales/". $AnioReg . "/" . $MesReg . "/". $folio;
+
+		//verificamos si es propia o red
+		if ($propia == 1) {
+			$rutaWeb = "/public_html/registro/Digitales/". $AnioReg . "/" . $MesReg . "/". $folio;
+		}else{
+			$rutaWeb = "/public_html/registro/Digitales/". $AnioReg . "/" . $MesReg . "/". $folio . '/1';
+		}
+
+
 
 		//conectamos al ftp del folio
 		$files =  FTP::connection()->getDirListing($rutaWeb);
 
+		$archivosPDF = array();
+
 		//recorremos cada archivo que encuentra
 		foreach ($files as $file) {
 
+
+			$formato = File::extension($file);
+
 			//esta validacion es por que el ftp toma como puntos como un archivo y no deja pasar
-			if (strlen($file) > 3 ) {
+			if (strlen($file) > 3 && $formato != 'pdf') {
 
 				// si no existe ruta la crea
 				if(!is_dir($rutaLocal)) mkdir($rutaLocal);
 
 				FTP::connection()->downloadFile( $rutaWeb . '/' . $file, $rutaLocal . '/' . $file );
-
 				// mandamos a llamar la accion del controlador para generar codigos
 		    	$nombreArchivo = App::make('QualitasController')->nombreArchivo($folio);
 
@@ -436,23 +464,27 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado pase medico " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+
+		    		// echo "Encontrado pase medico " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 
 
 		    	}
 
 		    	//es aviso de privacidad
 		    	if (preg_match('/_AP_' . $folio . '/' , $file)) {
-		    		echo "Encontrado aviso de privacidad " . $file . '<br>';
+		    		// echo "Encontrado aviso de privacidad " . $file . '<br>';
 		    		File::move($rutaLocal . '/' . $file, $rutaLocal . '/ap_' . $folio . '.jpg');
 
 		    	}
 
 		    	// cuestionario
 		    	if (preg_match('/_CA_' . $folio . '/' , $file)) {
-		    		echo "Encontrado cuestionario " . $file . '<br>';
+		    		// echo "Encontrado cuestionario " . $file . '<br>';
 		    		File::move($rutaLocal . '/' . $file, $rutaLocal . '/cu_' . $folio . '.jpg');
 		    		
 		    	}
@@ -474,9 +506,16 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
 
-		    		echo "folio autorizacion " . $file . ' y pesa ' . $peso .'<br>';
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
+
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+
+		    		$folioAutorizacion = $nombreQualitas;
+
+		    		// echo "folio autorizacion " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 
 		    	}
 
@@ -497,9 +536,13 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado identificacion " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+
+		    		// echo "Encontrado identificacion " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 		    	}
 
 		    	//es nota medica
@@ -514,17 +557,23 @@ class OperacionController extends BaseController {
 		    		//generamos una copia de ese archivo para nombrarlo como identiicador qualitas
 		    		File::copy($nombreNuevo, $nombreQualitas);
 
-
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado nota medica " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+		    		//agregamos a documento que ira en el pdf
+		    		array_push($archivosPDF, $nombreQualitas);
+
+		    		// echo "Encontrado nota medica " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 		    	}
 
 		    	//es nota medica
 		    	if (preg_match('/2_NM_' . $folio . '/' , $file)) {
+
 		    		//generamos los nombres que debe tener el archivo
 		    		$nombreNuevo = $rutaLocal . '/i2_' . $folio . '.jpg';
 		    		$nombreQualitas = $rutaLocal . '/' . $nombreArchivo . 'ME022.jpg';
@@ -539,13 +588,20 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado nota medica " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+		    		//agregamos a documento que ira en el pdf
+		    		array_push($archivosPDF, $nombreQualitas);
+
+		    		// echo "Encontrado nota medica " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 		    	}
 
 		    	//es nota medica
 		    	if (preg_match('/3_NM_' . $folio . '/' , $file)) {
+
 		    		//generamos los nombres que debe tener el archivo
 		    		$nombreNuevo = $rutaLocal . '/i3_' . $folio . '.jpg';
 		    		$nombreQualitas = $rutaLocal . '/' . $nombreArchivo . 'ME023.jpg';
@@ -560,13 +616,20 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado nota medica " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+		    		//agregamos a documento que ira en el pdf
+		    		array_push($archivosPDF, $nombreQualitas);
+
+		    		// echo "Encontrado nota medica " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 		    	}
 
 		    	//es nota medica
 		    	if (preg_match('/4_NM_' . $folio . '/' , $file)) {
+
 		    		//generamos los nombres que debe tener el archivo
 		    		$nombreNuevo = $rutaLocal . '/i4_' . $folio . '.jpg';
 		    		$nombreQualitas = $rutaLocal . '/' . $nombreArchivo . 'ME024.jpg';
@@ -581,13 +644,20 @@ class OperacionController extends BaseController {
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
 		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
 
-		    		echo "Encontrado nota medica " . $file . ' y pesa ' . $peso .'<br>';
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+		    		//agregamos a documento que ira en el pdf
+		    		array_push($archivosPDF, $nombreQualitas);
+
+		    		// echo "Encontrado nota medica " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
 		    	}
 
 		    	//es nota medica
 		    	if (preg_match('/5_NM_' . $folio . '/' , $file)) {
+
 		    		//generamos los nombres que debe tener el archivo
 		    		$nombreNuevo = $rutaLocal . '/i5_' . $folio . '.jpg';
 		    		$nombreQualitas = $rutaLocal . '/' . $nombreArchivo . 'ME025.jpg';
@@ -598,19 +668,60 @@ class OperacionController extends BaseController {
 		    		//generamos una copia de ese archivo para nombrarlo como identiicador qualitas
 		    		File::copy($nombreNuevo, $nombreQualitas);
 
-
 		    		//medimos el peso para que segun sea el peso calcule el porcentaje de archivo
 		    		$peso = File::size($nombreQualitas);
-		    		//comprimimos imagen
-		    		Image::make($nombreQualitas)->save($nombreQualitas, 50);
 
-		    		echo "Encontrado nota medica " . $file . ' y pesa ' . $peso .'<br>';
+		    		//comprimimos imagen
+		    		// cambiamos tamaño para bajar peso
+					$img = Image::make($nombreQualitas)->resize(850,900);
+
+					// comprimimos la calidad al 40%
+					$img->save($nombreQualitas, 45);
+
+		    		//agregamos a documento que ira en el pdf
+		    		array_push($archivosPDF, $nombreQualitas);
+
+		    		// echo "Encontrado nota medica " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
+		    	
 		    	}
 		    	
 			}
 		}
 
-		return 'Importacion Exitosa';
+		/// generamos el PDF con las imagenes
+		PDF::setPrintHeader(false);
+		PDF::setPrintFooter(false);
+
+		// set margins
+		PDF::SetMargins(0, 0, 0, true);
+
+		// set auto page breaks false
+		PDF::SetAutoPageBreak(false, 0);
+
+
+		foreach ($archivosPDF as $imagen) {
+			// add a page
+			PDF::AddPage('P', 'A4');
+
+			// Display image on full page
+			PDF::Image($imagen, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
+
+		}
+
+
+		// la ultima debe ser el folio de autorización
+
+		// add a page
+		PDF::AddPage('P', 'A4');
+
+		// Display image on full page
+		PDF::Image($folioAutorizacion, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
+
+
+		//Guardamos el ma misma ubicacion
+		PDF::Output($rutaLocal .'/' . $nombreArchivo . 'ME02.pdf', 'F');
+
+		return true;
 
 	}
 

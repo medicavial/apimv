@@ -13,7 +13,8 @@
 		"anchu/ftp": "1.0.0",
 		"intervention/image": "1.*",
 		"barryvdh/laravel-dompdf": "0.4.*",
-		"maxxscho/laravel-tcpdf": "0.*"
+		"maxxscho/laravel-tcpdf": "0.*",
+		"alchemy/ghostscript":"0.4"
 	},
 	"autoload": {
 		"classmap": [
@@ -42,5 +43,8 @@
 	"config": {
 		"preferred-install": "dist"
 	},
-	"minimum-stability": "stable"
+	"minimum-stability": "stable",
+	"require-dev": {
+		"spatie/pdf-to-image": "^1.2"
+	}
 }

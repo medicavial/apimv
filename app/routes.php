@@ -17,24 +17,21 @@ Route::group(array('prefix' => 'api'), function()
 {
 	Route::get('/', function()
 	{
-		// return View::make('hello');
 
-		// return HospitalarioWeb::where('EXP_folio','ITMV003094')->get();
-		
-		// $files =  FTP::connection()->getDirListing('/public_html/registro/Digitales/2016/November/SAMV033307');
+		$imagen1 = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\2016\\11\\TUEL000127\\1_pa_TUEL000127.pdf";
+		$imagen2 = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\2016\\11\\TUEL000127\\1_pa_TUEL000127.jpg";
 
-		// foreach ($files as $file) {
+		// $logger = array();
 
-		// 	if (strlen($file) > 3 ) {
-		// 		FTP::connection()->downloadFile('/public_html/registro/Digitales/2016/November/SAMV033307/' . $file, 'imagenes/' . $file );
-		// 	}
-		// }
+		// $transcoder = Ghostscript\Transcoder::create(array(
+		//     'timeout' => 60,
+		//     'gs.binaries' => 'C:\\Program Files\\gs\\gs9.20\\bin\\gswin64.exe',
+		// ));
 
+		// $transcoder->toImage($imagen1, $imagen2);
 
-		// resizing an uploaded file
-		Image::make('imagenes/1_CA_SAMV033307.jpg')->save('imagenes/1_CA_SAMV033307.jpg', 50);
-
-		echo "Compression exitosa";
+		// $pdf = new Spatie\PdfToImage\Pdf($imagen1);
+		// $pdf->saveImage($imagen2);
 
 	});
 
@@ -206,6 +203,7 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('renombrar', array('uses' => 'QualitasController@renombrar'));
     	Route::post('sinarchivo', array('uses' => 'QualitasController@sinarchivo'));
     	Route::post('sinprocesar', array('uses' => 'QualitasController@sinprocesar'));
+    	Route::post('sinprocesarFE', array('uses' => 'QualitasController@sinprocesarFE'));
     	Route::get('test/{folio}', array('uses' => 'QualitasController@test'));
     	Route::post('incompletos', array('uses' => 'QualitasController@incompletos'));
     	Route::post('invalidos', array('uses' => 'QualitasController@invalidos'));

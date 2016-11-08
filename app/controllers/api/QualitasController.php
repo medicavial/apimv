@@ -209,6 +209,7 @@ class QualitasController extends BaseController {
 			
 			$folio = $dato['folioSistema'];
 			$fecha = $dato['FechaCaptura'];
+			$fe = $dato['FacturaEx'];
 
 			$MesNro = date('m', strtotime($fecha));
 			$DiaNro = date('d', strtotime($fecha));
@@ -255,6 +256,17 @@ class QualitasController extends BaseController {
 			//$ruta = "C:\\Users\\salcala.MEDICAVIAL\\Desktop\\MV\\QUALITAS\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
 			//ruta en producción
 			$ruta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
+
+
+			//si es facturacion express
+			if ($fe == 'SI') {
+
+				$archivos = File::files($ruta);
+				if (count($archivos) == 0) {
+					$imagenesFE = App::make('OperacionController')->importaImagenes($folio);
+				}
+
+			}
 
 			$archivo1 = $ruta . "\\" . $nombre . "QS07.jpg";
 			$archivo2 = $ruta . "\\" . $nombre . "GN19.jpg";
@@ -595,6 +607,7 @@ class QualitasController extends BaseController {
 							"Descuento" => $dato->Descuento,
 							"Total" => $dato->Total,
 							"TipoUnidad" => $dato->TipoUnidad,
+							"FacturaEx" => $dato->FacturaEx,
 							"FechaCaptura" => $dato->FechaCaptura
 					    );
 
@@ -617,6 +630,85 @@ class QualitasController extends BaseController {
 							"Descuento" => $dato->Descuento,
 							"Total" => $dato->Total,
 							"TipoUnidad" => $dato->TipoUnidad,
+							"FacturaEx" => $dato->FacturaEx,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+            			
+            		}
+
+            	}
+            }
+
+
+		}
+
+		return $data;
+	
+	}
+
+	public function sinprocesarFE(){
+
+ 		$fechaini =  Input::get('fechaini'); 
+	    $fechafin =  Input::get('fechafin'); 
+		$datos =  DB::select("EXEC MVQualitasFEWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+
+		$data = array();
+
+		foreach ($datos as $dato) {
+			
+            $valor5 = $dato->claveprestador;
+			$valor6 = $dato->Siniestro;
+            $valor7 = $dato->Reporte;
+            $valor10 = $dato->Cobertura;
+            $valor18 = $dato->Unidad;
+
+            if ($valor6 != $valor7) {
+
+            	if ($valor10 != 99) {
+
+            		if ($valor5 == '07370' && $valor18 == 33 ) {
+
+            			$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FacturaEx" => $dato->FacturaEx,
+							"FechaCaptura" => $dato->FechaCaptura
+					    );
+
+            		}else{
+
+						$data[] = array(
+					        "folioElectronico" => $dato->folioElectronico,
+				            "folioAdministradora" => $dato->folioAdministradora,
+				            "folioSistema" =>$dato->folioSistema,
+				            "claveproovedor" =>$dato->claveproovedor,
+				            "claveprestador" => $dato->claveprestador,
+				            "Siniestro" => $dato->Siniestro,
+				            "Reporte" => $dato->Reporte,
+				            "Poliza" =>$dato->Poliza,
+							"Lesionado" =>$dato->Lesionado,
+							"Afectado" => $dato->Afectado,
+							"Cobertura" => $dato->Cobertura,
+							"Subtotal" => $dato->Subtotal,
+							"iva" => $dato->iva,
+							"Descuento" => $dato->Descuento,
+							"Total" => $dato->Total,
+							"TipoUnidad" => $dato->TipoUnidad,
+							"FacturaEx" => $dato->FacturaEx,
 							"FechaCaptura" => $dato->FechaCaptura
 					    );
             			
