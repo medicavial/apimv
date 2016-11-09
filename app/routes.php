@@ -179,11 +179,11 @@ Route::group(array('prefix' => 'api'), function()
 	Route::group(array('prefix' => 'operacion'), function()
 	{
 		Route::post('editaDatos', array('uses' => 'OperacionController@editaDatos'));
-		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
 		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
-		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
 		Route::get('expedienteInfo/{folio}', array('uses' => 'OperacionController@expedienteInfo'));
-		Route::get('importaImagenes/{folio}', array('uses' => 'OperacionController@importaImagenes'));
+		Route::get('guardaImagenes/{folio}', array('uses' => 'OperacionController@guardaImagenes'));
+		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
+		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
 
 	});
 

@@ -301,6 +301,7 @@ class FacturacionExpressController extends BaseController {
 		}
 
 
+
 		$respuesta = array('respuesta' => 'Solicitud Generada Correctamente');
 
  		return Response::json($respuesta);

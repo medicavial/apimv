@@ -209,7 +209,7 @@ class QualitasController extends BaseController {
 			
 			$folio = $dato['folioSistema'];
 			$fecha = $dato['FechaCaptura'];
-			$fe = $dato['FacturaEx'];
+			$fe = isset($dato['FacturaEx']) == null ? 'NO' : $dato['FacturaEx'];
 
 			$MesNro = date('m', strtotime($fecha));
 			$DiaNro = date('d', strtotime($fecha));
@@ -257,16 +257,6 @@ class QualitasController extends BaseController {
 			//ruta en producción
 			$ruta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro . "\\" . $MesNro . "\\". $folio;
 
-
-			//si es facturacion express
-			if ($fe == 'SI') {
-
-				$archivos = File::files($ruta);
-				if (count($archivos) == 0) {
-					$imagenesFE = App::make('OperacionController')->importaImagenes($folio);
-				}
-
-			}
 
 			$archivo1 = $ruta . "\\" . $nombre . "QS07.jpg";
 			$archivo2 = $ruta . "\\" . $nombre . "GN19.jpg";
