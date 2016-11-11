@@ -260,12 +260,11 @@ class FacturacionExpressController extends BaseController {
 			if ($fechaIni != null) {
         
 		        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
-		        $ultimaHoraFac = date('H', strtotime( $fechaIni ) ) ;
-		        $ultimaSecFac = date('i', strtotime( $fechaIni ) )  + 1;
+		        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
 		        $fechaActual = date('Y-m-d');
 
 		        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
-		          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac . ":" . $ultimaSecFac;
+		          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
 		        }else{
 		          $fechaFactura = date('Y-m-d') . ' 21:00';
 		        }
@@ -275,36 +274,39 @@ class FacturacionExpressController extends BaseController {
 	        	$fechaFactura = date('Y-m-d') . ' 21:00';
 		    }
 
-		    //insertamos 
-			$facturacion = new FacturaWeb;
-			$facturacion->CIA_clave = $cliente;
-			$facturacion->FAC_serie = 'FW';
-			$facturacion->FAC_folio = $facFolio;
-			$facturacion->FAC_fecha = $fechaFactura;
-			$facturacion->FAC_global = 0;
-			$facturacion->FAC_importe = $importe;
-			$facturacion->FAC_iva = $iva;
-			$facturacion->FAC_total = $total;
-			$facturacion->FAC_saldo = $total;
-			$facturacion->FAC_fechaReg = $fecha;
-			$facturacion->USU_registro = $usuario;
+		    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
+			    //insertamos 
+				$facturacion = new FacturaWeb;
+				$facturacion->CIA_clave = $cliente;
+				$facturacion->FAC_serie = 'FW';
+				$facturacion->FAC_folio = $facFolio;
+				$facturacion->FAC_fecha = $fechaFactura;
+				$facturacion->FAC_global = 0;
+				$facturacion->FAC_importe = $importe;
+				$facturacion->FAC_iva = $iva;
+				$facturacion->FAC_total = $total;
+				$facturacion->FAC_saldo = $total;
+				$facturacion->FAC_fechaReg = $fecha;
+				$facturacion->USU_registro = $usuario;
 
-			$facturacion->save();
+				$facturacion->save();
 
-			$factura = $facturacion->FAC_clave;
+				$factura = $facturacion->FAC_clave;
 
-			$facturacionExpediente = new FacturaExpedienteWeb;
-			$facturacionExpediente->EXP_folio = $folio;
-			$facturacionExpediente->FAC_clave = $factura;
-			$facturacionExpediente->save();
+				$facturacionExpediente = new FacturaExpedienteWeb;
+				$facturacionExpediente->EXP_folio = $folio;
+				$facturacionExpediente->FAC_clave = $factura;
+				$facturacionExpediente->save();
+		    	
+		    }else{
+
+		    	return Response::json(array('flash' => 'Factura Ya generada'),500);
+		    }
+
 
 		}
 
-
-
-		$respuesta = array('respuesta' => 'Solicitud Generada Correctamente');
-
- 		return Response::json($respuesta);
+ 		return Response::json(array('respuesta' => 'Solicitud Generada Correctamente'));
 
 	}
 
