@@ -18,7 +18,7 @@ class Tickets extends Eloquent {
 				->select(DB::raw('TSeg_clave as Folio_Interno, TicketSeguimiento.Exp_folio as Folio_Web, TSeg_etapa as Etapa, TCat_nombre as Categoria, TSub_nombre as Subcategoria,
 									TStatus_nombre as Status, TSeg_obs as Observaciones, UNI_nombreMV as Unidad, TSeg_Asignado as Asignado, TSeg_fechareg as Registro,
 									Usu_nombre as Usuario_Registro, Tseg_fechaactualizacion as Ultima_Actualizacion, CONCAT(Exp_nombre," ", Exp_paterno," ", Exp_materno) As Lesionado,Cia_nombrecorto as Cliente,
-									TicketSeguimiento.Cia_clave, Usuario.Usu_login, TicketSeguimiento.Uni_clave,TicketSeguimiento.TStatus_clave,(SELECT TN_descripcion FROM TicketNotas where EXP_folio = TicketSeguimiento.Exp_folio limit 1) As Observaciones'))
+									TicketSeguimiento.Cia_clave, Usuario.Usu_login, TicketSeguimiento.Uni_clave,TicketSeguimiento.TStatus_clave,(SELECT TN_descripcion FROM TicketNotas where EXP_folio = TicketSeguimiento.Exp_folio limit 1) As Notas'))
 				->whereBetween('TSeg_fechareg', array($fechaini, $fechafin))
 				->orderBy('TSeg_clave')
 				->get();

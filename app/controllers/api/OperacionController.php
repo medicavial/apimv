@@ -441,7 +441,7 @@ class OperacionController extends BaseController {
 
 		$archivos = File::files($rutaLocal);
 
-		// if (count($archivos) == 0) {
+		if (count($archivos) == 0) {
 				
 			//conectamos al ftp del folio
 			$files =  FTP::connection()->getDirListing($rutaWeb);
@@ -473,7 +473,7 @@ class OperacionController extends BaseController {
 			    		//obtenemos solo en nombre del archivo
 			    		$nombrePDF = explode(".", $file ); 
 			    		$imagenJPG = $rutaLocal . '/' . $nombrePDF[0] . '.jpg';
-						exec('"' . $convert . '" -density 600 ' . $imagenPDF . '[0] '. $imagenJPG .'');
+						exec('"' . $convert . '" -density 600 -quality 100 ' . $imagenPDF . '[0] '. $imagenJPG .'');
 						File::delete($imagenPDF);
 
 						$file = $nombrePDF[0] . '.jpg';
@@ -760,11 +760,11 @@ class OperacionController extends BaseController {
 
 			return true;
 
-		// }else{
+		}else{
 
-		// 	return false;
+			return false;
 
-		// }
+		}
 
 
 	}

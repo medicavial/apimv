@@ -23,23 +23,11 @@ Route::group(array('prefix' => 'api'), function()
 		$imagen1 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.pdf";
 		$imagen2 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.jpg";
 
-		// exec('"C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert" $imagen1 $imagen2', $output, $return);
+		exec('"C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert" $imagen1 $imagen2', $output, $return);
 		$archivo = explode(".", $imagen1 );
-
-		// exec('"' . $convert . '" ' . $imagen1 . ' '. $imagen2 .'');
 
 		return $archivo[0];
 
-
-		// $comando = "$convert  -quality 100 $imagen1  $imagen2";
-		// $comando = "dir";
-		// exec($comando);
-		// print_r($output);
-
-
-
-		
-		
 
 	});
 
