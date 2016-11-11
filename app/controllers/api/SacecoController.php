@@ -499,27 +499,31 @@ class SacecoController extends BaseController {
 					$fechaFactura = date('Y-m-d') . ' 21:00';
 				}	 
 
-				$factura = new Factura;				
-				$factura ->CIA_clave  		= $datosExp['claveEmpresa'];
-				$factura ->FAC_serie  		= 'FW';
-				$factura ->FAC_folio  		= $facFolio;
-				$factura ->FAC_fecha  		= $fechaFactura;
-				$factura ->FAC_global 		= 0;
-				$factura ->FAC_importe		= $importe;
-				$factura ->FAC_iva    		= $iva;
-				$factura ->FAC_total  		= $total;
-				$factura ->FAC_saldo  	 	= $total;
-				$factura ->FAC_fechaReg		= $fecha;
-				$factura ->USU_registro		= $datosExp['usrMV'];
-				$factura ->save();
+				if(FacturaExpedienteWeb::where('Exp_folio',$datosExp['folio'])->count() == 0){
+					$factura = new Factura;				
+					$factura ->CIA_clave  		= $datosExp['claveEmpresa'];
+					$factura ->FAC_serie  		= 'FW';
+					$factura ->FAC_folio  		= $facFolio;
+					$factura ->FAC_fecha  		= $fechaFactura;
+					$factura ->FAC_global 		= 0;
+					$factura ->FAC_importe		= $importe;
+					$factura ->FAC_iva    		= $iva;
+					$factura ->FAC_total  		= $total;
+					$factura ->FAC_saldo  	 	= $total;
+					$factura ->FAC_fechaReg		= $fecha;
+					$factura ->USU_registro		= $datosExp['usrMV'];
+					$factura ->save();
 
-				$noFactura  = Factura::max('FAC_clave');
+					$noFactura  = Factura::max('FAC_clave');
 
-				$facExp = new FacturaExpediente;
-				$facExp ->Exp_folio 		= $datosExp['folio'];
-				$facExp ->FAC_clave 		= $noFactura;
-				$facExp ->save();
-				$valImgs ='ok';
+					$facExp = new FacturaExpediente;
+					$facExp ->Exp_folio 		= $datosExp['folio'];
+					$facExp ->FAC_clave 		= $noFactura;
+					$facExp ->save();
+					$valImgs ='ok';
+			 	}else{
+		    		return Response::json(array('flash' => 'Factura Ya generada'),500);
+		    	}
 			}
 		}
 			$respuesta = array('respuesta' => 'exito', 'imags'=>$valImgs, 'fol'=>$datosExp['folio']); 		
