@@ -18,20 +18,28 @@ Route::group(array('prefix' => 'api'), function()
 	Route::get('/', function()
 	{
 
-		$imagen1 = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\2016\\11\\TUEL000127\\1_pa_TUEL000127.pdf";
-		$imagen2 = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\2016\\11\\TUEL000127\\1_pa_TUEL000127.jpg";
+		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
+		$folio = 'PEMV040517';
+		$imagen1 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.pdf";
+		$imagen2 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.jpg";
 
-		// $logger = array();
+		// exec('"C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert" $imagen1 $imagen2', $output, $return);
+		$archivo = explode(".", $imagen1 );
 
-		// $transcoder = Ghostscript\Transcoder::create(array(
-		//     'timeout' => 60,
-		//     'gs.binaries' => 'C:\\Program Files\\gs\\gs9.20\\bin\\gswin64.exe',
-		// ));
+		// exec('"' . $convert . '" ' . $imagen1 . ' '. $imagen2 .'');
 
-		// $transcoder->toImage($imagen1, $imagen2);
+		return $archivo[0];
 
-		// $pdf = new Spatie\PdfToImage\Pdf($imagen1);
-		// $pdf->saveImage($imagen2);
+
+		// $comando = "$convert  -quality 100 $imagen1  $imagen2";
+		// $comando = "dir";
+		// exec($comando);
+		// print_r($output);
+
+
+
+		
+		
 
 	});
 

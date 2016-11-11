@@ -404,20 +404,12 @@ class OperacionController extends BaseController {
 		$MesReg = date('F',strtotime($fechaRegistro));
 
 
+		//ruta del convertidor pdf jpg
+
+		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
+
 		//armamos las rutas prueba
-		// $rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
-
-		// if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
-
-		// $rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
-
-		// if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
-
-		// $rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
-
-
-		//armamos las rutas produccion
-		$rutaLocalAnioCarpeta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro;
+		$rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
 
 		if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
 
@@ -426,6 +418,18 @@ class OperacionController extends BaseController {
 		if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
 
 		$rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
+
+
+		//armamos las rutas produccion
+		// $rutaLocalAnioCarpeta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro;
+
+		// if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
+
+		// $rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
+
+		// if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
+
+		// $rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
 
 
 		//verificamos si es propia o red
@@ -437,7 +441,7 @@ class OperacionController extends BaseController {
 
 		$archivos = File::files($rutaLocal);
 
-		if (count($archivos) == 0) {
+		// if (count($archivos) == 0) {
 				
 			//conectamos al ftp del folio
 			$files =  FTP::connection()->getDirListing($rutaWeb);
@@ -452,7 +456,8 @@ class OperacionController extends BaseController {
 				$formato = File::extension($file);
 
 				//esta validacion es por que el ftp toma como puntos como un archivo y no deja pasar
-				if (strlen($file) > 3 && $formato != 'pdf') {
+				if (strlen($file) > 3) {
+
 
 					// si no existe ruta la crea
 					if(!is_dir($rutaLocal)) mkdir($rutaLocal);
@@ -460,6 +465,21 @@ class OperacionController extends BaseController {
 					FTP::connection()->downloadFile( $rutaWeb . '/' . $file, $rutaLocal . '/' . $file );
 					// mandamos a llamar la accion del controlador para generar codigos
 			    	$nombreArchivo = App::make('QualitasController')->nombreArchivo($folio);
+
+					if ($formato == 'pdf') {
+
+						//obtenemos la ubicacion del pdf descargado
+			    		$imagenPDF = $rutaLocal . '/' . $file;
+			    		//obtenemos solo en nombre del archivo
+			    		$nombrePDF = explode(".", $file ); 
+			    		$imagenJPG = $rutaLocal . '/' . $nombrePDF[0] . '.jpg';
+						exec('"' . $convert . '" -density 600 ' . $imagenPDF . '[0] '. $imagenJPG .'');
+						File::delete($imagenPDF);
+
+						$file = $nombrePDF[0] . '.jpg';
+
+					}
+
 
 			    	//es pase medico
 			    	if (preg_match('/_pa_' . $folio . '/' , $file)) {
@@ -702,50 +722,49 @@ class OperacionController extends BaseController {
 				}
 			}
 
-			if ( count($archivosPDF) > 0 ) {
-				
-				/// generamos el PDF con las imagenes
-				PDF::setPrintHeader(false);
-				PDF::setPrintFooter(false);
 
-				// set margins
-				PDF::SetMargins(0, 0, 0, true);
+			/// generamos el PDF con las imagenes
+			PDF::setPrintHeader(false);
+			PDF::setPrintFooter(false);
 
-				// set auto page breaks false
-				PDF::SetAutoPageBreak(false, 0);
+			// set margins
+			PDF::SetMargins(0, 0, 0, true);
+
+			// set auto page breaks false
+			PDF::SetAutoPageBreak(false, 0);
 
 
-				foreach ($archivosPDF as $imagen) {
-					// add a page
-					PDF::AddPage('P', 'A4');
-
-					// Display image on full page
-					PDF::Image($imagen, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
-
-				}
-
-				// la ultima debe ser el folio de autorización
-
+			foreach ($archivosPDF as $imagen) {
 				// add a page
 				PDF::AddPage('P', 'A4');
 
-				if ($folioAutorizacion != '') {
-					// Display image on full page
-					PDF::Image($folioAutorizacion, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
-				}
-
-				//Guardamos el ma misma ubicacion
-				PDF::Output($rutaLocal .'/' . $nombreArchivo . 'ME02.pdf', 'F');
+				// Display image on full page
+				PDF::Image($imagen, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
 
 			}
 
+			// la ultima debe ser el folio de autorización
+
+			// add a page
+			PDF::AddPage('P', 'A4');
+
+			if ($folioAutorizacion != '') {
+				// Display image on full page
+				PDF::Image($folioAutorizacion, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
+			}
+
+			//Guardamos el ma misma ubicacion
+			PDF::Output($rutaLocal .'/' . $nombreArchivo . 'ME02.pdf', 'F');
+
+			
+
 			return true;
 
-		}else{
+		// }else{
 
-			return false;
+		// 	return false;
 
-		}
+		// }
 
 
 	}

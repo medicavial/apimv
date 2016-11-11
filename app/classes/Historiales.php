@@ -66,6 +66,40 @@ class Historial {
 
     }
 
+    public static function actualizaOriginal($folio,$etapa,$entrega,$fe,$usuario)
+    {
+
+        $datos = Documento::where('DOC_folio',$folio)->where('DOC_etapa',$etapa)->where('DOC_numeroEntrega',$entrega)->get();
+		foreach ($datos as $dato) {
+			$documento = $dato['DOC_claveint'];
+		}
+
+		$flujo = Flujo::where('DOC_claveint',$documento)->first();
+		$area = $flujo->ARO_activa;
+		$claveflujo = $flujo->FLD_claveint;
+
+		$nombre = User::find($usuario)->USU_nombre;
+
+		$feTexto = $fe == 1 ? 'FE':'';
+
+		$historial = new Historico;
+		$historial->HIS_folio = $folio;
+		$historial->HIS_fecha =  date('d/m/Y H:i:s'); 
+		$historial->HIS_hora =  date('d/m/Y H:i:s'); 
+		$historial->HIS_titulo =  'Se guardo Original del folio ' . $feTexto; //indica que se ingreso un nuevo expediente en recepcion de documentos
+		$historial->HIS_descripcion =  "Se capturó el Original del folio " . $feTexto ." por el usuario " . $nombre;
+		$historial->HIS_area =  $area;
+		$historial->HIS_usuario =  $usuario;
+		$historial->HIS_accion = 'Alta Original';
+		$historial->HIS_etapa =  $etapa;
+		$historial->HIS_entrega =  $entrega;
+		$historial->DOC_claveint =  $documento;  
+		$historial->FLD_claveint =  $claveflujo;
+		$historial->save();
+		
+		return  true;
+
+    }
 
 
     public static function altaTicket($folio,$foliointerno,$etapa,$usuario)

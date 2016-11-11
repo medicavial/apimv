@@ -285,48 +285,38 @@ class FlujoController extends BaseController {
 	    $totalfactura = Input::get('totalfactura');
 	    $factura = Input::get('factura');
 
+	    $fe = documento::find($claveint)->DOC_FE;
 
 	    $documento =  documento::find($claveint);	    
 
 		$documento->DOC_lesionado = $lesionado;                                
-		$documento->DOC_ambulancia = 0;
-		$documento->DOC_fechapago = NULL; 
-		$documento->DOC_original = 1; 
+		// $documento->DOC_ambulancia = 0;
+		// $documento->DOC_fechapago = NULL; 
+		$documento->DOC_original = $fe == 1 ? 0 : 1; 
 		$documento->DOC_originalfecha = $fecha; 
 		$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
 		$documento->USU_original = $usuario; 
 		$documento->DOC_remesa = $remesa; 
-		$documento->DOC_factura = $factura; 
-		$documento->DOC_totalFac = $totalfactura; 
+		// $documento->DOC_factura = $factura; 
+		// $documento->DOC_totalFac = $totalfactura; 
 
 		$documento->save();
 
-		$flujo = new Flujo;
+		if ($fe != 1) {
 
-		$flujo->FLD_formaRecep = 'O'; 
-	    $flujo->FLD_AROrec = 1; 		  
-	    $flujo->USU_rec = $usuario;
-	    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
-        $flujo->USU_activo = $usuario;
-        $flujo->DOC_claveint = $claveint; 
+			$flujo = new Flujo;
 
-        $flujo->save();
+			$flujo->FLD_formaRecep = 'O'; 
+		    $flujo->FLD_AROrec = 1; 		  
+		    $flujo->USU_rec = $usuario;
+		    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
+	        $flujo->USU_activo = $usuario;
+	        $flujo->DOC_claveint = $claveint; 
 
-		// $conexion = DB::connection()->getPdo();
+	        $flujo->save();
+		}
 
-		// $query = "EXEC MV_DCU_ActualizaDocumento @claveint = :clave, @lesionado = :lesionado, @ambulancia = 0, @fechapago = '',  @originalfecha = :fecha,  
-		// 		@usuario = :usuario , @remesa = :remesa, @folioFac = :factura, @totalFac = :totalfactura";
-		
-		// $stmt = $conexion->prepare( $query ); 
-
-		// $stmt->bindParam('clave',$claveint);
-		// $stmt->bindParam('folio',$folio);
-		// $stmt->bindParam('lesionado',$lesionado);
-		// $stmt->bindParam('usuario',$usuario);
-		// $stmt->bindParam('remesa',$remesa);
-		// $stmt->bindParam('factura',$factura);
-		// $stmt->bindParam('totalfactura',$totalfactura);
-		// $stmt->bindParam('originalfecha',$fecha);
+		Historial::actualizaOriginal($folio,1,1,$fe,$usuario);
 
 		return Response::json(array('respuesta' => 'Folio Actualizado Correctamente')); 
 
