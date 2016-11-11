@@ -447,6 +447,7 @@ class SacecoController extends BaseController {
 	    		$fecha = date('Y-m-d H:i');
 				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
 				$archivos = DB::connection('mysql')->update($qry);
+				$valImgs ='no';
 			}elseif ($atencionEstatus==2) {	
 				$tickets= Tickets::where('Exp_folio',$datosExp['folio'])->get();
 				if($tickets){
@@ -518,9 +519,10 @@ class SacecoController extends BaseController {
 				$facExp ->Exp_folio 		= $datosExp['folio'];
 				$facExp ->FAC_clave 		= $noFactura;
 				$facExp ->save();
+				$valImgs ='ok';
 			}
 		}
-			$respuesta = array('respuesta' => 'exito'); 		
+			$respuesta = array('respuesta' => 'exito', 'imags'=>$valImgs, 'fol'=>$datosExp['folio']); 		
 	 	}catch(Exception $e){
 	 		$respuesta = array('respuesta' => $e->getmessage());	
 	 	}
