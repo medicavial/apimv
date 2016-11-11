@@ -279,16 +279,15 @@ class BusquedaController extends BaseController {
 
 		//verificamos rehabilitacion en web
 		return Rehabilitacion::join('Expediente','Expediente.Exp_folio','=','Rehabilitacion.Exp_folio')
-						   ->join('Unidad','Unidad.Uni_clave','=','Rehabilitacion.Uni_clave')
-						   ->join('Rehabilitador', function($join) {
+						    ->join('Unidad','Unidad.Uni_clave','=','Rehabilitacion.Uni_clave')
+						    ->join('Rehabilitador', function($join) {
 							   $join->on('Rehabilitador.Usu_login', '=', 'Rehabilitacion.Usu_registro');
 							   $join->on('Rehabilitador.Uni_clave', '=', 'Rehabilitacion.Uni_clave');
 							})
-						   ->select('Uni_nombrecorto AS Unidad', 'Uni_claveMV AS unidad','Reh_claveMV AS rehabilitador','UNI_propia as propia','Rehab_fecha as fecha','Rehab_obs as observaciones','Rehab_dolor as escalaDolor','Rehab_mejoria as escalaMejoria','Rehab_tipo as tipoRehabilitacion')
-						   ->where('Rehabilitacion.Exp_folio',$folio)
-						   ->where('Rehab_cons',$entrega)
-						   ->first();
-
+						    ->select('Uni_nombrecorto AS Unidad', 'Uni_claveMV AS unidad','Reh_claveMV AS rehabilitador','UNI_propia as propia','Rehab_fecha as fecha','Rehab_obs as observaciones','Rehab_dolor as escalaDolor','Rehab_mejoria as escalaMejoria','Rehab_tipo as tipoRehabilitacion')
+						    ->where('Rehabilitacion.Exp_folio',$folio)
+						    ->where('Rehab_cons',$entrega)
+						    ->first();
 	}
 
 	public function subsecuencia($folio,$entrega){

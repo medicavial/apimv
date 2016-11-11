@@ -18,12 +18,13 @@ Route::group(array('prefix' => 'api'), function()
 	Route::get('/', function()
 	{
 
-		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
+		$convert = "C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick";
 		$folio = 'PEMV040517';
 		$imagen1 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.pdf";
 		$imagen2 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.jpg";
 
-		exec('"C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert" $imagen1 $imagen2', $output, $return);
+		//exec('"C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick" '.$imagen1 . ' ' . $imagen2 '', $output, $return);
+		exec('"' . $convert . '" -density 600 -quality 100 ' . $imagen1 . '[0] '. $imagen2 .'');
 		$archivo = explode(".", $imagen1 );
 
 		return $archivo[0];

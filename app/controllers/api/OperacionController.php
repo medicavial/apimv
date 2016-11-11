@@ -406,7 +406,7 @@ class OperacionController extends BaseController {
 
 		//ruta del convertidor pdf jpg
 
-		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
+		$convert = "C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick";
 
 		//armamos las rutas prueba
 		$rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
