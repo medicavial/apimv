@@ -263,7 +263,7 @@ class FacturacionExpressController extends BaseController {
 		        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
 		        $fechaActual = date('Y-m-d');
 
-		        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
+		        if ( $fechaActual == $ultimaFechaFac) {
 		          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
 		        }else{
 		          $fechaFactura = date('Y-m-d') . ' 21:00';

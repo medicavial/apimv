@@ -736,6 +736,16 @@ class QualitasController extends BaseController {
 	
 	}
 
+	public function renombrarIndividual($folio){
+
+		$fecha = Pase::where('PAS_folio',$folio)->first()->PAS_fechaCaptura;
+		$nombreEsperado = $this->nombreArchivo($folio);
+		$renombres = $this->archivoRenombra($folio,$fecha,$nombreEsperado);
+
+		return Response::json(array('respuesta' => 'Renombre Completo'));
+
+	}
+
 	public function test($folio){
 		$fecha = Pase::where('PAS_folio',$folio)->first()->PAS_fechaCaptura;
 		$nombre = $this->nombreArchivo($folio);

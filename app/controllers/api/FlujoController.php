@@ -297,8 +297,8 @@ class FlujoController extends BaseController {
 		$documento->DOC_originalfechacaptura = date('d/m/Y H:i:s'); 
 		$documento->USU_original = $usuario; 
 		$documento->DOC_remesa = $remesa; 
-		// $documento->DOC_factura = $factura; 
-		// $documento->DOC_totalFac = $totalfactura; 
+		$documento->DOC_factura = $factura; 
+		$documento->DOC_totalFac = $totalfactura; 
 
 		$documento->save();
 

@@ -18,16 +18,17 @@ Route::group(array('prefix' => 'api'), function()
 	Route::get('/', function()
 	{
 
-		$convert = "C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick";
+		$convert = "\\\\SISTEMAS2\\ImageMagick-7.0.3-Q16\\magick";
 		$folio = 'PEMV040517';
-		$imagen1 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.pdf";
-		$imagen2 = "C:\\mamp\\htdocs\\apimv\\public\\imagenes\\PEMV040517\\id_PEMV040517.jpg";
+		$imagen1 = "\\\\Eaa\\renaut\\10\\test\\PEMV040517\\id_PEMV040517.pdf";
+		$imagen2 = "\\\\Eaa\\renaut\\10\\test\\PEMV040517\\id_PEMV040517.jpg";
 
 		//exec('"C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick" '.$imagen1 . ' ' . $imagen2 '', $output, $return);
 		exec('"' . $convert . '" -density 600 -quality 100 ' . $imagen1 . '[0] '. $imagen2 .'');
 		$archivo = explode(".", $imagen1 );
 
 		return $archivo[0];
+
 
 
 	});
@@ -181,6 +182,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('guardaImagenes/{folio}', array('uses' => 'OperacionController@guardaImagenes'));
 		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
 		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
+		Route::get('riesgo/{folio}/{valor}', array('uses' => 'OperacionController@editaRiesgo'));
 
 	});
 
@@ -198,12 +200,28 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('rechazos', array('uses' => 'QualitasController@rechazos'));
     	Route::get('reporte/{reporte}', array('uses' => 'QualitasController@reporte'));
     	Route::post('renombrar', array('uses' => 'QualitasController@renombrar'));
+    	Route::get('renombrarIndividual/{folio}', array('uses' => 'QualitasController@renombrarIndividual'));
     	Route::post('sinarchivo', array('uses' => 'QualitasController@sinarchivo'));
     	Route::post('sinprocesar', array('uses' => 'QualitasController@sinprocesar'));
     	Route::post('sinprocesarFE', array('uses' => 'QualitasController@sinprocesarFE'));
     	Route::get('test/{folio}', array('uses' => 'QualitasController@test'));
     	Route::post('incompletos', array('uses' => 'QualitasController@incompletos'));
     	Route::post('invalidos', array('uses' => 'QualitasController@invalidos'));
+	});
+
+
+	Route::group(array('prefix' => 'qualitasFE'), function()
+	{
+		
+		Route::post('actualiza/{envio}', array('uses' => 'QualitasFEController@actualiza'));
+    	Route::post('general', array('uses' => 'QualitasFEController@general'));
+    	Route::post('incompletos', array('uses' => 'QualitasFEController@incompletos'));
+    	Route::post('invalidos', array('uses' => 'QualitasFEController@invalidos'));
+    	Route::post('principal', array('uses' => 'QualitasFEController@principal'));
+    	Route::post('rechazos', array('uses' => 'QualitasFEController@rechazos'));
+    	Route::post('sinarchivo', array('uses' => 'QualitasFEController@sinarchivo'));
+    	Route::post('sinprocesar', array('uses' => 'QualitasFEController@sinprocesar'));
+
 	});
 
 	Route::group(array('prefix' => 'reportes'), function()
