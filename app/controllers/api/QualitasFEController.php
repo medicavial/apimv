@@ -54,7 +54,7 @@ class QualitasFEController extends BaseController {
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
 		
-		$datos =  DB::select("EXEC MVQualitasWSgeneral @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		$datos =  DB::select("EXEC MVQualitasFEWSgeneral @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
 
 		$data = array();
 
@@ -130,7 +130,7 @@ class QualitasFEController extends BaseController {
 
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
-		$datos =  DB::select("EXEC MVQualitasWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		$datos =  DB::select("EXEC MVQualitasFEWS @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
 
 		$data = array();
 		
@@ -187,7 +187,7 @@ class QualitasFEController extends BaseController {
 	public function invalidos(){
  		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin'); 
-		return DB::select("EXEC MVQualitasWSrechazado @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
+		return DB::select("EXEC MVQualitasFEWSrechazado @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
 	}
 	
 

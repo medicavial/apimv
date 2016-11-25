@@ -254,8 +254,8 @@ Route::group(array('prefix' => 'api'), function()
 	});
 
 
-	Route::group(array('prefix' => 'saceco'), function()
-	{
+	Route::group(array('prefix' => 'saceco'), function(){
+		
     	Route::post('autorizados', array('uses' => 'SacecoController@autorizados'));
     	Route::put('actualizaFolio', array('uses' => 'SacecoController@actualizaFolio'));
     	Route::post('doctosValidados', array('uses' => 'SacecoController@doctosValidados'));
