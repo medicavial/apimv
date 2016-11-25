@@ -472,7 +472,7 @@ class SacecoController extends BaseController {
 				$archivos = DB::connection('mysql')->update($qry);
 
 
-				$conteo = ExpedienteInfo::find($datosExp['folio'])->count();
+				$conteo = ExpedienteInfo::where('EXP_folio',$datosExp['folio'])->count();
 				if($conteo > 0){
 				$importe = ExpedienteInfo::find($datosExp['folio'])->EXP_costoEmpresa;
 				$iva = round($importe * 0.16, 2);
