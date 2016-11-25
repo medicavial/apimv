@@ -150,7 +150,7 @@ class SacecoController extends BaseController {
 		$cont = "SELECT count(*) as con FROM ExpedienteLesion WHERE Exp_folio='".$folio."'";
 		$con = DB::connection('mysql')->select($cont)[0];
 		if($con->con>0){
-			$sqlLes="SELECT  ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion, Clave_lesionCia as lesionCIA, LesE_clave FROM ExpedienteLesion
+			$sqlLes="SELECT  ExpedienteLesion.TLE_claveint, LesionCodificada.CIE_cve, CIE_descripcion, Clave_lesionCia as lesionCIA, LesE_clave,ExpedienteLesion.LES_clave FROM ExpedienteLesion
 					 INNER JOIN LesionCodificada on ExpedienteLesion.LCO_cve = LesionCodificada.LCO_cve				 
 					 INNER JOIN CieOrtopedico on LesionCodificada.CIE_cve = CieOrtopedico.CIE_cve
                      INNER JOIN LesionEquivalencia on ExpedienteLesion.LES_clave = LesionEquivalencia.Clave_lesionMV
@@ -443,7 +443,9 @@ class SacecoController extends BaseController {
 			$sqlDoctosAtn="UPDATE Atenciones SET ATN_estatus = ".$atencionEstatus.", ATN_mensaje='".$mensaje."' WHERE ATN_clave=".$atencion;
 			$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
 
-			if($atencionEstatus==3){							 	
+			$valImgs ='ok';
+
+			if($atencionEstatus == 3){							 	
 	    		$fecha = date('Y-m-d H:i');
 				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
 				$archivos = DB::connection('mysql')->update($qry);
@@ -466,65 +468,65 @@ class SacecoController extends BaseController {
 					$datos->Exp_fechaSolicitud = date('Y-m-d H:i');
 					$datos->save();
 				}elseif($datosExp['claveEmpresa']==19){	
-				$fecha = date('Y-m-d H:i');
-				$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
-				$archivos = DB::connection('mysql')->update($qry);
+					$fecha = date('Y-m-d H:i');
+					$qry = "UPDATE Expediente SET Exp_solicitado = 0,EXP_rechazado = 0, EXP_autorizado = 1, USU_autorizo = '".$usr."', Exp_fechaAutorizado = '".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
+					$archivos = DB::connection('mysql')->update($qry);
 
 
-				$importe = ExpedienteInfo::find($datosExp['folio'])->EXP_costoEmpresa;
-				$iva = round($importe * 0.16, 2);
-	    		$total = $importe  + $iva;
+					$importe = ExpedienteInfo::find($datosExp['folio'])->EXP_costoEmpresa;
+					$iva = round($importe * 0.16, 2);
+		    		$total = $importe  + $iva;
 
-				$query = "SELECT IFNULL( MAX(FAC_folio) , 0) AS numero, MAX(FAC_fecha) as fecha FROM Factura";
-				$existe = DB::connection('mysql')->select($query)[0];				
+					$query = "SELECT IFNULL( MAX(FAC_folio) , 0) AS numero, MAX(FAC_fecha) as fecha FROM Factura";
+					$existe = DB::connection('mysql')->select($query)[0];				
 
-			 	$facFolio = $existe->numero + 1;
-  				$fechaIni = $existe->fecha;
+				 	$facFolio = $existe->numero + 1;
+	  				$fechaIni = $existe->fecha;
 
-  				if ($fechaIni != null) {
-        
-			        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
-			        $ultimaHoraFac = date('H', strtotime( $fechaIni ) ) ;
-			        $ultimaSecFac = date('i', strtotime( $fechaIni ) )  + 1;
-			        $fechaActual = date('Y-m-d');
+	  				if ($fechaIni != null) {
+	        
+				        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
+				        $ultimaHoraFac = date('H', strtotime( $fechaIni ) ) ;
+				        $ultimaSecFac = date('i', strtotime( $fechaIni ) )  + 1;
+				        $fechaActual = date('Y-m-d');
 
-			        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
-			          	$fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac . ":" . $ultimaSecFac;
-			        }else{
-			          	$fechaFactura = date('Y-m-d') . ' 21:00';
-			        }
+				        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
+				          	$fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac . ":" . $ultimaSecFac;
+				        }else{
+				          	$fechaFactura = date('Y-m-d') . ' 21:00';
+				        }
 
-			      // si no reseteamos la fecha APARTIR DE las 9 de la noche 
-				}else{
-					$fechaFactura = date('Y-m-d') . ' 21:00';
-				}	 
+				      // si no reseteamos la fecha APARTIR DE las 9 de la noche 
+					}else{
+						$fechaFactura = date('Y-m-d') . ' 21:00';
+					}	 
 
-				if(FacturaExpedienteWeb::where('Exp_folio',$datosExp['folio'])->count() == 0){
-					$factura = new Factura;				
-					$factura ->CIA_clave  		= $datosExp['claveEmpresa'];
-					$factura ->FAC_serie  		= 'FW';
-					$factura ->FAC_folio  		= $facFolio;
-					$factura ->FAC_fecha  		= $fechaFactura;
-					$factura ->FAC_global 		= 0;
-					$factura ->FAC_importe		= $importe;
-					$factura ->FAC_iva    		= $iva;
-					$factura ->FAC_total  		= $total;
-					$factura ->FAC_saldo  	 	= $total;
-					$factura ->FAC_fechaReg		= $fecha;
-					$factura ->USU_registro		= $datosExp['usrMV'];
-					$factura ->save();
+					if(FacturaExpedienteWeb::where('Exp_folio',$datosExp['folio'])->count() == 0){
+						$factura = new Factura;				
+						$factura ->CIA_clave  		= $datosExp['claveEmpresa'];
+						$factura ->FAC_serie  		= 'FW';
+						$factura ->FAC_folio  		= $facFolio;
+						$factura ->FAC_fecha  		= $fechaFactura;
+						$factura ->FAC_global 		= 0;
+						$factura ->FAC_importe		= $importe;
+						$factura ->FAC_iva    		= $iva;
+						$factura ->FAC_total  		= $total;
+						$factura ->FAC_saldo  	 	= $total;
+						$factura ->FAC_fechaReg		= $fecha;
+						$factura ->USU_registro		= $datosExp['usrMV'];
+						$factura ->save();
 
-					$noFactura  = Factura::max('FAC_clave');
+						$noFactura  = Factura::max('FAC_clave');
 
-					$facExp = new FacturaExpediente;
-					$facExp ->Exp_folio 		= $datosExp['folio'];
-					$facExp ->FAC_clave 		= $noFactura;
-					$facExp ->save();
-					$valImgs ='ok';
-			 	}else{
-		    		return Response::json(array('flash' => 'Factura Ya generada'),500);
-		    	}
-			}
+						$facExp = new FacturaExpediente;
+						$facExp ->Exp_folio 		= $datosExp['folio'];
+						$facExp ->FAC_clave 		= $noFactura;
+						$facExp ->save();
+						$valImgs ='ok';
+				 	}else{
+			    		return Response::json(array('flash' => 'Factura Ya generada'),500);
+			    	}
+				}
 		}
 			$respuesta = array('respuesta' => 'exito', 'imags'=>$valImgs, 'fol'=>$datosExp['folio']); 		
 	 	}catch(Exception $e){

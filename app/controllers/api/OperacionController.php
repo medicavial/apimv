@@ -413,22 +413,10 @@ class OperacionController extends BaseController {
 
 		//ruta del convertidor pdf jpg
 
-		$convert = "\\\\SISTEMAS2\\ImageMagick-7.0.3-Q16\\magick";
+		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
 
 		//armamos las rutas prueba
-		$rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
-
-		if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
-
-		$rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
-
-		if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
-
-		$rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
-
-
-		//armamos las rutas produccion
-		// $rutaLocalAnioCarpeta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro;
+		// $rutaLocalAnioCarpeta = "C:\\Users\\SISTEMAS2\\Documents\\Qualitas\\". $AnyoNro;
 
 		// if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
 
@@ -437,6 +425,18 @@ class OperacionController extends BaseController {
 		// if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
 
 		// $rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
+
+
+		//armamos las rutas produccion
+		$rutaLocalAnioCarpeta = "\\\\Eaa\\RENAUT\\10\\". $AnyoNro;
+
+		if(!is_dir($rutaLocalAnioCarpeta)) mkdir($rutaLocalAnioCarpeta);
+
+		$rutaLocalMesCarpeta = $rutaLocalAnioCarpeta . "\\" . $MesNro;
+
+		if(!is_dir($rutaLocalMesCarpeta)) mkdir($rutaLocalMesCarpeta);
+
+		$rutaLocal =  $rutaLocalMesCarpeta . "\\". $folio;
 
 
 		//verificamos si es propia o red
