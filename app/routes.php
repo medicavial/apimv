@@ -271,6 +271,7 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitarAutorizacion', array('uses' => 'SacecoController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'SacecoController@solicitarAutorizacionRechazos'));
     	Route::post('solicitados', array('uses' => 'SacecoController@solicitados'));
+    	Route::post('autorizadosSinCaptura', array('uses' => 'SacecoController@autorizadosSinCaptura'));
 	});
 
     Route::group(array('prefix' => 'RelacionPagos'), function()

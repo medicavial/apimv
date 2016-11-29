@@ -554,6 +554,26 @@ class SacecoController extends BaseController {
 
 	}
 
+	/******************   listado de Aturizados sin captura *********************/
+	public function autorizadosSinCaptura(){
+
+		$sqlAutorizadoNoFac = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
+	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
+	            Exp_completo, Exp_fecreg, Cia_nombrecorto , RIE_nombre,Exp_fechaAutorizado, ATN_clave
+	            FROM Expediente
+	                inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave
+	                inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
+	                inner join Compania on Compania.Cia_clave = Expediente.Cia_clave
+	                inner join Atenciones on Expediente.Exp_folio = Atenciones.Exp_folio
+	                left join RiesgoAfectado on RiesgoAfectado.RIE_clave = Expediente.RIE_clave
+	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
+	            WHERE Exp_fecreg > '2016-11-01 00:00:00' and Exp_FE = 1 and Unidad.Uni_clave  not in (8,185) and EXP_cancelado <> 1 and EXP_fechaCaptura is null and ATN_estatus in (2,5)" ;
+
+	    return DB::connection('mysql')->select($sqlAutorizadoNoFac);
+
+	}
+
+
 	public function solicitarAutorizacionRechazos(){
 
 		$datos = Input::get('folio');
