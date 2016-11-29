@@ -487,7 +487,6 @@ class OperacionController extends BaseController {
 
 				}
 
-
 		    	//es pase medico
 		    	if (preg_match('/_pa_' . $folio . '/' , $file)) {
 
@@ -512,8 +511,6 @@ class OperacionController extends BaseController {
 					$img->save($nombreQualitas, 40);
 
 		    		// echo "Encontrado pase medico " . $nombreQualitas . ' y pesa ' . $peso .'<br>';
-
-
 		    	}
 
 		    	//es aviso de privacidad
@@ -752,7 +749,6 @@ class OperacionController extends BaseController {
 		// la ultima debe ser el folio de autorización
 
 		// add a page
-
 		if ($folioAutorizacion != '') {
 			// add a page
 			PDF::AddPage('P', 'A4');
@@ -760,11 +756,13 @@ class OperacionController extends BaseController {
 			PDF::Image($folioAutorizacion, 0, 0, 210, 297, 'JPG', '', '', true, 200, '', false, false, 0, false, false, true);
 		}
 
-		//Guardamos el ma misma ubicacion
-		PDF::Output($rutaLocal .'/' . $nombreArchivo . 'ME02.pdf', 'F');
+		//Guardamos en la misma ubicacion
+		PDF::Output( __DIR__ . '/' .$nombreArchivo . 'ME02.pdf', 'F' );
 
+		File::copy( __DIR__ . '/' . $nombreArchivo . 'ME02.pdf', $rutaLocal . '/' .$nombreArchivo . 'ME02.pdf');
+
+		File::delete(__DIR__ . '/' .$nombreArchivo . 'ME02.pdf');
 		
-
 		return true;
 
 
