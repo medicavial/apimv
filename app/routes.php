@@ -18,19 +18,18 @@ Route::group(array('prefix' => 'api'), function()
 	Route::get('/', function()
 	{
 
-		// $convert = "\\\\SISTEMAS2\\ImageMagick-7.0.3-Q16\\magick";
-		// $folio = 'PEMV040517';
-		// $imagen1 = "\\\\Eaa\\renaut\\10\\test\\PEMV040517\\id_PEMV040517.pdf";
-		// $imagen2 = "\\\\Eaa\\renaut\\10\\test\\PEMV040517\\id_PEMV040517.jpg";
+		$fechaIni  = '2016-12-01 21:59:00';
+		$ultimaFechaFac = date('Y-m-d', strtotime( $fechaIni ));
+        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
+        $fechaActual = date('Y-m-d');
 
-		// //exec('"C:\\Program Files\\ImageMagick-7.0.3-Q16\\magick" '.$imagen1 . ' ' . $imagen2 '', $output, $return);
-		// exec('"' . $convert . '" -density 600 -quality 100 ' . $imagen1 . '[0] '. $imagen2 .'');
-		// $archivo = explode(".", $imagen1 );
+        if ( $fechaActual == $ultimaFechaFac) {
+          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
+        }else{
+          $fechaFactura = date('Y-m-d') . ' 21:00';
+        }
 
-		// return $archivo[0];
-
-
-		return ExpedienteInfo::where('EXP_folio','ROMV000100')->count();
+        return $fechaFactura;
 
 
 

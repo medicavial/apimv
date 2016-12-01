@@ -487,15 +487,14 @@ class SacecoController extends BaseController {
 
   				if ($fechaIni != null) {
         
-			        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
-			        $ultimaHoraFac = date('H', strtotime( $fechaIni ) ) ;
-			        $ultimaSecFac = date('i', strtotime( $fechaIni ) )  + 1;
+			        $ultimaFechaFac = date('Y-m-d', strtotime( $fechaIni ));
+			        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
 			        $fechaActual = date('Y-m-d');
 
-			        if ( $fechaActual == $ultimaFechaFac && $ultimaHoraFac >= '21' ) {
-			          	$fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac . ":" . $ultimaSecFac;
+			        if ( $fechaActual == $ultimaFechaFac) {
+			          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
 			        }else{
-			          	$fechaFactura = date('Y-m-d') . ' 21:00';
+			          $fechaFactura = date('Y-m-d') . ' 21:00';
 			        }
 
 			      // si no reseteamos la fecha APARTIR DE las 9 de la noche 
@@ -525,6 +524,7 @@ class SacecoController extends BaseController {
 					$facExp ->FAC_clave 		= $noFactura;
 					$facExp ->save();
 					$valImgs ='ok';
+					
 			 	}else{
 		    		return Response::json(array('flash' => 'Factura Ya generada'),500);
 		    	}

@@ -25,7 +25,7 @@ class HomeController extends BaseController {
 	public function procesos(){
 
 
-		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='08/02/2016 00:00:00', @fechafin='18/02/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='01/11/2016 00:00:00', @fechafin='29/11/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -34,13 +34,9 @@ class HomeController extends BaseController {
 			$existencia = ExpedienteInfo::find($folio);
 
 			if ($existencia) {
-				
 				$registro = ExpedienteInfo::find($folio);
-
 			}else{
-				
 				$registro = new ExpedienteInfo;
-
 			}
 			
 			$registro->EXP_folio = $folio;
