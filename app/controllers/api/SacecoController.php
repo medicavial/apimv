@@ -102,7 +102,8 @@ class SacecoController extends BaseController {
                     FAC_fecha as fechafactura, FAC_importe as importe, FAC_iva as iva, FAC_total as total, Cia_rfc as rfc,
                     Cia_nombrecorto as empresa, Compania.Cia_clave  as claveEmpresa,Exp_telefono as telefono,Exp_mail as mail,
                     EXP_costoEmpresa as costo,
-                    Pro_clave as producto             
+                    Pro_clave as producto,
+                    Exp_triageActual as triage             
             FROM Expediente
                 inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave 
                 inner join Localidad on Unidad.LOC_claveint = Localidad.LOC_claveint
