@@ -48,7 +48,7 @@ class ReportesController extends BaseController {
 		$fechaini =  Input::get('fechaini'); 
 	    $fechafin =  Input::get('fechafin');
 
-		return DB::select("EXEC MV_PAG_Listado  @fechaini='$fechaini', @fechafin='$fechafin 23:59:58.999'");
+		return DB::select(" EXEC MV_PAG_Listado  @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999' ");
 	}
 
 	

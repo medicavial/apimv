@@ -3,29 +3,14 @@
 class HomeController extends BaseController {
 
 	public function index(){
-		// funcion que nos permite agregar folio en el flujo de documentos
-		// $clave = 606331;
-		// $folio = 'MZMA001341';
 
-		// $flujo = new Flujo;
-
-		// $flujo->FLD_formaRecep = 'O'; 
-	 //    $flujo->FLD_AROrec = 8; 		  
-	 //    //aqui va el id del usuario que debe tener el folio
-	 //    $flujo->USU_rec = 228;
-	 //    $flujo->FLD_fechaRec = date('d/m/Y H:i:s');
-  //       //aqui va el id del usuario que debe tener el folio
-  //       $flujo->USU_activo = 228;
-  //       $flujo->DOC_claveint = $clave; 
-
-  //       $flujo->save();
 		return View::make('hello');
 	}
 
 	public function procesos(){
 
 
-		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='01/11/2016 00:00:00', @fechafin='29/11/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='01/12/2016 00:00:00', @fechafin='21/12/2016 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
@@ -124,6 +109,7 @@ class HomeController extends BaseController {
 			$registro->PEU_fechaImp = $dato->FechaExp;
 			$registro->PEU_etapa = $dato->EXPClave;
 			$registro->save();
+		
 		}
 
 
@@ -148,6 +134,7 @@ class HomeController extends BaseController {
 			$registro->PAU_fechaPago = $dato->FPago;
 			$registro->PAU_fechaImp = $dato->FechaExp;
 			$registro->save();
+		
 		}
 
 
@@ -174,6 +161,7 @@ class HomeController extends BaseController {
 			$registro->PEU_fechaImp = $dato->FechaExp;
 			$registro->PEU_etapa = $dato->EXPClave;
 			$registro->save();
+		
 		}
 
 
@@ -198,6 +186,7 @@ class HomeController extends BaseController {
 			$registro->PAU_fechaPago = $dato->FPago;
 			$registro->PAU_fechaImp = $dato->FechaExp;
 			$registro->save();
+		
 		}
 
 
@@ -224,6 +213,7 @@ class HomeController extends BaseController {
 			$registro->PEU_fechaImp = $dato->FechaExp;
 			$registro->PEU_etapa = $dato->EXPClave;
 			$registro->save();
+		
 		}
 
 

@@ -181,10 +181,13 @@ Route::group(array('prefix' => 'api'), function()
 		Route::post('editaDatos', array('uses' => 'OperacionController@editaDatos'));
 		Route::get('estatusUnidad/{unidad}/{bit}/{usuario}', array('uses' => 'OperacionController@estatusUnidad'));
 		Route::get('expedienteInfo/{folio}', array('uses' => 'OperacionController@expedienteInfo'));
+		Route::get('generaFactura/{folio}', array('uses' => 'OperacionController@generaFactura'));
 		Route::get('guardaImagenes/{folio}', array('uses' => 'OperacionController@guardaImagenes'));
+		Route::post('guardaTramite', array('uses' => 'OperacionController@guardaTramite'));
 		Route::post('usuarios', array('uses' => 'OperacionController@guardaUsuario'));
 		Route::put('usuarios/{id}', array('uses' => 'OperacionController@editaUsuario'));
 		Route::get('riesgo/{folio}/{valor}', array('uses' => 'OperacionController@editaRiesgo'));
+		Route::get('pdfImagen/{archivo}', array('uses' => 'OperacionController@pdfImagen'));
 
 	});
 

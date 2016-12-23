@@ -295,6 +295,18 @@ class OperacionController extends BaseController {
 	}
 
 	//funcion para guardar usuario nuevo en flujo
+	public function guardaTramite(){
+		
+		$usuario = Input::get('usuario');
+		$fecha = date('Y-m-d H:i');
+		$lesionado = Input::get('lesionado');
+		$hospital = Input::get('hospital');
+
+	    return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
+	
+	}
+
+	//funcion para guardar usuario nuevo en flujo
 	public function guardaUsuario(){
 		$usuario = new User;
 
@@ -329,6 +341,78 @@ class OperacionController extends BaseController {
 
 	    return Response::json(array('respuesta' => 'Usuario Guardado Correctamente'));
 	
+	}
+
+	//funcion para generar factura manual
+	//solo usar en caso de emergencia y para FE y qualitas
+	public function generaFactura($folio){
+
+		$fecha = date('Y-m-d H:i');
+		$usuario = 'algo';
+
+		$datos = FolioWeb::find($folio);
+		$datos->Exp_autorizado = 1;
+		$datos->USU_solicito = $usuario;
+		$datos->Exp_fechaSolicitud = $fecha;
+		$datos->save();
+
+		$cliente = FolioWeb::find($folio)->Cia_clave;
+
+		$importe = ExpedienteInfo::find($folio)->EXP_costoEmpresa;
+		$iva = round($importe * 0.16, 2);
+		$total = $importe  + $iva;
+
+		// //consultamos consecutivo de factura
+		$facFolio = FacturaWeb::max('FAC_folio') + 1;
+		$fechaIni = FacturaWeb::max('FAC_fecha');
+
+		if ($fechaIni != null) {
+    
+	        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
+	        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
+	        $fechaActual = date('Y-m-d');
+
+	        if ( $fechaActual == $ultimaFechaFac) {
+	          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
+	        }else{
+	          $fechaFactura = date('Y-m-d') . ' 21:00';
+	        }
+
+	    // si no reseteamos la fecha APARTIR DE las 9 de la noche 
+	    }else{
+        	$fechaFactura = date('Y-m-d') . ' 21:00';
+	    }
+
+	    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
+		    //insertamos 
+			$facturacion = new FacturaWeb;
+			$facturacion->CIA_clave = $cliente;
+			$facturacion->FAC_serie = 'FW';
+			$facturacion->FAC_folio = $facFolio;
+			$facturacion->FAC_fecha = $fechaFactura;
+			$facturacion->FAC_global = 0;
+			$facturacion->FAC_importe = $importe;
+			$facturacion->FAC_iva = $iva;
+			$facturacion->FAC_total = $total;
+			$facturacion->FAC_saldo = $total;
+			$facturacion->FAC_fechaReg = $fecha;
+			$facturacion->USU_registro = $usuario;
+
+			$facturacion->save();
+
+			$factura = $facturacion->FAC_clave;
+
+			$facturacionExpediente = new FacturaExpedienteWeb;
+			$facturacionExpediente->EXP_folio = $folio;
+			$facturacionExpediente->FAC_clave = $factura;
+			$facturacionExpediente->save();
+
+			return Response::json(array('flash' => 'Factura generada'));
+	    	
+	    }else{
+
+	    	return Response::json(array('flash' => 'Factura Ya Existente'),500);
+	    }
 	}
 
 	public function guardaImagenes($folio){
@@ -776,6 +860,19 @@ class OperacionController extends BaseController {
 
 		return Response::json(array('respuesta' => 'Riesgo Guardado'));
 
+	}
+
+
+	public function pdfImagen($archivo){
+
+		$convert = "C:\\Program Files\\ImageMagick-6.8.9-Q16\\convert";
+		//obtenemos la ubicacion del pdf descargado
+		$imagenPDF = public_path('pdf/' . $archivo . '.pdf');
+		//obtenemos solo en nombre del archivo
+		$imagenJPG = public_path('pdf/' . $archivo . '.jpg');
+		exec('"' . $convert . '" -density 600 -quality 100 ' . $imagenPDF . ' '. $imagenJPG .'');
+
+		return Response::json(array('respuesta' => 'Imagen Separada'));
 	}
 
 
