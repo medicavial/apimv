@@ -6,3 +6,4 @@ class conceptoTramite extends Eloquent {
     protected $table = 'TipoConcepto';
 
 }		
+

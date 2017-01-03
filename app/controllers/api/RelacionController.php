@@ -4,6 +4,67 @@ ini_set('memory_limit', '-1');
 
 class RelacionController extends BaseController {
 
+	public function conecta_ftp(){
+
+		try{
+
+		//Permite conectarse al Servidor FTP
+		$ftp_server = "172.17.10.9";
+		$ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+		$login = ftp_login($ftp_conn, 'admin', 'Med1$4_01i0');
+		return $ftp_conn; //Devuelve el manejador a la función
+
+		} catch (Exception $e){
+
+		  echo 'Excepción capturada: ',  $e->getMessage(), "\n";
+
+		}
+	}
+
+	public function SubirCFDI($archivo,$archivo,$clave,$usucarpeta){
+
+	  // // $archivo_remoto = "CFDCGastos/Facturas/$archivo";
+	  $anio = date('Y'); 
+	  $mes = date('m'); 
+	  $ruta = "web/FacturasPagos/";
+	  $diranio =  "web/FacturasPagos/$anio";
+	  $dirmes =   "web/FacturasPagos/$anio/$mes";
+	  $dirfinal = "web/FacturasPagos/$anio/$mes/$clave";
+
+	  	$ruta = FTP::connection()->getDirListing($ruta);
+		$rutaanio = FTP::connection()->getDirListing($diranio);
+		$rutames = FTP::connection()->getDirListing($dirmes);
+		$rutafinal = FTP::connection()->getDirListing($dirfinal);
+
+	    // ftp_chmod($id_ftp,0644,$ruta);
+		if (count($rutaanio) == 0){
+
+			FTP::connection()->makeDir($diranio);
+		}
+
+		if (count($rutames) == 0){
+			FTP::connection()->makeDir($dirmes);
+		}
+
+		if (count($rutafinal) == 0) {
+			FTP::connection()->makeDir($dirfinal);
+		}
+
+	    $archivo_remoto = "web/FacturasPagos/$anio/$mes/$clave/$archivo";
+	    $archivo_local =  "FacturasPagos/".$usucarpeta."/$archivo";
+
+	    FTP::connection()->uploadFile($archivo_local,$archivo_remoto, FTP_ASCII);
+
+	    $archivosFinal = FTP::connection()->getDirListing($ruta);
+
+		// print_r($archivosFinal);
+
+	 //    FTP::disconnect($ruta);
+
+
+	}
+
+
 	public function buscaxProveedor($id){
 
 	 //    DB::disableQueryLog();
@@ -79,11 +140,13 @@ class RelacionController extends BaseController {
 											CASE WHEN REL_fPagada IS NULL THEN 0 ELSE 1 END as RelP, 
 											REL_pagada as Pagado,
 											PAS_pagado as Cobrado,
-											PAS_penalizado as penalizado'))
-                        ->where('his_accion', '=', 'Recepcion')
+											PAS_penalizado as penalizado,
+											Unidad.UNI_claveint as claveunidad,
+											UNI_rfc as rfc'))
                         ->where('his_area', '=', 6)
                         ->where('Documento.UNI_claveint', '=',$id)
                         ->whereNull('RelacionPago.REL_clave')
+                        ->distinct()
 	               //      ->whereNotExists(function($query)
 				            // {
 				            //     $query->select(DB::raw('FEE_Folio'))
@@ -164,12 +227,66 @@ class RelacionController extends BaseController {
 		$folios =  Input::all(); 
 
 		$numrelacion = $folios['numrelacion'];
+		$usucarpeta = $folios['usucarpeta'];
 		$obs = $folios['observacion'];
 		$tipofactura = $folios['tipofactura'];
+		$unidad = $folios['unidad'];
 		$fecha = date('d/m/Y');
 		$fechaH = date('Y-m-d H:i:s');
+		$fechaH  = date( 'd-m-y H:i:s',strtotime($fecha));
 
 		foreach ($folios['seleccionados'] as $foliodato){
+    
+            $importe = $foliodato['importe'];
+            if (!isset($foliodato['total'])){
+		    	$total = 0;
+		    }else{
+		    	$total = $foliodato['total'];
+		    }
+
+        }
+                                                                                                                                                                                                                             
+	    $relacion = DB::table('RelacionFiscal')->insert(
+		    array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
+		);
+
+	    $relacionusuario = DB::table('RelacionUsuarios')->insert(
+		    array('REL_clave' => $numrelacion, 'USU_creo' => $usuario, 'USU_cancelo' => null, 'USU_aplico' => null)
+		);
+
+		$relacionfechas = DB::table('RelacionFechas')->insert(
+		    array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
+		);
+
+		$sql = "EXEC MV_REL_InsertaRelacion 
+
+						@relacion = '$numrelacion',
+						@fechaPago = '$fecha',
+						@unidad = '$unidad',
+					    @subtotalp = '$importe',
+					    @impuestop = '0.00',
+					    @totalp = '$total',
+						@subtotal = '0.00',
+						@impuesto = '0.00',
+						@total = '0.00',
+						@observaciones = '',
+					    @conFactura = 0,  
+						@usuario = '$usuario',
+					    @conIVA = 0,
+					    @retIVA = 0,
+					    @retISR = 0,
+					    @impIVA = '0.00',
+					    @impISR = '0.00'";
+		DB::statement($sql);
+
+		$consecutivo = 0;
+
+		foreach ($folios['seleccionados'] as $foliodato){
+
+			$consecutivo+=1;
+    
+            $claveunidad = $foliodato['claveunidad'];
+
 
 		    if (!isset($foliodato['descuento'])){
 		    	$descuento = 0;
@@ -214,17 +331,17 @@ class RelacionController extends BaseController {
 		    }
 
 		    if (!isset($foliodato['emisor'])){
-		    	$emisor = 0;
+		    	$emisor = $foliodato['emisor'];
 		    }else{
 		    	$emisor = $foliodato['emisor'];
 		    }
-
 
 		    $folio = $foliodato['Folio'];
 		    $etapa = $foliodato['Etapa'];
 		    $entrega = $foliodato['Entrega'];
 		    
 		    $llave = $folio.$etapa.$entrega;
+
 
 		$folioetapaent = DB::table('FolioEtapaEntrega')->insert(
 		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
@@ -233,30 +350,41 @@ class RelacionController extends BaseController {
 	    $tramite = DB::table('Tramite')->insert(
 		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
 		);
-		// $max_tramite = DB::table('Tramite')->max('TRA_clave');
 
-	 //    $tramiteRelacion = DB::table('TramiteRelacion')->insert(
-		//     array('TRA_clave' => $max_tramite, 'REL_clave' => $numrelacion)
-		// );
-		// 
 		$cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
                                                 'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
                                                 'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
 
-	    }                                                                                                                                                                                                                               
+	    
+		$sql1 ="EXEC MV_REL_ActualizaPago
 
-	    $relacion = DB::table('RelacionFiscal')->insert(
-		    array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
-		);
+					@relacion = '$numrelacion',
+					@referencia = '$consecutivo',
+				    @factura = 0,
+				    @importeFac = 0.00,
+					@siniestro = ,
+					@fechaCaptura date,
+					@tipoLesion char(1),
+					@diagnostico char(4),
+					@pago money,
+					@lesionado varchar(100),
+					@statusFac varchar(3),             
+					@excepcion bit,
+				    @statusRes varchar(10),
+				    @unidad int,
+				    @etapa int,
+				    @folio char(10),
+				    @usuario int,
+				    @expediente int";
+		DB::statement($sql1);
 
-	    $relacionusuario = DB::table('RelacionUsuarios')->insert(
-		    array('REL_clave' => $numrelacion, 'USU_creo' => $usuario, 'USU_cancelo' => null, 'USU_aplico' => null)
-		);
+	    }  
 
-		$relacionfechas = DB::table('RelacionFechas')->insert(
-		    array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
-		);
+	    foreach ($folios['archivos'] as $archi){
 
+	             $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
+
+	    }
 
     return Response::json(array('respuesta' => 'Folios Relacionados Correctamente'));
 
@@ -266,12 +394,20 @@ class RelacionController extends BaseController {
 		$folios =  Input::all(); 
 
 		$numrelacion = $folios['numrelacion'];
+		$usucarpeta = $folios['usucarpeta'];
 		$obs = $folios['observacion'];
 		$tipofactura = $folios['tipofactura'];
+	    $unidad = $folios['unidad'];
 		$fecha = date('d/m/Y');
 		$fechaH = date('Y-m-d H:i:s');
-
-
+		$fechaH  = date( 'd-m-y H:i:s',strtotime($fecha));
+	    foreach ($folios['seleccionados'] as $foliodato){    
+            if (!isset($foliodato['total'])){
+		    	$total = 0;
+		    }else{
+		    	$total = $foliodato['total'];
+		    }
+        }
 		$foliofiscal = Input::get('factura')['foliofiscal'];
 	    $fechaemision = Input::get('factura')['fechaemision'];
 		$emisor = Input::get('factura')['emisor'];
@@ -289,8 +425,29 @@ class RelacionController extends BaseController {
 
 	    $cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
                                                 'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
-                                                'CFD_fechasistema' => $fecha, 'CFD_valido' => NULL));
+                                                'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
 
+	    $sql = "EXEC MV_REL_InsertaRelacion 
+
+					@relacion = '$numrelacion',
+					@fechaPago = '$fecha',
+					@unidad = '$unidad',
+				    @subtotalp = '$importe',
+				    @impuestop = '0.00',
+				    @totalp = '$total',
+					@subtotal = '0.00',
+					@impuesto = '0.00',
+					@total = '0.00',
+					@observaciones = '',
+				    @conFactura = 0,  
+					@usuario = '$usuario',
+				    @conIVA = 0,
+				    @retIVA = 0,
+				    @retISR = 0,
+				    @impIVA = '0.00',
+				    @impISR = '0.00'";
+		DB::statement($sql);
+ 
 		foreach ($folios['seleccionados'] as $foliodato){
 
 		    $folio = $foliodato['Folio'];
@@ -310,6 +467,28 @@ class RelacionController extends BaseController {
 		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
 		);
 	    }
+	    
+	 //    $sql1 ="EXEC MV_REL_ActualizaPago
+
+		// 			@relacion = '$numrelacion',
+		// 			@referencia = '$consecutivo',
+		// 		    @factura = 0,
+		// 		    @importeFac = 0.00,
+		// 			@siniestro = ,
+		// 			@fechaCaptura date,
+		// 			@tipoLesion char(1),
+		// 			@diagnostico char(4),
+		// 			@pago money,
+		// 			@lesionado varchar(100),
+		// 			@statusFac varchar(3),             
+		// 			@excepcion bit,
+		// 		    @statusRes varchar(10),
+		// 		    @unidad int,
+		// 		    @etapa int,
+		// 		    @folio char(10),
+		// 		    @usuario int,
+		// 		    @expediente int";
+		// DB::statement($sql1);
                                                                                                                                                                                                                
 	    $relacion = DB::table('RelacionFiscal')->insert(
 		    array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
@@ -323,51 +502,99 @@ class RelacionController extends BaseController {
 		    array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
 		);
 
+	    $archi = $folios['archivos'];
+
+	    $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
+
 
     	return Response::json(array('respuesta' => 'Folios Relacionados Correctamente'));
 
     }
 
-    	public function upload($idx)
-	{
-	    // if(!\Input::file("file"))
-	    // {
-	    //     return redirect('upload')->with('error-message', 'File has required field');
-	    // }else{
-	    // 	return Response::json(array('respuesta' => 'Bien'));
-	    // }
-	    $fecha = date('Y-m-d');
-	    $mime = \Input::file('file')->getMimeType();
-	    $extension = strtolower(\Input::file('file')->getClientOriginalExtension());
-	//    $fileName = $fecha.'-'.uniqid().'.'.$extension;
-	    $fileName = $idx.'.'.$extension;
-	    $path = "Complementos/";
+// TRUNCATE TABLE FolioEtapaEntrega
 
-	    if (\Request::file('file')->isValid())
-	    {
-	        \Request::file('file')->move($path, $fileName);
+// TRUNCATE TABLE CFDI
+
+// TRUNCATE TABLE Tramite
+
+// TRUNCATE TABLE RelacionFiscal
+
+// TRUNCATE TABLE RelacionUsuarios
+
+// TRUNCATE TABLE RelacionFechas
+
+
+// SELECT * FROM FolioEtapaEntrega
+
+// SELECT * FROM CFDI
+
+// SELECT * FROM Tramite
+
+// SELECT * FROM RelacionFiscal
+
+// SELECT * FROM RelacionUsuarios
+
+// SELECT * FROM RelacionFechas
+
+    public function upload($usuario){
+ 
+	    if (!file_exists("FacturasPagos/$usuario")) { 
+	       $carpeta = mkdir("FacturasPagos/$usuario/", 0700);
 	    }
-	    $directorio = opendir($path); //ruta actual
-	    while ($archivo = readdir($directorio)) //obtenemos un archivo y luego otro sucesivamente
-	    {
-	        if (is_dir($archivo))//verificamos si es o no un directorio
+
+        if (is_uploaded_file($_FILES['file']['tmp_name'])) {
+
+	        $nombre =  $_FILES['file']['name'];
+	        $file = str_replace(" ","",$nombre);
+      
+	        copy($_FILES['file']['tmp_name'], 'FacturasPagos/'.$usuario.'/'. $file);
+	        $file_name = $file;
+	        $subido = true;
+
+	        //$total_imagenes = count(glob("Facturas/{*.pdf,*.xml}",GLOB_BRACE));
+	        $directorio = opendir('FacturasPagos/'.$usuario.'/'); //ruta actual
+	        while ($archivo1 = readdir($directorio)) //obtenemos un archivo y luego otro sucesivamente
 	        {
-	            //echo "[".$archivo . "]<br />"; //de ser un directorio lo envolvemos entre corchetes
+	            if (is_dir($archivo1))//verificamos si es o no un directorio
+	            {
+	                //echo "[".$archivo . "]<br />"; //de ser un directorio lo envolvemos entre corchetes
+	            }
+	            else
+	            {   
+	                $ext = strtolower(\Input::file('file')->getClientOriginalExtension());   //Line 32
+				    // $ext = array_shift($ext);  //Line 34
+	                if ($ext == 'xml' or $ext == 'XML'){
+	                    
+	                    $archivo[] = $archivo1;
+	                }
+	                
+	            }
 	        }
-	        else
-	        {   
-				$archivos[] = $archivo;  
-	            
+
+	    foreach ($archivo as $var){
+
+            $extension = strtolower(\Input::file('file')->getClientOriginalExtension());
+            //echo $extension;
+            if ($extension == 'xml' or $extension == 'XML') {
+
+                $leexml = $var;
+                $bit2 = 1;
+            }
+	    
+	        if($subido) {
+	           $respuesta = array('respuesta' => "El Archivo subio con exito", 'ruta' => $file_name, 'archivo' => $archivo, 'leexml' => $leexml, 'bit2' => $bit2);
+	        } else {
+	           $respuesta = array('respuesta' => "Error al subir el archivo");
 	        }
-	    }
+        } 
 
-	    return Response::json(array('respuesta' => $archivos));
-
-	}
+        return Response::json($respuesta);
+}
+}
 
 	public function eliminaxml(){
 
-		$dir = "Complementos/"; 
+		$dir = "FacturasPagos/"; 
 		$handle = opendir($dir); 
 
 		while ($file = readdir($handle))  { 
@@ -381,7 +608,7 @@ class RelacionController extends BaseController {
 
 	public function eliminaxmlInd($idx){
 
-		$dir = "Complementos/"; 
+		$dir = "FacturasPagos/"; 
 		$handle = opendir($dir); 
 		while ($file = readdir($handle)){
 			if (is_dir($file)){ 
@@ -393,10 +620,58 @@ class RelacionController extends BaseController {
 
 		}
 
-		unlink('Complementos/'.$idx.'.xml');
- 
+		unlink('FacturasPagos/'.$idx.'.xml');
+ 		
+	}
 
-		
+	public function borratemporales($usuario){
+
+	      $files = glob('FacturasPagos/'.$usuario.'/*'); // obtiene todos los archivos
+	      foreach($files as $file){
+	        if(is_file($file)) // si se trata de un archivo
+	           unlink($file); // lo elimina
+	      }
+	}
+
+	public function busquedaRelaciones(){
+
+		$folios =  Input::all(); 
+
+		$relacion = $folios['numrelacion'];
+		$resultado = DB::table('Relacion')->where('REL_clave', '=', $relacion)->get();
+
+		if (count($resultado) == 1){
+		    return Response::json(array('respuesta' => 1));
+
+		}else{
+			return Response::json(array('respuesta' => 0));
+		}
+
+	}
+
+	public function consultaFolioFiscal($foliofiscal){
+
+      $resultado = DB::table('CFDI')->select(DB::raw('count(*) as count'))->where('CFD_foliofiscal', '=', $foliofiscal)->get();
+      $respuesta = array('count' => $resultado);
+
+      return $resultado;
+    }
+
+    public function validaUnidad($rfc){
+
+      $resultado = DB::table('Unidad')->select(DB::raw('UNI_rfc as rfc, UNI_claveWeb as unidadweb, UNI_claveint as unidad'))->where('UNI_rfc', '=', $rfc)->get();
+      $respuesta = array('count' => $resultado);
+
+      return $resultado;
+
+    }
+
+
+	public function borraxArchivo($usuario,$archivo){
+
+		 File::delete ('FacturasPagos/'.$usuario.'/'.$archivo);
+
+	      
 	}
 
 

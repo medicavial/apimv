@@ -276,37 +276,50 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('autorizadosSinCaptura', array('uses' => 'SacecoController@autorizadosSinCaptura'));
 	});
 
+
     Route::group(array('prefix' => 'RelacionPagos'), function()
 	{
         // Route::post('fechaEntrega', array('uses' => 'RelacionController@relacionFechaEnt'));
         Route::post('buscaxProveedor/{id}', array('uses' => 'RelacionController@buscaxProveedor'));
         Route::post('insertaRelacion/{usuario}', array('uses' => 'RelacionController@insertaRelacion'));
         Route::post('insertaRelacionGlo/{usuario}', array('uses' => 'RelacionController@insertaRelacionGlo'));
-        Route::post('upload/{idx}', array('uses' => 'RelacionController@upload'));
+        Route::post('upload/{usuario}', array('uses' => 'RelacionController@upload'));
         Route::post('eliminaxml', array('uses' => 'RelacionController@eliminaxml'));
         Route::post('eliminaxmlInd/{idx}', array('uses' => 'RelacionController@eliminaxmlInd'));
+        Route::get('borratemporales/{usuario}', array('uses' => 'RelacionController@borratemporales'));
+        Route::post('buscaRelacion', array('uses' => 'RelacionController@busquedaRelaciones'));
+        Route::post('consultaFolioFiscal/{foliofiscal}', array('uses' => 'RelacionController@consultaFolioFiscal'));
+        Route::post('borrarxArchivo/{foliofiscal}/{usuario}', array('uses' => 'RelacionController@borrarxArchivo'));
+        Route::post('validaUnidad/{rfc}', array('uses' => 'RelacionController@validaUnidad'));
 
-		
+    });
 
-    	Route::group(array('prefix' => 'relacion'), function()
-		{
-			Route::post('entrega', array('uses' => 'PagosController@entrega'));
+    Route::group(array('prefix' => 'FacturaUnidades'), function()
+	{
+        Route::post('buscaFolios', array('uses' => 'FacturaUnidadesController@buscaFolios'));
+        Route::post('enviaFolios/{usuario}', array('uses' => 'FacturaUnidadesController@enviaFolios'));
+        Route::post('actualiza', array('uses' => 'FacturaUnidadesController@actualiza'));
+        Route::post('listadoFactura', array('uses' => 'FacturaUnidadesController@listadoFactura'));
+        Route::post('buscaxUnidad/{id}', array('uses' => 'FacturaUnidadesController@buscaxUnidad'));
+        Route::post('unidades', array('uses' => 'FacturaUnidadesController@unidades'));
 
 
-	    });
+    });
 
-        Route::group(array('prefix' => 'RelacionNP'), function()
-		{
-	        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
+    Route::group(array('prefix' => 'DetalleFacturas'), function()
+	{
+        Route::post('imprimeDatos/{folio}', array('uses' => 'DetalleFacturasController@imprimeDatos'));
+        Route::post('rechazaFactura', array('uses' => 'DetalleFacturasController@rechazaFactura'));
+        Route::post('revisa', array('uses' => 'DetalleFacturasController@revision'));
 
-	    });
 
-	    Route::group(array('prefix' => 'detalleRelacion'), function()
-		{
-	        Route::get('detalle/{relacion}', array('uses' => 'DetalleRelacionController@detalle'));
-	        
+    });	
 
-	    });
+    Route::group(array('prefix' => 'FacturaZima'), function()
+	{
+        Route::post('unidades', array('uses' => 'FacturaZimaController@unidades'));
+
+    });	
 
 
 
