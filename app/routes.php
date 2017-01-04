@@ -303,7 +303,6 @@ Route::group(array('prefix' => 'api'), function()
         Route::post('buscaxUnidad/{id}', array('uses' => 'FacturaUnidadesController@buscaxUnidad'));
         Route::post('unidades', array('uses' => 'FacturaUnidadesController@unidades'));
 
-
     });
 
     Route::group(array('prefix' => 'DetalleFacturas'), function()
@@ -340,8 +339,6 @@ Route::group(array('prefix' => 'api'), function()
 	    });
 
 	});
-
-});
 
 Route::get('/', array('uses' => 'HomeController@index'));
 Route::get('/procesos', array('uses' => 'HomeController@procesos'));

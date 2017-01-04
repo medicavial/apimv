@@ -26,7 +26,7 @@ return array(
 	|
 	*/
 
-	'default' => 'production',
+	'default' => 'sqlsrv',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -61,6 +61,17 @@ return array(
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
 			'prefix'    => '',
+		),
+
+		'zima' => array(
+			'driver'   => 'mysql',
+			'host'     => 'www.pmzima.net',
+			'database' => 'zima_sscp_3',
+			'username' => 'zima_web',
+			'password' => 'W3dik@_0i12',
+			'charset'  => 'utf8',
+			'collation' => 'utf8_unicode_ci',
+			'prefix'   => '',
 		),
 
 		'pgsql' => array(
