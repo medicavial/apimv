@@ -433,7 +433,7 @@ class FlujoController extends BaseController {
 		$respuesta = array();
 
 		$condicionRechazo = ['USU_activo' => $usuario, 'FLD_porRecibir' => 0, 'FLD_rechazado' => 1];
-		$condicionXRecibir = ['USU_recibe' => $usuario, 'FLD_rechazado' => 0];
+		$condicionXRecibir = ['USU_recibe' => $usuario, 'FLD_rechazado' => 0, 'FLD_porRecibir' => 1];
 		
 		$respuesta['rechazos'] = Flujo::where($condicionRechazo)->count();
 		$respuesta['xrecibir'] = Flujo::where($condicionXRecibir)->count();
