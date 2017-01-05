@@ -459,9 +459,11 @@ class SacecoController extends BaseController {
 			 			$pase->TStatus_clave = 7;
 			 			$pase->save();
 			 		} 
-		 		}											
+		 		}				
 
-				if($datosExp['claveEmpresa']==7){
+		 		$contExpInfo = ExpedienteInfo::where('EXP_folio',$datosExp['folio'])->count();							
+
+				if($datosExp['claveEmpresa']==7&&$contExpInfo>0){
 
 					$datos = FolioWeb::find($datosExp['folio']);
 					$datos->Exp_solicitado = 1;
