@@ -320,6 +320,14 @@ Route::group(array('prefix' => 'api'), function()
 
     });	
 
+    Route::group(array('prefix' => 'RelacionNP'), function()
+	{
+        Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
+
+    });
+
+
+
 
 
 		Route::get('/xml', function(){

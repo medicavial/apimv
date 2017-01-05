@@ -28,7 +28,6 @@ class FacturaUnidadesController extends BaseController {
 	                        ))
 	                        ->select('Expediente.Exp_folio')
 	                        ->whereBetween('ATN_fecreg', array($fechaini, $fechafin))
-	                        ->distinct()
 	                        // ->skip(10)
 	                        // ->take(5)
 	                        ->get()
@@ -99,6 +98,18 @@ public function buscaxUnidad($id){
 	                        ->get()
 	                        ->toArray();
 
+		    // $val = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
+		    //                     ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
+		    //                     ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
+		    //                     ->whereIn('DOC_folio',$folios)
+		    // 					->where('DOC_etapa',1)
+		    // 					->where('DOC_situacionOriginal',1)
+		    // 					->select('DOC_folio')
+		    // 					->get()
+		    // 					->toArray();
+		    // print_r($folios)
+		    // $fol = RelacionPago::whereIn('PAS_folio',$folios)->whereNull('REL_clave')->select('PAS_folio as folio')->get()->toArray();  
+ 					// print_r($fol);
 		    $validos = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
 		                        ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
 		                        ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
@@ -110,27 +121,34 @@ public function buscaxUnidad($id){
 		    					->get()
 		    					->toArray();
 
-        $respuesta = array();
+		$respuesta = array();
 
 	    foreach ($validos as $valido){
 
 	    	$clave = $valido['claveDoc'];
-	    	$claveflujo = Flujo::where(array('DOC_claveint' => $clave))->first();
-	    	// print_r($claveflujo['FLD_formaRecep']);    	
+	    	$claveflujo = Flujo::where(array('DOC_claveint' => $clave,'FLD_formaRecep' => 'FE'))->first();
+
 		    if($claveflujo['FLD_formaRecep'] == 'FE'){
 
 		    	$tiporecep = "Facturacion Express";
 		        $valido['tiporecepcion'] = $tiporecep;
-		        array_push($respuesta, $valido);
+		        $clave_flujo = $claveflujo['FLD_claveint'];
+	    	    $existe_relacion = RelacionPago::where('FLD_claveint',$clave_flujo)->count();
+	    	    // print_r($relacion);
+	    	    if($existe_relacion == 0){
 
-
-		    }elseif($claveflujo['FLD_formaRecep'] = 'O'){
-
-		    	$tiporecep = "Verifica Pago";
-		        $valido['tiporecepcion'] = $tiporecep;
-		        array_push($respuesta, $valido);
+		          array_push($respuesta, $valido);
+		        }
 
 		    }
+		    // elseif($claveflujo['FLD_formaRecep'] = 'O'){
+
+		    // 	$tiporecep = "Verifica Pago";
+		    //     $valido['tiporecepcion'] = $tiporecep;
+		    //     array_push($respuesta, $valido);
+
+		    // }
+		    
 
 		}
 

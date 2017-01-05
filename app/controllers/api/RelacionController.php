@@ -278,6 +278,7 @@ class RelacionController extends BaseController {
 					    @impIVA = '0.00',
 					    @impISR = '0.00'";
 		DB::statement($sql);
+		// return DB::select
 
 		$consecutivo = 0;
 
@@ -347,37 +348,45 @@ class RelacionController extends BaseController {
 		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
 		);
 
-	    $tramite = DB::table('Tramite')->insert(
+	    $tramite = DB::table('OrdenPago')->insert(
 		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
 		);
 
 		$cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
                                                 'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
                                                 'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
+        $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => $etapa, 'DOC_numeroEntrega' => $entrega))->first();
+        $DOC_clave = $Documento->DOC_claveint;	
+
+        $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
+
+        $rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
 
 	    
-		$sql1 ="EXEC MV_REL_ActualizaPago
+		$sql = "EXEC MV_REL_ActualizaPago
 
+					@rpaClave = $rpaClave,
 					@relacion = '$numrelacion',
-					@referencia = '$consecutivo',
+					@referencia = 1,
 				    @factura = 0,
 				    @importeFac = 0.00,
-					@siniestro = ,
-					@fechaCaptura date,
-					@tipoLesion char(1),
-					@diagnostico char(4),
-					@pago money,
-					@lesionado varchar(100),
-					@statusFac varchar(3),             
-					@excepcion bit,
-				    @statusRes varchar(10),
-				    @unidad int,
-				    @etapa int,
-				    @folio char(10),
-				    @usuario int,
-				    @expediente int";
-		DB::statement($sql1);
-
+					@siniestro = '',
+					@fechaCaptura = '',
+					@tipoLesion = '1',
+					@diagnostico = '',
+					@pago = '0.00',
+					@lesionado = '',
+					@statusFac = 0,             
+					@excepcion = 0,
+				    @statusRes = '',
+				    @unidad = $claveunidad,
+				    @etapa = $etapa,
+				    @folio = '$folio',
+				    @usuario = $usuario,
+				    @expediente = 1";
+		DB::statement($sql);
+		// 
+		
 	    }  
 
 	    foreach ($folios['archivos'] as $archi){
@@ -463,33 +472,43 @@ class RelacionController extends BaseController {
 		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
 		);
 
-	    $tramite = DB::table('Tramite')->insert(
+	    $tramite = DB::table('OrdenPago')->insert(
 		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
 		);
 	    }
-	    
-	 //    $sql1 ="EXEC MV_REL_ActualizaPago
 
-		// 			@relacion = '$numrelacion',
-		// 			@referencia = '$consecutivo',
-		// 		    @factura = 0,
-		// 		    @importeFac = 0.00,
-		// 			@siniestro = ,
-		// 			@fechaCaptura date,
-		// 			@tipoLesion char(1),
-		// 			@diagnostico char(4),
-		// 			@pago money,
-		// 			@lesionado varchar(100),
-		// 			@statusFac varchar(3),             
-		// 			@excepcion bit,
-		// 		    @statusRes varchar(10),
-		// 		    @unidad int,
-		// 		    @etapa int,
-		// 		    @folio char(10),
-		// 		    @usuario int,
-		// 		    @expediente int";
+	    $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => $etapa, 'DOC_numeroEntrega' => $entrega))->first();
+        $DOC_clave = $Documento->DOC_claveint;	
+
+        $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
+	    
+		$rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
+
+		$sql ="EXEC MV_REL_ActualizaPago
+
+					@rpaClave = $rpaClave,
+					@relacion = '$numrelacion',
+					@referencia = 1,
+				    @factura = 0,
+				    @importeFac = 0.00,
+					@siniestro = '',
+					@fechaCaptura = '',
+					@tipoLesion = '1',
+					@diagnostico = '',
+					@pago = '0.00',
+					@lesionado = '',
+					@statusFac = 0,             
+					@excepcion = 0,
+				    @statusRes = '',
+				    @unidad = $unidad,
+				    @etapa = $etapa,
+				    @folio = '$folio',
+				    @usuario = $usuario,
+				    @expediente = 1";
 		// DB::statement($sql1);
-                                                                                                                                                                                                               
+		DB::statement($sql);
+
+	    
 	    $relacion = DB::table('RelacionFiscal')->insert(
 		    array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
 		);
