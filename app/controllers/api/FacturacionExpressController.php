@@ -253,52 +253,62 @@ class FacturacionExpressController extends BaseController {
 			$iva = round($importe * 0.16, 2);
     		$total = $importe  + $iva;
 
+
 			// //consultamos consecutivo de factura
 			$facFolio = FacturaWeb::max('FAC_folio') + 1;
 			$fechaIni = FacturaWeb::max('FAC_fecha');
 
-			if ($fechaIni != null) {
-        
-		        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
-		        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
-		        $fechaActual = date('Y-m-d');
 
-		        if ( $fechaActual == $ultimaFechaFac) {
-		          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
-		        }else{
-		          $fechaFactura = date('Y-m-d') . ' 21:00';
-		        }
+			// validacion para evitar duplicado de facturas
+    		if(FacturaWeb::where('FAC_folio',$facFolio)->count() == 0){
 
-		    // si no reseteamos la fecha APARTIR DE las 9 de la noche 
-		    }else{
-	        	$fechaFactura = date('Y-m-d') . ' 21:00';
-		    }
+				if ($fechaIni != null) {
+	        
+			        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
+			        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
+			        $fechaActual = date('Y-m-d');
 
-		    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
-			    //insertamos 
-				$facturacion = new FacturaWeb;
-				$facturacion->CIA_clave = $cliente;
-				$facturacion->FAC_serie = 'FW';
-				$facturacion->FAC_folio = $facFolio;
-				$facturacion->FAC_fecha = $fechaFactura;
-				$facturacion->FAC_global = 0;
-				$facturacion->FAC_importe = $importe;
-				$facturacion->FAC_iva = $iva;
-				$facturacion->FAC_total = $total;
-				$facturacion->FAC_saldo = $total;
-				$facturacion->FAC_fechaReg = $fecha;
-				$facturacion->USU_registro = $usuario;
+			        if ( $fechaActual == $ultimaFechaFac) {
+			          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
+			        }else{
+			          $fechaFactura = date('Y-m-d') . ' 21:00';
+			        }
 
-				$facturacion->save();
+			    // si no reseteamos la fecha APARTIR DE las 9 de la noche 
+			    }else{
+		        	$fechaFactura = date('Y-m-d') . ' 21:00';
+			    }
 
-				$factura = $facturacion->FAC_clave;
+			    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
+				    //insertamos 
+					$facturacion = new FacturaWeb;
+					$facturacion->CIA_clave = $cliente;
+					$facturacion->FAC_serie = 'FW';
+					$facturacion->FAC_folio = $facFolio;
+					$facturacion->FAC_fecha = $fechaFactura;
+					$facturacion->FAC_global = 0;
+					$facturacion->FAC_importe = $importe;
+					$facturacion->FAC_iva = $iva;
+					$facturacion->FAC_total = $total;
+					$facturacion->FAC_saldo = $total;
+					$facturacion->FAC_fechaReg = $fecha;
+					$facturacion->USU_registro = $usuario;
 
-				$facturacionExpediente = new FacturaExpedienteWeb;
-				$facturacionExpediente->EXP_folio = $folio;
-				$facturacionExpediente->FAC_clave = $factura;
-				$facturacionExpediente->save();
-		    	
-		    }else{
+					$facturacion->save();
+
+					$factura = $facturacion->FAC_clave;
+
+					$facturacionExpediente = new FacturaExpedienteWeb;
+					$facturacionExpediente->EXP_folio = $folio;
+					$facturacionExpediente->FAC_clave = $factura;
+					$facturacionExpediente->save();
+			    	
+			    }else{
+
+			    	return Response::json(array('flash' => 'Factura Ya generada'),500);
+			    }
+
+			}else{
 
 		    	return Response::json(array('flash' => 'Factura Ya generada'),500);
 		    }
