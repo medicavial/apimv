@@ -10,7 +10,7 @@
 		"Chumper/Zipper": "0.5.*",
 		"orchestra/parser": "2.2.*",
 		"fuelphp/upload": "1.*",
-		"anchu/ftp": "1.0.0",
+		"anchu/ftp": "~2.0",
 		"intervention/image": "1.*",
 		"barryvdh/laravel-dompdf": "0.4.*",
 		"maxxscho/laravel-tcpdf": "0.*",

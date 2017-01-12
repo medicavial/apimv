@@ -17,6 +17,8 @@ Route::group(array('prefix' => 'api'), function()
 {
 	Route::get('/', function()
 	{
+	    $anio = date('Y'); 
+	    $mes = date('m'); 
 
 		$fechaIni  = '2016-12-01 21:59:00';
 		$ultimaFechaFac = date('Y-m-d', strtotime( $fechaIni ));
@@ -30,7 +32,6 @@ Route::group(array('prefix' => 'api'), function()
         }
 
         return $fechaFactura;
-
 
 
 	});

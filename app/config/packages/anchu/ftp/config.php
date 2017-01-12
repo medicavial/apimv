@@ -31,5 +31,14 @@ return array(
             'password'   => 'm3D$k4_100i',
             'passive'   => false,
         ),
+
+
+        'connection2' => array(
+            'host'   => '172.17.10.9',
+            'port'  => 21,
+            'username' => 'admin',
+            'password'   => 'Med1$4_01i0',
+            'passive'   => false,
+        ),
     ),
 );

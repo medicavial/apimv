@@ -24,6 +24,7 @@ class RelacionController extends BaseController {
 	public function SubirCFDI($archivo,$archivo,$clave,$usucarpeta){
 
 	  // // $archivo_remoto = "CFDCGastos/Facturas/$archivo";
+		
 	  $anio = date('Y'); 
 	  $mes = date('m'); 
 	  $ruta = "web/FacturasPagos/";
@@ -31,65 +32,40 @@ class RelacionController extends BaseController {
 	  $dirmes =   "web/FacturasPagos/$anio/$mes";
 	  $dirfinal = "web/FacturasPagos/$anio/$mes/$clave";
 
-	  	$ruta = FTP::connection()->getDirListing($ruta);
-		$rutaanio = FTP::connection()->getDirListing($diranio);
-		$rutames = FTP::connection()->getDirListing($dirmes);
-		$rutafinal = FTP::connection()->getDirListing($dirfinal);
+	  	$ruta = FTP::connection('connection2')->getDirListing($ruta);
+		$rutaanio = FTP::connection('connection2')->getDirListing($diranio);
+		$rutames = FTP::connection('connection2')->getDirListing($dirmes);
+		$rutafinal = FTP::connection('connection2')->getDirListing($dirfinal);
 
 	    // ftp_chmod($id_ftp,0644,$ruta);
 		if (count($rutaanio) == 0){
 
-			FTP::connection()->makeDir($diranio);
+			FTP::connection('connection2')->makeDir($diranio);
 		}
 
 		if (count($rutames) == 0){
-			FTP::connection()->makeDir($dirmes);
+			FTP::connection('connection2')->makeDir($dirmes);
 		}
 
-		if (count($rutafinal) == 0) {
-			FTP::connection()->makeDir($dirfinal);
+		if (count($rutafinal) == 0){
+			FTP::connection('connection2')->makeDir($dirfinal);
 		}
 
 	    $archivo_remoto = "web/FacturasPagos/$anio/$mes/$clave/$archivo";
 	    $archivo_local =  "FacturasPagos/".$usucarpeta."/$archivo";
 
-	    FTP::connection()->uploadFile($archivo_local,$archivo_remoto, FTP_ASCII);
+	    FTP::connection('connection2')->uploadFile($archivo_local,$archivo_remoto, FTP_ASCII);
 
-	    $archivosFinal = FTP::connection()->getDirListing($ruta);
+	    $archivosFinal = FTP::connection('connection2')->getDirListing($ruta);
 
 		// print_r($archivosFinal);
-
-	 //    FTP::disconnect($ruta);
-
+	    FTP::disconnect('connection2');
 
 	}
 
 
 	public function buscaxProveedor($id){
 
-	 //    DB::disableQueryLog();
-		// $fechaini =  Input::get('fechainiEnt'); 
-	 //    $fechafin =  Input::get('fechafinEnt'). ' 23:59:58.999'; 
-
-	// $norelacionados =DB::table('RelacionPago')
-	//                   ->join('FlujoDoc', 'RelacionPago.FLD_claveint', '=', 'FlujoDoc.FLD_claveint')
-	 //                      ->join('Documento', 'FlujoDoc.DOC_claveint', '=', 'Documento.DOC_claveint') 
-	 //                      ->join('Pase', 'Pase.PAS_folio', '=', 'Documento.DOC_folio') 
-	 //                      ->join('Usuario', 'FlujoDoc.USU_ent', '=', 'Usuario.USU_claveint')  
-	 //                      ->join('Producto', 'Documento.PRO_claveint', '=', 'Producto.PRO_claveint')
-	 //                      ->join('Empresa', 'Documento.EMP_claveint', '=', 'Empresa.EMP_claveint')
-	 //                      ->join('Unidad', 'Documento.UNI_claveint', '=', 'Unidad.UNI_claveint') 
-	 //                      ->join('Etapa1', 'Etapa1.PAS_folio', '=', 'Pase.PAS_folio')
-	 //                      ->join('Reporte', 'Reporte.REP_claveint', '=', 'Etapa1.REP_claveint')
-	 //                      ->join('Lesion', 'Lesion.LES_clave', '=', 'Reporte.LES_primaria') 
-	 //                      ->join('TipoLesion', 'TipoLesion.TLE_claveint', '=', 'Lesion.TLE_claveint')
-	 //                      ->join('HistorialFlujo','HistorialFlujo.DOC_claveint', '=', 'Documento.DOC_claveint')  
-	 //                      ->whereNull('REL_clave')
-	 //                      ->where('his_area', '=', 6)
-	 //                      ->whereBetween('DOC_originalfecha', array($fechaini, $fechafin))
-	 //                      ->get();
-
-  //       return $norelacionados;
 
     $norelacionados = DB::table ('RelacionPago')                                              
                         ->join('FlujoDoc', 'RelacionPago.FLD_claveint', '=', 'FlujoDoc.FLD_claveint')
@@ -147,11 +123,6 @@ class RelacionController extends BaseController {
                         ->where('Documento.UNI_claveint', '=',$id)
                         ->whereNull('RelacionPago.REL_clave')
                         ->distinct()
-	               //      ->whereNotExists(function($query)
-				            // {
-				            //     $query->select(DB::raw('FEE_Folio'))
-				            //           ->from('FolioEtapaEntrega');
-				            // })
                         ->get();
 
 
@@ -221,7 +192,6 @@ class RelacionController extends BaseController {
 
  //        return $norelacionados;
 	// }
-
 	public function insertaRelacion($usuario){
 
 		$folios =  Input::all(); 
@@ -361,7 +331,6 @@ class RelacionController extends BaseController {
         $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
 
         $rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
-
 	    
 		$sql = "EXEC MV_REL_ActualizaPago
 
@@ -387,7 +356,8 @@ class RelacionController extends BaseController {
 		DB::statement($sql);
 		// 
 		
-	    }  
+	    }
+
 
 	    foreach ($folios['archivos'] as $archi){
 
