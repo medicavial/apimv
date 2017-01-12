@@ -10,7 +10,7 @@ class HomeController extends BaseController {
 	public function procesos(){
 
 
-		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='01/12/2016 00:00:00', @fechafin='21/12/2016 23:59:58.999' " );
+		$datos =  DB::select("EXEC MV_REW_Captura  @fechaini='01/11/2016 00:00:00', @fechafin='08/01/2017 23:59:58.999' " );
 
 		foreach ($datos as $dato) {
 
