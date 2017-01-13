@@ -1,7 +1,7 @@
 <?php
 
 
-class FacturacionExpressController extends BaseController {
+class FacturacionExpressBetaController extends BaseController {
 
 	public function pendientes(){
 

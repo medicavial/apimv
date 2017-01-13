@@ -261,17 +261,17 @@ Route::group(array('prefix' => 'api'), function()
 
 	Route::group(array('prefix' => 'facturacionExpressBeta'), function()
 	{
-    	Route::post('autorizados', array('uses' => 'FacturacionExpressController@autorizados'));
-    	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressController@actualizaFolio'));
-    	Route::post('captura', array('uses' => 'FacturacionExpressController@captura'));
-    	Route::post('capturaCuestionario', array('uses' => 'FacturacionExpressController@capturaCuestionario'));
-    	Route::post('capturaAjustador', array('uses' => 'FacturacionExpressController@capturaAjustador'));
-		Route::get('detalleFolio/{folio}', array('uses' => 'FacturacionExpressController@detalleFolio'));
-    	Route::post('pendientes', array('uses' => 'FacturacionExpressController@pendientes'));
-    	Route::post('rechazados', array('uses' => 'FacturacionExpressController@rechazados'));
-    	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
+    	Route::post('autorizados', array('uses' => 'FacturacionExpressBetaController@autorizados'));
+    	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressBetaController@actualizaFolio'));
+    	Route::post('captura', array('uses' => 'FacturacionExpressBetaController@captura'));
+    	Route::post('capturaCuestionario', array('uses' => 'FacturacionExpressBetaController@capturaCuestionario'));
+    	Route::post('capturaAjustador', array('uses' => 'FacturacionExpressBetaController@capturaAjustador'));
+		Route::get('detalleFolio/{folio}', array('uses' => 'FacturacionExpressBetaController@detalleFolio'));
+    	Route::post('pendientes', array('uses' => 'FacturacionExpressBetaController@pendientes'));
+    	Route::post('rechazados', array('uses' => 'FacturacionExpressBetaController@rechazados'));
+    	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressBetaController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
-    	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
+    	Route::post('solicitados', array('uses' => 'FacturacionExpressBetaController@solicitados'));
 	});
 
 
