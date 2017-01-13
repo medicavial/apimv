@@ -72,6 +72,8 @@ function revision(){
 
 	$datos = Input::all();
 
+	$folio = $datos['folio'];
+
     Mail::send('emails.auth.reminder', array($datos), function($message) use ($datos)
 	{
 	                
@@ -99,6 +101,10 @@ function revision(){
         $message->attach($archivo1);
 
 	});
+
+        $actualiza = Atenciones::where('Exp_folio', $folio)->update(array('ATN_estatusrevision' => 1));
+
+
 
 	$respuesta = array('respuesta' => 'Tu Factura fue enviada a Revisión');
 

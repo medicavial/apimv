@@ -201,6 +201,7 @@ class RelacionController extends BaseController {
 		$obs = $folios['observacion'];
 		$tipofactura = $folios['tipofactura'];
 		$unidad = $folios['unidad'];
+		$totales = $folios['total'];
 		$fecha = date('d/m/Y');
 		$fechaH = date('Y-m-d H:i:s');
 		$fechaH  = date( 'd-m-y H:i:s',strtotime($fecha));
@@ -235,7 +236,7 @@ class RelacionController extends BaseController {
 						@unidad = '$unidad',
 					    @subtotalp = '$importe',
 					    @impuestop = '0.00',
-					    @totalp = '$total',
+					    @totalp = '$totales',
 						@subtotal = '0.00',
 						@impuesto = '0.00',
 						@total = '0.00',
@@ -343,7 +344,7 @@ class RelacionController extends BaseController {
 					@fechaCaptura = '',
 					@tipoLesion = '1',
 					@diagnostico = '',
-					@pago = '0.00',
+					@pago = '$total',
 					@lesionado = '',
 					@statusFac = 0,             
 					@excepcion = 0,
@@ -354,11 +355,9 @@ class RelacionController extends BaseController {
 				    @usuario = $usuario,
 				    @expediente = 1";
 		DB::statement($sql);
-		// 
-		
+		// 		
 	    }
-
-
+	    
 	    foreach ($folios['archivos'] as $archi){
 
 	             $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
