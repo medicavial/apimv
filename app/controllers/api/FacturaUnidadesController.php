@@ -26,8 +26,8 @@ class FacturaUnidadesController extends BaseController {
 	                            'Exp_cancelado' => 0,
 	                            'ATN_estatus' => 5
 	                        ))
-	                        ->select('Expediente.Exp_folio')
-	                        ->whereBetween('ATN_fecreg', array($fechaini, $fechafin))
+	                        ->select('Expediente.Exp_folio as folio')
+	                        ->whereBetween('ATN_fecreg', array($fechaini,$fechafin))
 	                        // ->skip(10)
 	                        // ->take(5)
 	                        ->get()
@@ -41,13 +41,15 @@ class FacturaUnidadesController extends BaseController {
 		    					->where('DOC_situacionOriginal',1)
 		    					->select('UNI_nombrecorto as Unidad', 'DOC_folio as Folio', 'DOC_lesionado as Lesionado','PRO_nombre AS Producto',
 		    						    'EMP_NombreCorto as Cliente', 'DOC_fechacapturado as fechaReg', 'DOC_claveint as claveDoc')
+		    					// ->select('DOC_folio as folio')
 		    					->get()
 		    					->toArray();
 
 		    // return $validos;
-		function array_push_assoc(array &$arrayDatos, array $values){
-            $arrayDatos = array_merge($arrayDatos, $values);
-        }
+		// function array_push_assoc(array &$arrayDatos, array $values){
+  //           $arrayDatos = array_merge($arrayDatos, $values);
+  //       }
+  //       
 
         $respuesta = array();
 
@@ -86,10 +88,7 @@ public function buscaxUnidad($id){
 	                        // ->select('Expediente.Exp_folio as Folio','Exp_completo As Lesionado',
 	                        //       	 'Unidad.Uni_nombrecorto as Unidad','Triage_nombre as Triage','Cia_nombrecorto as Cliente',
 	                        //       	 'Pro_nombre as Producto', 'Exp_fecreg as fechaReg')
-	                        ->where(array(
-	                            'Exp_cancelado' => 0,
-	                            'ATN_estatus' => 5
-	                        ))
+	                        ->where(array('Exp_cancelado' => 0,'ATN_estatus' => 5))
 	                        ->select('Expediente.Exp_folio')
 	                        ->where('Uni_ClaveActual', '=' , $id)
 	                        ->distinct()
@@ -98,40 +97,45 @@ public function buscaxUnidad($id){
 	                        ->get()
 	                        ->toArray();
 
-		    // $val = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
-		    //                     ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
-		    //                     ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
-		    //                     ->whereIn('DOC_folio',$folios)
-		    // 					->where('DOC_etapa',1)
-		    // 					->where('DOC_situacionOriginal',1)
-		    // 					->select('DOC_folio')
-		    // 					->get()
-		    // 					->toArray();
-		    // print_r($folios)
-		    // $fol = RelacionPago::whereIn('PAS_folio',$folios)->whereNull('REL_clave')->select('PAS_folio as folio')->get()->toArray();  
- 					// print_r($fol);
-		    $validos = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
-		                        ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
-		                        ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
-		                        ->whereIn('DOC_folio',$folios)
-		    					->where('DOC_etapa',1)
-		    					->where('DOC_situacionOriginal',1)
-		    					->select('UNI_nombrecorto as Unidad', 'DOC_folio as Folio', 'DOC_lesionado as Lesionado','PRO_nombre AS Producto',
+	                        // print_r($folios);
+
+	    $validos = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
+	                        ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
+	                        ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
+	                        ->whereIn('DOC_folio',$folios)
+	    					->where('DOC_etapa',1)
+	    					->where('DOC_situacionOriginal',1)
+	    					->select('UNI_nombrecorto as Unidad', 'DOC_folio as Folio', 'DOC_lesionado as Lesionado','PRO_nombre AS Producto',
 		    						    'EMP_NombreCorto as Cliente', 'DOC_fechacapturado as fechaReg', 'DOC_claveint as claveDoc')
-		    					->get()
-		    					->toArray();
+	    					->get()
+	    					->toArray();
+	    // print_r($folios)
+	    // $fol = RelacionPago::whereIn('PAS_folio',$folios)->whereNull('REL_clave')->select('PAS_folio as folio')->get()->toArray();  
+					// print_r($fol);
 
 		$respuesta = array();
 
 	    foreach ($validos as $valido){
 
-	    	$clave = $valido['claveDoc'];
+	        $clave = $valido['claveDoc'];
+	        $folio = $valido['Folio'];
+
 	    	$claveflujo = Flujo::where(array('DOC_claveint' => $clave,'FLD_formaRecep' => 'FE'))->first();
+            $revisado = Atenciones::where(array('Exp_folio' => $folio))->first();
+            
 
 		    if($claveflujo['FLD_formaRecep'] == 'FE'){
 
 		    	$tiporecep = "Facturacion Express";
+		    	$rev = "En Revision";
 		        $valido['tiporecepcion'] = $tiporecep;
+		        $valido['revisado'] = "";
+		        $valido['bitrevisado'] = 0;
+		        if ($revisado['ATN_estatusrevision'] == 1){
+		        	$valido['revisado'] = $rev;
+		        	$valido['bitrevisado'] = 1;
+                }
+
 		        $clave_flujo = $claveflujo['FLD_claveint'];
 	    	    $existe_relacion = RelacionPago::where('FLD_claveint',$clave_flujo)->count();
 	    	    // print_r($relacion);
