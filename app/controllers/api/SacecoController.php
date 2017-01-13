@@ -331,6 +331,7 @@ class SacecoController extends BaseController {
 		$atencion=0;
 		$miFolio = array();
 		$mensaje='';
+		$valImgs ='';
 		
 		$contTipoDoc=0;
 		try{
