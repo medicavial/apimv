@@ -94,15 +94,16 @@ class SacecoController extends BaseController {
 		$resultado = array();
 
 		$sql = "SELECT  Expediente.Exp_folio as folio,Exp_completo as lesionado,Exp_cveAjustador as cveAjustador ,Unidad.Uni_clave as UniClave, UNI_nombreMV as unidad, 
+					Pro_clave as producto,
                     Expediente.Exp_poliza as poliza, Expediente.Exp_siniestro as siniestro ,Expediente.Exp_reporte as reporte,
                     Exp_fecreg as fechaatencion , Expediente.EXP_edad as edad, Expediente.EXP_sexo as sexo,EXP_fechaCaptura as fechacaptura,
                     ExpedienteInfo.EXP_fechaExpedicion as fechaexpedicion, Expediente.EXP_orden as orden,  RIE_nombre as riesgo, 
                     POS_nombre  as posicion, Expediente.Exp_ajustador as ajustador, EXP_obsAjustador as observaciones, TLE_nombre as lesion, 
                     EXP_diagnostico as descripcion, FAC_folioFiscal as sat, CONCAT(FAC_serie,FAC_folio) as foliointerno,
                     FAC_fecha as fechafactura, FAC_importe as importe, FAC_iva as iva, FAC_total as total, Cia_rfc as rfc,
-                    Cia_nombrecorto as empresa, Compania.Cia_clave  as claveEmpresa,Exp_telefono as telefono,Exp_mail as mail,
+                    Cia_nombrecorto as empresa, Compania.Cia_clave  as claveEmpresa,Exp_telefono as telefono,Exp_mail as mail,                    
                     EXP_costoEmpresa as costo,
-                    Pro_clave as producto,
+                    
                     Exp_triageActual as triage             
             FROM Expediente
                 inner join Unidad on Unidad.Uni_clave = Expediente.Uni_clave 
@@ -119,13 +120,15 @@ class SacecoController extends BaseController {
 
         $resultado['expediente'] = DB::connection('mysql')->select($sql)[0];
 
+        //return $resultado;
+
         $productoCve = $resultado['expediente'];                
         foreach ($productoCve as $key => $value) {
         	if($key='producto'){
         		$prodCve=$value;
+
         	}
-        }
-		
+        }		
         $sql="SELECT Distinct atn.TID_clave, Atenciones.ATN_clave, Exp_folio, atn.TIA_clave, ATN_cons, ATN_estatus, ATN_fecreg, Producto.Pro_clave,  TID_nombre,Arc_cons, Arc_clave, Arc_archivo, Arc_tipo, ATD_requerido, ATD_estatus, ATD_motivo, Arc_estatus, Arc_motivo, Arc_motivoCat, Arc_autorizado from Atenciones
 				inner join AtencionDocumento atn on Atenciones.TIA_clave = atn.TIA_clave
 				inner join TipoDocumento on TipoDocumento.TID_claveint = atn.TID_clave
@@ -447,9 +450,9 @@ class SacecoController extends BaseController {
 			$archivos = DB::connection('mysql')->update($sqlDoctosAtn);
 
 			if($atencionEstatus==3){							 	
-	    		$fecha = date('Y-m-d H:i');
+	    		/*$fecha = date('Y-m-d H:i');
 				$qry = "UPDATE Expediente SET  Exp_rechazado = 1, USU_rechazo = '".$usr."', Exp_fechaRechazo ='".$fecha."'  where Exp_folio = '".$datosExp['folio']."'";
-				$archivos = DB::connection('mysql')->update($qry);
+				$archivos = DB::connection('mysql')->update($qry);*/
 				$valImgs ='no';
 			}elseif ($atencionEstatus==2) {	
 				$tickets= Tickets::where('Exp_folio',$datosExp['folio'])->get();

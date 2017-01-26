@@ -247,6 +247,7 @@ Route::group(array('prefix' => 'api'), function()
 
     	Route::post('autorizados', array('uses' => 'FacturacionExpressController@autorizados'));
     	Route::put('actualizaFolio', array('uses' => 'FacturacionExpressController@actualizaFolio'));
+    	Route::get('consultaCedula/{cedula}/{nombre}', array('uses' => 'FacturacionExpressController@consultaCedula'));
     	Route::post('captura', array('uses' => 'FacturacionExpressController@captura'));
     	Route::post('capturaCuestionario', array('uses' => 'FacturacionExpressController@capturaCuestionario'));
     	Route::post('capturaAjustador', array('uses' => 'FacturacionExpressController@capturaAjustador'));
