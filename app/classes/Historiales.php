@@ -200,6 +200,48 @@ class Historial {
 
     }
 
+    public static function altaOrden($clave)
+    {
+
+		$flujo = Flujo::find($clave);
+
+		$documento = $flujo->DOC_claveint;
+
+		$doc = Documento::find($documento);
+
+		$folio = $doc->DOC_folio;
+		$etapa = $doc->DOC_etapa;
+		$entrega = $doc->DOC_numeroEntrega;
+
+		$usuarioentrega = User::find($flujo->USU_ent)->USU_nombre;
+		$areaentrega = Areas::find($flujo->FLD_AROEnt)->ARO_nombre;
+		// $arearecibe = Areas::find($flujo->ARO_porRecibir)->ARO_nombre;
+		// $usuariorecibe = User::find($flujo->USU_recibe)->USU_nombre;
+
+		// $nombre = User::find($flujo->USU_recibe)->USU_nombre;
+		
+		$titulo = "El Usuario " . $usuarioentrega . " generó una entrega";
+		$descripcion = "Se entregó una Orde de Pago del area" . $areaentrega . " al area de Pagos x motivo de FE";
+
+		$historial = new Historico;
+		$historial->HIS_folio = $folio;
+		$historial->HIS_fecha =  date('d/m/Y H:i:s'); 
+		$historial->HIS_hora =  date('d/m/Y H:i:s'); 
+		$historial->HIS_titulo =  $titulo; //indica que se ingreso un nuevo expediente en recepcion de documentos
+		$historial->HIS_descripcion =  $descripcion; 
+		$historial->HIS_area =  6;
+		$historial->HIS_usuario =  78;
+		$historial->HIS_accion = 'Recepcion';
+		$historial->HIS_etapa =  $etapa;
+		$historial->HIS_entrega =  $entrega;
+		$historial->DOC_claveint =  $documento;  
+		$historial->FLD_claveint =  $clave;
+		$historial->save();
+		
+		return  true;
+
+    }
+
 
     public static function altaNPC($clave)
     {

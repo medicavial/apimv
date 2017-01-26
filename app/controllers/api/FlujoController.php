@@ -43,7 +43,6 @@ class FlujoController extends BaseController {
 		return Response::json(array('respuesta' => 'Documento(s) enviado Correctamente'));
 
 	}
-
 	//alta manual de juego de faturacion
 	public function altaManualJF(){
 
@@ -436,7 +435,7 @@ class FlujoController extends BaseController {
 		$condicionXRecibir = ['USU_recibe' => $usuario, 'FLD_rechazado' => 0, 'FLD_porRecibir' => 1];
 		
 		$respuesta['rechazos'] = Flujo::where($condicionRechazo)->count();
-		$respuesta['xrecibir'] = Flujo::where($condicionXRecibir)->count();
+		$respuesta['xrecibir'] = Flujo::where($condicionXRecibir)->where('FLD_formaRecep', '<>', 'FE')->where('ARO_porRecibir', '<>', 6)->count();
 
 		return $respuesta;
 

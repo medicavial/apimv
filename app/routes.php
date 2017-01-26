@@ -319,6 +319,12 @@ Route::group(array('prefix' => 'api'), function()
         Route::post('listadoFactura', array('uses' => 'FacturaUnidadesController@listadoFactura'));
         Route::post('buscaxUnidad/{id}', array('uses' => 'FacturaUnidadesController@buscaxUnidad'));
         Route::post('unidades', array('uses' => 'FacturaUnidadesController@unidades'));
+        Route::post('ordenPago', array('uses' => 'FacturaUnidadesController@ordenPago'));
+        Route::post('borratemporales', array('uses' => 'FacturaUnidadesController@borratemporales'));
+        Route::post('listadofacturas', array('uses' => 'FacturaUnidadesController@listadofacturas'));
+        Route::post('listadofacturasxfecha', array('uses' => 'FacturaUnidadesController@listadofacturasxfecha'));
+
+
 
     });
 
@@ -340,6 +346,14 @@ Route::group(array('prefix' => 'api'), function()
     Route::group(array('prefix' => 'RelacionNP'), function()
 	{
         Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
+
+    });
+
+    Route::group(array('prefix' => 'OrdenesPago'), function()
+	{
+        Route::post('listadoOrdenPago', array('uses' => 'OrdenesPagoController@listadoOrdenPago'));
+        Route::post('aceptaOrden', array('uses' => 'OrdenesPagoController@aceptaOrden'));
+
 
     });
 

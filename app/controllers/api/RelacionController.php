@@ -63,11 +63,11 @@ class RelacionController extends BaseController {
 
 	}
 
+    public function listadoOrdenes($id){
 
-	public function buscaxProveedor($id){
 
-
-    $norelacionados = DB::table ('RelacionPago')                                              
+    $norelacionados = DB::table ('RelacionPago')       
+                        ->join('ordenPago', 'RelacionPago.FLD_claveint', '=', 'ordenPago.FLD_claveint')                                       
                         ->join('FlujoDoc', 'RelacionPago.FLD_claveint', '=', 'FlujoDoc.FLD_claveint')
                         ->join('Documento', 'FlujoDoc.DOC_claveint', '=', 'Documento.DOC_claveint')
                         ->join('Empresa', 'Empresa.EMP_claveint', '=', 'Documento.EMP_claveint')
@@ -92,7 +92,7 @@ class RelacionController extends BaseController {
 											UNI_nombrecorto as Unidad,
 											Documento.UNI_claveint as claveunidad, 
 											UNI_ref as referencia,
-											DOC_folio as Folio, 
+											RelacionPago.DOC_folio as Folio, 
 											DOC_lesionado as Lesionado, 
 											DOC_etapa as Etapa, 
 											DOC_numeroentrega as Entrega, 
@@ -129,69 +129,80 @@ class RelacionController extends BaseController {
     return $norelacionados;
 	}
 
-	// public function relacionFechaRec(){
 
-	//     DB::disableQueryLog();
-	// 	$fechaini =  Input::get('fechainiRec'); 
-	//     $fechafin =  Input::get('fechafinRec'). ' 23:59:58.999'; 		
 
- //    $norelacionados = DB::table ('RelacionPago')                                              
- //                        ->join('FlujoDoc', 'RelacionPago.FLD_claveint', '=', 'FlujoDoc.FLD_claveint')
- //                        ->join('Documento', 'FlujoDoc.DOC_claveint', '=', 'Documento.DOC_claveint')
- //                        ->join('Empresa', 'Empresa.EMP_claveint', '=', 'Documento.EMP_claveint')
- //                        ->join('Unidad', 'Unidad.UNI_claveint', '=', 'Documento.UNI_claveint')
- //                        ->join('Usuario', 'Usuario.USU_claveint', '=', 'FlujoDoc.USU_activo')
- //                        ->join('AreaOperativa', 'AreaOperativa.ARO_claveint',  '=', 'FlujoDoc.ARO_activa')
- //                        ->join('Pase',  'Pase.PAS_folio', '=', 'Documento.DOC_folio')
- //                        ->join('DatosSiniestro', 'DatosSiniestro.DAS_claveint', '=', 'Pase.DAS_claveint')
- //                        ->join('Producto', 'Producto.PRO_claveint', '=', 'DatosSiniestro.PRO_claveint')
- //                        ->join('Etapa1',  'Etapa1.PAS_folio', '=', 'Pase.PAS_folio')
- //                        ->join('Expediente',  'Expediente.ET1_claveint', '=', 'Etapa1.ET1_claveint')
- //                        ->join('Reporte', 'Reporte.REP_claveint', '=', 'Etapa1.REP_claveint')
- //                        ->join('Lesion', 'Lesion.LES_clave', '=', 'Reporte.LES_primaria')
- //                        ->join('TipoLesion', 'TipoLesion.TLE_claveint', '=', 'Lesion.TLE_claveint')
- //                        ->join('HistorialFlujo',  'HistorialFlujo.DOC_claveint', '=', 'Documento.DOC_claveint')
- //                        ->leftjoin('Relacion', 'Relacion.REL_clave', '=', 'RelacionPago.REL_clave')
- //                        ->leftjoin('Triage',  'Triage.TRI_claveint', '=', 'Pase.TRI_claveint')
- //                        ->select(DB::raw('USU_nombre as USUNombre, 
-	// 										PRO_abreviatura as Producto,
-	// 										TRI_nombre as Triage,
-	// 										EMP_nombrecorto as Cliente, 
-	// 										UNI_nombrecorto as Unidad, 
-	// 										Documento.UNI_claveint as claveunidad, 
-	// 										DOC_folio as Folio, 
-	// 										DOC_lesionado as Lesionado, 
-	// 										DOC_etapa as Etapa, 
-	// 										DOC_numeroentrega as Entrega, 
-	// 										REP_fechaconsulta as FAtencion,
-	// 										FLD_formaRecep as FormaRecep,
-	// 										DOC_originalfechacaptura as fechaRecepcion,             
-	// 										his_fecha as FechaRecepPag,
-	// 										TLE_nombre as Tipo,
-	// 										LES_nombre as Lesion,
-	// 										Relacion.REL_clave as Relacion,
-	// 										REL_fecha as FRelacion,
-	// 										REL_fPagada as FRelPago,
-	// 										REL_fPagadaReg as FRelPagoReg,
-	// 										CASE WHEN PAS_fechaPago IS NULL THEN 0 ELSE 1 END as PasC,  
-	// 										PAS_fechaPago  as FPasCobrado,
-	// 										CONVERT(varchar,RPA_pago,1) as Pago,
-	// 										CASE DOC_etapa WHEN 1 THEN CONVERT(varchar, EXP_pagoET1,1) WHEN 2 THEN CONVERT(varchar, EXP_pagoET2, 1) ELSE CONVERT(varchar, EXP_pagoET3, 1) END as Tabulador,
-	// 										EXP_reserva_inicial_Tot as Reserva,
-	// 										RPA_factura as FacturaRelacion,                                              
-	// 										DOC_factura as FacDoc,
-	// 										CASE WHEN REL_fPagada IS NULL THEN 0 ELSE 1 END as RelP, 
-	// 										REL_pagada as Pagado,
-	// 										PAS_pagado as Cobrado,
-	// 										PAS_penalizado as penalizado'))
- //                        ->where('his_accion', '=', 'Recepcion')
- //                        ->where('his_area', '=', 6)
- //                        ->whereBetween('his_fecha', array($fechaini, $fechafin))
- //                        ->whereNull('RelacionPago.REL_clave')
- //                        ->get();
+	public function buscaxProveedor($id){
 
- //        return $norelacionados;
-	// }
+
+    $norelacionados = DB::table ('RelacionPago')       
+                        ->join('ordenPago', 'RelacionPago.FLD_claveint', '=', 'ordenPago.FLD_claveint')                                       
+                        ->join('FlujoDoc', 'RelacionPago.FLD_claveint', '=', 'FlujoDoc.FLD_claveint')
+                        ->join('Documento', 'FlujoDoc.DOC_claveint', '=', 'Documento.DOC_claveint')
+                        ->join('Empresa', 'Empresa.EMP_claveint', '=', 'Documento.EMP_claveint')
+                        ->join('Unidad', 'Unidad.UNI_claveint', '=', 'Documento.UNI_claveint')
+                        ->join('Usuario', 'Usuario.USU_claveint', '=', 'FlujoDoc.USU_activo')
+                        ->join('AreaOperativa', 'AreaOperativa.ARO_claveint',  '=', 'FlujoDoc.ARO_activa')
+                        ->join('Pase',  'Pase.PAS_folio', '=', 'Documento.DOC_folio')
+                        ->join('DatosSiniestro', 'DatosSiniestro.DAS_claveint', '=', 'Pase.DAS_claveint')
+                        ->join('Producto', 'Producto.PRO_claveint', '=', 'DatosSiniestro.PRO_claveint')
+                        ->join('Etapa1',  'Etapa1.PAS_folio', '=', 'Pase.PAS_folio')
+                        ->join('Expediente',  'Expediente.ET1_claveint', '=', 'Etapa1.ET1_claveint')
+                        ->join('Reporte', 'Reporte.REP_claveint', '=', 'Etapa1.REP_claveint')
+                        ->join('Lesion', 'Lesion.LES_clave', '=', 'Reporte.LES_primaria')
+                        ->join('TipoLesion', 'TipoLesion.TLE_claveint', '=', 'Lesion.TLE_claveint')
+                        ->join('HistorialFlujo',  'HistorialFlujo.DOC_claveint', '=', 'Documento.DOC_claveint')
+                        ->leftjoin('Relacion', 'Relacion.REL_clave', '=', 'RelacionPago.REL_clave')
+                        ->leftjoin('Triage',  'Triage.TRI_claveint', '=', 'Pase.TRI_claveint')
+                        ->leftjoin('TipoOrdenPago', 'ordenPago.TIO_id', '=', 'TipoOrdenPago.TIO_id')
+                        ->select(DB::raw('USU_nombre as USUNombre, 
+											PRO_abreviatura as Producto,
+											TRI_nombre as Triage,
+											EMP_nombrecorto as Cliente, 
+											UNI_nombrecorto as Unidad,
+											Documento.UNI_claveint as claveunidad, 
+											UNI_ref as referencia,
+											Documento.DOC_folio as Folio, 
+											DOC_lesionado as Lesionado, 
+											DOC_etapa as Etapa, 
+											DOC_numeroentrega as Entrega, 
+											REP_fechaconsulta as FAtencion,
+											FLD_formaRecep as FormaRecep,
+											DOC_originalfechacaptura as fechaRecepcion,             
+											his_fecha as FechaRecepPag,
+											TLE_nombre as Tipo,
+											LES_nombre as Lesi,
+											Relacion.REL_clave as Relacion,
+											REL_fecha as FRelacion,
+											REL_fPagada as FRelPago,
+											REL_fPagadaReg as FRelPagoReg,
+											CASE WHEN PAS_fechaPago IS NULL THEN 0 ELSE 1 END as PasC,  
+											PAS_fechaPago  as FPasCobrado,
+											CONVERT(varchar,RPA_pago,1) as Pago,
+											CASE DOC_etapa WHEN 1 THEN CONVERT(varchar, EXP_pagoET1,1) WHEN 2 THEN CONVERT(varchar, EXP_pagoET2, 1) ELSE CONVERT(varchar, EXP_pagoET3, 1) END as Tabulador,
+											EXP_reserva_inicial_Tot as Reserva,
+											RPA_factura as FacturaRelacion,                                              
+											DOC_factura as FacDoc,
+											CASE WHEN REL_fPagada IS NULL THEN 0 ELSE 1 END as RelP, 
+											REL_pagada as Pagado,
+											PAS_pagado as Cobrado,
+											PAS_penalizado as penalizado,
+											Unidad.UNI_claveint as claveunidad,
+											UNI_rfc as rfc,
+											TIO_nombreorden as nombreOrden,
+											ORP_foliofiscal as foliofiscal,
+											ORP_nombreEmisor as nombreEmisor,
+											ORP_rfcemisor as rfcemisor,
+											ORP_total as total'))
+                        ->where('his_area', '=', 6)
+                        ->where('Documento.UNI_claveint', '=',$id)
+                        ->whereNull('RelacionPago.REL_clave')
+                        ->distinct()
+                        ->get();
+
+
+    return $norelacionados;
+	}
+
 	public function insertaRelacion($usuario){
 
 		$folios =  Input::all(); 
@@ -208,13 +219,18 @@ class RelacionController extends BaseController {
 
 		foreach ($folios['seleccionados'] as $foliodato){
     
-            $importe = $foliodato['importe'];
+            // $importe = $foliodato['importe'];
             if (!isset($foliodato['total'])){
 		    	$total = 0;
 		    }else{
 		    	$total = $foliodato['total'];
 		    }
 
+		    if (!isset($foliodato['importe'])){
+		    	$importe = 0;
+		    }else{
+		    	$importe = $foliodato['importe'];
+		    }
         }
                                                                                                                                                                                                                              
 	    $relacion = DB::table('RelacionFiscal')->insert(
@@ -302,10 +318,17 @@ class RelacionController extends BaseController {
 		    	$total = $foliodato['total'];
 		    }
 
-		    if (!isset($foliodato['emisor'])){
-		    	$emisor = $foliodato['emisor'];
+		    if (!isset($foliodato['nombreEmisor'])){
+		    	$emisor = $foliodato['nombreEmisor'];
 		    }else{
-		    	$emisor = $foliodato['emisor'];
+		    	$emisor = $foliodato['nombreEmisor'];
+		    }
+
+
+		    if (!isset($foliodato['rfcemisor'])){
+		    	$rfcemisor = $foliodato['rfcemisor'];
+		    }else{
+		    	$rfcemisor = $foliodato['rfcemisor'];
 		    }
 
 		    $folio = $foliodato['Folio'];
@@ -319,17 +342,16 @@ class RelacionController extends BaseController {
 		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
 		);
 
-	    $tramite = DB::table('OrdenPago')->insert(
-		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
-		);
-
-		$cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
-                                                'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
-                                                'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
+		// $cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
+  //                                               'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
+  //                                               'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
         $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => $etapa, 'DOC_numeroEntrega' => $entrega))->first();
         $DOC_clave = $Documento->DOC_claveint;	
 
         $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
+
+        $tramite = DB::table('ordenPago')->where('FLD_claveint', $claveflujo)
+		    ->update(array('ORP_foliofiscal' => $foliofiscal, 'ORP_nombreEmisor' => $emisor ,'ORP_rfcemisor' => $rfcemisor, 'ORP_total' => $total));
 
         $rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
 	    
@@ -355,8 +377,14 @@ class RelacionController extends BaseController {
 				    @usuario = $usuario,
 				    @expediente = 1";
 		DB::statement($sql);
+
 		// 		
 	    }
+
+	    $pago = DB::table('Pago')->insert(
+		    array('DOC_claveint' => $DOC_clave,'PAS_folio' => $folio,'PAG_etapa' => $etapa,'PAG_entrega' => $entrega,'PAG_total' => $total,'PAG_fecha' => '','PAG_transferencia' => '',
+	                'PAG_factura' => '' ,'PAG_relacion' => $numrelacion,'UNI_claveint' => $unidad,'PAG_FRegistro' => $fechaH,'PAG_FPagoReg' => '','PAG_descuento' => 0,'TID_claveint' => '',
+	                'PAG_observaciones' => '','USU_registro' => $usuario,'USU_paga' => ''));
 	    
 	    foreach ($folios['archivos'] as $archi){
 
@@ -385,10 +413,28 @@ class RelacionController extends BaseController {
 		    }else{
 		    	$total = $foliodato['total'];
 		    }
+
+		    if (!isset($foliodato['rfcemisor'])){
+		    	$rfcemisor = null;
+		    }else{
+		    	$rfcemisor = $foliodato['rfcemisor'];
+		    }
+
+		    if (!isset($foliodato['foliofiscal'])){
+		    	$foliofiscal = null;
+		    }else{
+		    	$foliofiscal = $foliodato['foliofiscal'];
+		    }
+
+		    if (!isset($foliodato['nombreEmisor'])){
+		    	$emisor = $foliodato['nombreEmisor'];
+		    }else{
+		    	$emisor = $foliodato['nombreEmisor'];
+		    }
         }
 		$foliofiscal = Input::get('factura')['foliofiscal'];
 	    $fechaemision = Input::get('factura')['fechaemision'];
-		$emisor = Input::get('factura')['emisor'];
+		// $emisor = Input::get('factura')['rfcemisor'];
 		$importe = Input::get('factura')['importe'];
 		$total = Input::get('factura')['total'];
 	    if (!isset(Input::get('factura')['descuento'])){
@@ -401,9 +447,9 @@ class RelacionController extends BaseController {
      //                                            'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
      //                                            'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
 
-	    $cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
-                                                'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
-                                                'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
+	    // $cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
+     //                                            'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
+     //                                            'CFD_fechasistema' => $fechaH, 'CFD_valido' => NULL));
 
 	    $sql = "EXEC MV_REL_InsertaRelacion 
 
@@ -441,16 +487,19 @@ class RelacionController extends BaseController {
 		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
 		);
 
-	    $tramite = DB::table('OrdenPago')->insert(
-		    array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs)
-		);
-	    }
+	 //    $tramite = DB::table('OrdenPago')->insert(
+		//     array('TCO_concepto' => $concepto, 'TRA_tipo' => $tipo ,'TRA_fecha' => $fecha, 'TRA_llave' => $llave, 'TRA_foliofiscal' => $foliofiscal, 'TRA_obs' => $obs, 'TRA_total' => $total)
+		// );
+		}
 
 	    $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => $etapa, 'DOC_numeroEntrega' => $entrega))->first();
         $DOC_clave = $Documento->DOC_claveint;	
 
         $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
 	    
+		$tramite = DB::table('ordenPago')->where('FLD_claveint', $claveflujo)
+		    ->update(array('ORP_foliofiscal' => $foliofiscal, 'ORP_nombreEmisor' => $emisor ,'ORP_rfcemisor' => $rfcemisor, 'ORP_total' => $total));
+
 		$rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
 
 		$sql ="EXEC MV_REL_ActualizaPago
@@ -489,11 +538,21 @@ class RelacionController extends BaseController {
 		$relacionfechas = DB::table('RelacionFechas')->insert(
 		    array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
 		);
+        if (empty($folios['archivos'])) {
 
-	    $archi = $folios['archivos'];
+        	# code...
+        }else{
 
-	    $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
+        	$archi = $folios['archivos'];
+	        $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
 
+        }
+
+	    $tramite = DB::table('Pago')->insert(
+		    array('DOC_claveint' => $DOC_clave,'PAS_folio' => $folio,'PAG_etapa' => $etapa,'PAG_entrega' => $entrega,'PAG_total' => $total,'PAG_fecha' => '','PAG_transferencia' => '',
+	                'PAG_factura' => '' ,'PAG_relacion' => $numrelacion,'UNI_claveint' => $unidad,'PAG_FRegistro' => $fechaH,'PAG_FPagoReg' => '','PAG_descuento' => 0,'TID_claveint' => '',
+	                'PAG_observaciones' => '','USU_registro' => $usuario,'USU_paga' => '')
+		);
 
     	return Response::json(array('respuesta' => 'Folios Relacionados Correctamente'));
 

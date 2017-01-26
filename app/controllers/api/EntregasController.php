@@ -21,7 +21,16 @@ class EntregasController extends BaseController {
 	    	$etapa = $foliodato['FLD_etapa'];
 	    	$entrega = $foliodato['FLD_numeroEntrega'];
 
-			Historial::aceptaEntrega($clave);
+	    	if ($arearecibe == 6) {
+	    		
+	    		Historial::altaOrden($clave);
+
+	    	}else{
+
+	    		Historial::aceptaEntrega($clave);
+
+	    	}
+
 			
 			$flujo = Flujo::find($clave);
 
@@ -37,7 +46,7 @@ class EntregasController extends BaseController {
 
 			$flujo->save();
 
-			if ($arearecibe == 6) {
+			if ($arearecibe == 6){
 
 				$flujopagos = new Flujopagos;
 				$flujopagos->FLD_claveint = $clave;
@@ -47,12 +56,36 @@ class EntregasController extends BaseController {
 	
 				$flujopagos->save();
 
-			}
+			    $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => $etapa, 'DOC_numeroEntrega' => $entrega))
+	                                    ->first();
+	            $DOC_clave = $Documento->DOC_claveint;	
 
+	            $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;    	
+
+            //// mando una orden de pago
+				// $atencion = Atenciones::find($folio);
+				$ordenpago = new OrdenPago;
+
+				$ordenpago->TIO_id = 2;
+				$ordenpago->DOC_folio = $folio;
+			    $ordenpago->FLD_claveint = $claveflujo;
+			    $ordenpago->DOC_claveint = $DOC_clave;
+				$ordenpago->ORP_foliofiscal =  NULL;
+				$ordenpago->ORP_nombreEmisor = NULL;
+				$ordenpago->ORP_rfcemisor = NULL;
+				$ordenpago->ORP_importe = NULL;
+				$ordenpago->ORP_iva = NULL;
+				$ordenpago->ORP_total= NULL;
+				$ordenpago->ORP_fechaemision = date('d/m/Y H:i:s'); 
+				$ordenpago->ORP_usuregistro = $usuariorecibe;
+
+				$ordenpago->save();
+           
+			}
 
 		}
 
-		return Response::json(array('respuesta' => 'Aceptación con exito'));
+		return Response::json(array('respuesta' => 'Aceptación con exito: Se Genero una Orden de Pago'));
 
 	}
 
