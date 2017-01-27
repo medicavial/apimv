@@ -689,7 +689,7 @@ class FacturacionExpressController extends BaseController {
 	    }
 	    $nombreCedula 		= str_replace(' ', '', $cedulaQualitas[0]->CQ_paciente);
 	    $nombreExpediente	= str_replace(' ', '', $nombre);
-	    $nombreExpediente = sanear_string($nombreExpediente);
+	    $nombreExpediente = $this->sanear_string($nombreExpediente);
 	    $contCedulas =  count($cedulaQualitas);	    
 	    if($contCedulas>1){
 	    	return 1;
