@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 	</head>
 	<body>
-		<h2>Valida XML</h2>
+		<h2>Se manda a Validar XML</h2>
 
 		<div>
 			

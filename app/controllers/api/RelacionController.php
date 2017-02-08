@@ -192,7 +192,8 @@ class RelacionController extends BaseController {
 											ORP_foliofiscal as foliofiscal,
 											ORP_nombreEmisor as nombreEmisor,
 											ORP_rfcemisor as rfcemisor,
-											ORP_total as total'))
+											ORP_total as total,
+											ORP_factura as foliointerno'))
                         ->where('his_area', '=', 6)
                         ->where('Documento.UNI_claveint', '=',$id)
                         ->whereNull('RelacionPago.REL_clave')
@@ -210,7 +211,7 @@ class RelacionController extends BaseController {
 		$numrelacion = $folios['numrelacion'];
 		$usucarpeta = $folios['usucarpeta'];
 		$obs = $folios['observacion'];
-		$tipofactura = $folios['tipofactura'];
+		// $tipofactura = $folios['tipofactura'];
 		$unidad = $folios['unidad'];
 		$totales = $folios['total'];
 		$fecha = date('d/m/Y');
@@ -233,17 +234,17 @@ class RelacionController extends BaseController {
 		    }
         }
                                                                                                                                                                                                                              
-	    $relacion = DB::table('RelacionFiscal')->insert(
-		    array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
-		);
+	 //    $relacion = DB::table('RelacionFiscal')->insert(
+		//     array('REL_clave' => $numrelacion, 'REL_global' => $tipofactura, 'REL_completa' => 0, 'REL_aplicada' =>0 , 'REL_editada' => 0)
+		// );
 
-	    $relacionusuario = DB::table('RelacionUsuarios')->insert(
-		    array('REL_clave' => $numrelacion, 'USU_creo' => $usuario, 'USU_cancelo' => null, 'USU_aplico' => null)
-		);
+	 //    $relacionusuario = DB::table('RelacionUsuarios')->insert(
+		//     array('REL_clave' => $numrelacion, 'USU_creo' => $usuario, 'USU_cancelo' => null, 'USU_aplico' => null)
+		// );
 
-		$relacionfechas = DB::table('RelacionFechas')->insert(
-		    array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
-		);
+		// $relacionfechas = DB::table('RelacionFechas')->insert(
+		//     array('REL_clave' => $numrelacion, 'RELF_fcreada' => $fecha, 'RELF_fcompleta' => null, 'RELF_fcancelada' => null, 'RELF_faplicada' => null)
+		// );
 
 		$sql = "EXEC MV_REL_InsertaRelacion 
 
@@ -253,9 +254,9 @@ class RelacionController extends BaseController {
 					    @subtotalp = '$importe',
 					    @impuestop = '0.00',
 					    @totalp = '$totales',
-						@subtotal = '0.00',
+						@subtotal = '$importe',
 						@impuesto = '0.00',
-						@total = '0.00',
+						@total = '$totales',
 						@observaciones = '',
 					    @conFactura = 0,  
 						@usuario = '$usuario',
@@ -338,9 +339,9 @@ class RelacionController extends BaseController {
 		    $llave = $folio.$etapa.$entrega;
 
 
-		$folioetapaent = DB::table('FolioEtapaEntrega')->insert(
-		    array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
-		);
+		// $folioetapaent = DB::table('FolioEtapaEntrega')->insert(
+		//     array('FEE_clave' => $llave, 'FEE_Folio' => $folio, 'FEE_Etapa' => $etapa, 'FEE_entrega' => $entrega)
+		// );
 
 		// $cfdi = DB::table('CFDI')->insert(array('CFD_foliofiscal' => $foliofiscal, 'REL_clave' => $numrelacion, 'CFD_fechaemision' => $fechaemision,
   //                                               'CFD_emisor' => $emisor, 'CFD_importe' => $importe, 'CFD_total' => $total, 'CFD_descuento' => $descuento,
@@ -350,8 +351,8 @@ class RelacionController extends BaseController {
 
         $claveflujo = Flujo::where(array('DOC_claveint' => $DOC_clave))->first()->FLD_claveint;  
 
-        $tramite = DB::table('ordenPago')->where('FLD_claveint', $claveflujo)
-		    ->update(array('ORP_foliofiscal' => $foliofiscal, 'ORP_nombreEmisor' => $emisor ,'ORP_rfcemisor' => $rfcemisor, 'ORP_total' => $total));
+        $tramite = DB::table('ordenPago')->where(array('DOC_claveint' => $DOC_clave,'FLD_claveint' => $claveflujo))
+		                                 ->update(array('REL_clave' => $numrelacion));
 
         $rpaClave = RelacionPago::where(array('FLD_claveint' => $claveflujo))->first()->RPA_claveint;  
 	    
@@ -382,15 +383,15 @@ class RelacionController extends BaseController {
 	    }
 
 	    $pago = DB::table('Pago')->insert(
-		    array('DOC_claveint' => $DOC_clave,'PAS_folio' => $folio,'PAG_etapa' => $etapa,'PAG_entrega' => $entrega,'PAG_total' => $total,'PAG_fecha' => '','PAG_transferencia' => '',
+		        array('DOC_claveint' => $DOC_clave, 'FLD_claveint' => $claveflujo,'PAS_folio' => $folio,'PAG_etapa' => $etapa,'PAG_entrega' => $entrega,'PAG_total' => $total,'PAG_fecha' => '','PAG_transferencia' => '',
 	                'PAG_factura' => '' ,'PAG_relacion' => $numrelacion,'UNI_claveint' => $unidad,'PAG_FRegistro' => $fechaH,'PAG_FPagoReg' => '','PAG_descuento' => 0,'TID_claveint' => '',
 	                'PAG_observaciones' => '','USU_registro' => $usuario,'USU_paga' => ''));
 	    
-	    foreach ($folios['archivos'] as $archi){
+	    // foreach ($folios['archivos'] as $archi){
 
-	             $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
+	    //          $this->SubirCFDI($archi,$archi,$numrelacion,$usucarpeta);
 
-	    }
+	    // }
 
     return Response::json(array('respuesta' => 'Folios Relacionados Correctamente'));
 

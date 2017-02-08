@@ -98,7 +98,7 @@ Route::group(array('prefix' => 'api'), function()
 		Route::get('areas', array('uses' => 'BusquedaController@areas'));
 		Route::get('ajustadores/{cliente}', array('uses' => 'BusquedaController@ajustador'));
 		Route::get('buscador/{consulta}/{tipo}', array('uses' => 'BusquedaController@buscador'));
-		Route::get('concepto', array('uses' => 'BusquedaController@concepto'));
+		Route::get('concepto/{tipo}', array('uses' => 'BusquedaController@concepto'));
 		Route::get('editaDatos/{folio}', array('uses' => 'BusquedaController@editaDatos'));
 		Route::get('empresas', array('uses' => 'BusquedaController@empresas'));
 		Route::get('empresasweb', array('uses' => 'BusquedaController@empresasweb'));
@@ -346,7 +346,8 @@ Route::group(array('prefix' => 'api'), function()
     Route::group(array('prefix' => 'RelacionNP'), function()
 	{
         Route::post('fechaRegistro', array('uses' => 'RelacionNoPagadaController@fechaRegistro'));
-
+        Route::post('generaReporte', array('uses' => 'RelacionNoPagadaController@generaReporte'));
+        
     });
 
     Route::group(array('prefix' => 'OrdenesPago'), function()
@@ -354,6 +355,12 @@ Route::group(array('prefix' => 'api'), function()
         Route::post('listadoOrdenPago', array('uses' => 'OrdenesPagoController@listadoOrdenPago'));
         Route::post('aceptaOrden', array('uses' => 'OrdenesPagoController@aceptaOrden'));
 
+    });
+
+    Route::group(array('prefix' => 'DetalleRelacion'), function()
+	{
+        Route::post('listadetalleRelacion/{relacion}', array('uses' => 'DetalleRelacionController@listadetalleRelacion'));
+        Route::post('generaReporte', array('uses' => 'DetalleRelacionController@generaReporte'));
 
     });
 

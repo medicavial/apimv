@@ -2,22 +2,30 @@
 
 class DetalleRelacionController extends BaseController {
 
-	public function detalle($relacion){
+	public function listadetalleRelacion($relacion){
 
-		$detalle = DB::table('FolioEtapaEntrega')
-		->select(DB::raw('RelacionFiscal.REL_clave, FEE_Folio, FEE_Etapa, FEE_entrega,TII_tipo, TRA_fecha, TRA_obs, REL_global,
-			             CASE FEE_Etapa WHEN 1 THEN CONVERT(varchar, EXP_pagoET1,1) WHEN 2 THEN CONVERT(varchar, EXP_pagoET2, 1) ELSE CONVERT(varchar, EXP_pagoET3, 1) END as Reserva' ))
-		->join('Tramite', 'FolioEtapaEntrega.FEE_clave', '=', 'Tramite.TRA_llave')
-		->join('TramiteRelacion', 'Tramite.TRA_clave', '=','TramiteRelacion.TRA_clave')
-		->join('RelacionFiscal', 'TramiteRelacion.REL_clave', '=','RelacionFiscal.REL_clave')
-		->join('TramiteTipo', 'Tramite.TRA_tipo', '=', 'TramiteTipo.TII_clave')
-		->join('TipoConcepto', 'Tramite.TCO_concepto', '=', 'TipoConcepto.TCO_clave')
-        ->join('Pase',  'Pase.PAS_folio', '=', 'FolioEtapaEntrega.FEE_Folio')
-        ->join('Etapa1',  'Etapa1.PAS_folio', '=', 'Pase.PAS_folio')
-        ->join('Expediente',  'Expediente.ET1_claveint', '=', 'Etapa1.ET1_claveint')
-		->where('RelacionFiscal.REL_clave', '=', $relacion)
-		->get();
-		
+		$detalle = DB::table('OrdenPago')
+					->join('Relacion', 'Relacion.REL_clave', '=', 'OrdenPago.REL_clave')
+					->join('RelacionPago', 'Relacion.REL_clave', '=', 'RelacionPago.REL_clave')
+					->join('Documento',  'OrdenPago.DOC_folio', '=', 'Documento.DOC_folio')
+					->join('Pase',  'OrdenPago.DOC_folio', '=', 'Pase.PAS_folio')
+					->join('Etapa1', 'Pase.PAS_folio', '=', 'Etapa1.PAS_folio')
+					->join('Reporte', 'Etapa1.REP_claveint', '=', 'Reporte.REP_claveint')
+					->where('Relacion.REL_clave', '=', $relacion)
+					->select(DB::raw('ROW_NUMBER() OVER(ORDER BY ORP_clave DESC) as Ref,
+						      substring(OrdenPago.DOC_folio,0,5) as Aseguradora,
+                             ORP_foliofiscal as FolioFiscal, 
+                             ORP_factura as Factura,
+                             ORP_importe as Importe, 
+                             PAS_fechaCaptura as FechaCaptura,
+	                         substring(LES_primaria,0,2) as TipoLesion, 
+	                         LES_primaria as Diagnostico, 
+	                         DOC_etapa as Etapa,
+	                         DOC_numeroEntrega Entrega,
+	                         REL_total as Total, 
+	                         DOC_lesionado as Lesionado'))
+					->get();
+
 		return $detalle;
 	}
 
@@ -57,6 +65,33 @@ class DetalleRelacionController extends BaseController {
 	    return Response::json(array('respuesta' => $archivos));
 
 	}
+
+	public function generaReporte(){
+
+            $datos=  Input::all();   
+                     
+            return Excel::create('DetalleRelacion', function ($excel) use($datos){
+
+                $excel->sheet('Detalle', function ($sheet) use($datos){
+
+                	$sheet->fromArray($datos);
+                    // setting column names for data - you can of course set it manually
+                    $sheet->row(1, array('Ref','Aseguradora','FolioFiscal','Factura', 'Importe','Total','FechaCaptura','TipoLesion','Diagnostico','Etapa','Total','Lesionado'));
+                    // getting last row number (the one we already filled and setting it to bold
+                    // $sheet->row($sheet->getHighestRow(), function ($row){
+                    //     $row->setFontWeight('bold');
+                    // });
+                    
+                    // $sheet->mergeCells('A3:M3');
+                    // $sheet->row(3, function ($row){
+                    //     $row->setFontFamily('Comic Sans MS');
+                    //     $row->setFontSize(14);
+                    // });
+
+                });
+            })->store('xls', public_path('exports') , true);
+            
+      }
 
 
 }

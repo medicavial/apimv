@@ -196,6 +196,7 @@ return array(
 		'Excel' 		  => 'Maatwebsite\Excel\Facades\Excel',
 		'Zipper' 		  => 'Chumper\Zipper\Zipper',
 		'Image' 		  => 'Intervention\Image\Facades\Image',
+		'Excel' 		  	=> 'Maatwebsite\Excel\Facades\Excel',
 
 	),
 

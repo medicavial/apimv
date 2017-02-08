@@ -8,7 +8,7 @@ class DetalleFacturasController extends BaseController {
 				->join('Compania','Expediente.Cia_clave', '=', 'Compania.Cia_clave')
 				->join('DocumentosDigitales', 'Expediente.Exp_folio', '=', 'DocumentosDigitales.REG_folio')
 				->select('Exp_folio as folio', 'Exp_completo as nombre', 'Cia_nombrecorto as cliente', 'Uni_nombrecorto as unidad',
-		                         'Arc_archivo as ruta','Arc_clave as archivo','Expediente.Cia_clave as clave', 'Arc_cons as consecutivo' )
+		                  'Arc_archivo as ruta','Arc_clave as archivo','Expediente.Cia_clave as clave', 'Arc_cons as consecutivo', 'Expediente.Uni_clave as claveunidad')
 				->where('Exp_folio', '=', $folio)
 				// ->where('DocumentosDigitales.Arc_tipo','=',30)
 				// ->where('DocumentosDigitales.Arc_tipo','=',29)
@@ -36,7 +36,6 @@ class DetalleFacturasController extends BaseController {
 
  		return Response::json($respuesta);
 
-
  	}
 
  	public function rechazaFactura(){
@@ -55,7 +54,6 @@ class DetalleFacturasController extends BaseController {
 			$actualiza_estatus = Atenciones::where('Exp_folio', $folio)->update(array('ATN_estatus' => 6));
 
  		}
-
  	    $respuesta = array('respuesta' => 'Factura Rechazada');
 
  		return Response::json($respuesta);
@@ -74,15 +72,22 @@ function revision(){
 
 	$folio = $datos['folio'];
 
+
+
     Mail::send('emails.auth.reminder', array($datos), function($message) use ($datos)
 	{
+
+		$folio = $datos['folio'];
+        $unidad = $datos['unidad'];
+
+        $rfc = Unidad::where(array('UNI_claveWeb' => $unidad))->first()->UNI_rfc;
 	                
         $xml = $datos['xml'];
         $pdf = $datos['pdf'];
         $ruta = $datos['ruta'];
-        // $copias = 'egutierrez@medicavial.com.mx,sistemasrep2@medicavial.com.mx';
-        $correo = "mvpagos@medicavial.com.mx";
-        $asunto = "es una prueba";
+        // $correo = 'entradacfd@medicavial.com.mx';
+        $correo = "adominguez@medicavial.com.mx";
+        $asunto = $folio.'-'.$rfc;
 
         // $copias = explode(',', $copias);
 
@@ -90,7 +95,6 @@ function revision(){
         $message->subject($asunto);
         $message->to($correo);
         // foreach ($copias as  $copia) {
-
         // 	$message->cc($copia);
         // 	# code...
         // }

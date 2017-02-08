@@ -424,9 +424,9 @@ class BusquedaController extends BaseController {
 		return DB::select("EXEC MV_DCU_ValidaPrefijoFolio  @prefijo='$prefijo', @empresa='$empresa'");
 	}
 
-	public function concepto(){
+	public function concepto($tipo){
 
-		return conceptoTramite::where('TCO_activo','=', 1)
+		return conceptoTramite::where(array('TCO_activo' => 1, 'TII_clave' => $tipo))
 				->select('TCO_clave as id','TCO_concepto as nombre')
 				->get();
 	}
