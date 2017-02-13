@@ -233,87 +233,100 @@ class FacturacionExpressController extends BaseController {
 		$cliente = FolioWeb::find($folio)->Cia_clave;
 		$fecha = date('Y-m-d H:i');
 
-		if ($cliente == 7) {
+		$contExpInfo = ExpedienteInfo::where('EXP_folio',$folio)->count();
 
-			$datos = FolioWeb::find($folio);
-			$datos->Exp_solicitado = 1;
-			$datos->USU_solicito = $usuario;
-			$datos->Exp_fechaSolicitud = $fecha;
-			$datos->save();
+		if($contExpInfo>0){
+			if ($cliente == 7) {
+				$importe = ExpedienteInfo::find($folio)->EXP_costoEmpresa;
+				if($importe!=0){
+					$datos = FolioWeb::find($folio);
+					$datos->Exp_solicitado = 1;
+					$datos->USU_solicito = $usuario;
+					$datos->Exp_fechaSolicitud = $fecha;
+					$datos->save();
+				}else{
+					return Response::json(array('flash' => 'Error en importe.'),500);
+				}
 
-		}elseif($cliente == 19){
+			}elseif($cliente == 19){
 
-			$datos = FolioWeb::find($folio);
-			$datos->Exp_autorizado = 1;
-			$datos->USU_solicito = $usuario;
-			$datos->Exp_fechaSolicitud = $fecha;
-			$datos->save();
+				$importe = ExpedienteInfo::find($folio)->EXP_costoEmpresa;
+				if($importe>0){
+				$datos = FolioWeb::find($folio);
+				$datos->Exp_autorizado = 1;
+				$datos->USU_solicito = $usuario;
+				$datos->Exp_fechaSolicitud = $fecha;
+				$datos->save();
 
-			$importe = ExpedienteInfo::find($folio)->EXP_costoEmpresa;
-			$iva = round($importe * 0.16, 2);
-    		$total = $importe  + $iva;
-
-
-			// //consultamos consecutivo de factura
-			$facFolio = FacturaWeb::max('FAC_folio') + 1;
-			$fechaIni = FacturaWeb::max('FAC_fecha');
+				
+				$iva = round($importe * 0.16, 2);
+	    		$total = $importe  + $iva;
 
 
-			// validacion para evitar duplicado de facturas
-    		if(FacturaWeb::where('FAC_folio',$facFolio)->count() == 0){
+				// //consultamos consecutivo de factura
+				$facFolio = FacturaWeb::max('FAC_folio') + 1;
+				$fechaIni = FacturaWeb::max('FAC_fecha');
 
-				if ($fechaIni != null) {
-	        
-			        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
-			        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
-			        $fechaActual = date('Y-m-d');
 
-			        if ( $fechaActual == $ultimaFechaFac) {
-			          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
-			        }else{
-			          $fechaFactura = date('Y-m-d') . ' 21:00';
-			        }
+				// validacion para evitar duplicado de facturas
+	    		if(FacturaWeb::where('FAC_folio',$facFolio)->count() == 0){
 
-			    // si no reseteamos la fecha APARTIR DE las 9 de la noche 
-			    }else{
-		        	$fechaFactura = date('Y-m-d') . ' 21:00';
-			    }
+					if ($fechaIni != null) {
+		        
+				        $ultimaFechaFac = date("Y-m-d", strtotime( $fechaIni ));
+				        $ultimaHoraFac =  date('H:i', strtotime( '+1 minutes' , strtotime($fechaIni) ) );
+				        $fechaActual = date('Y-m-d');
 
-			    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
-				    //insertamos 
-					$facturacion = new FacturaWeb;
-					$facturacion->CIA_clave = $cliente;
-					$facturacion->FAC_serie = 'FW';
-					$facturacion->FAC_folio = $facFolio;
-					$facturacion->FAC_fecha = $fechaFactura;
-					$facturacion->FAC_global = 0;
-					$facturacion->FAC_importe = $importe;
-					$facturacion->FAC_iva = $iva;
-					$facturacion->FAC_total = $total;
-					$facturacion->FAC_saldo = $total;
-					$facturacion->FAC_fechaReg = $fecha;
-					$facturacion->USU_registro = $usuario;
+				        if ( $fechaActual == $ultimaFechaFac) {
+				          $fechaFactura = date('Y-m-d') . " " . $ultimaHoraFac;
+				        }else{
+				          $fechaFactura = date('Y-m-d') . ' 21:00';
+				        }
 
-					$facturacion->save();
+				    // si no reseteamos la fecha APARTIR DE las 9 de la noche 
+				    }else{
+			        	$fechaFactura = date('Y-m-d') . ' 21:00';
+				    }
 
-					$factura = $facturacion->FAC_clave;
+				    if(FacturaExpedienteWeb::where('Exp_folio',$folio)->count() == 0){
+					    //insertamos 
+						$facturacion = new FacturaWeb;
+						$facturacion->CIA_clave = $cliente;
+						$facturacion->FAC_serie = 'FW';
+						$facturacion->FAC_folio = $facFolio;
+						$facturacion->FAC_fecha = $fechaFactura;
+						$facturacion->FAC_global = 0;
+						$facturacion->FAC_importe = $importe;
+						$facturacion->FAC_iva = $iva;
+						$facturacion->FAC_total = $total;
+						$facturacion->FAC_saldo = $total;
+						$facturacion->FAC_fechaReg = $fecha;
+						$facturacion->USU_registro = $usuario;
 
-					$facturacionExpediente = new FacturaExpedienteWeb;
-					$facturacionExpediente->EXP_folio = $folio;
-					$facturacionExpediente->FAC_clave = $factura;
-					$facturacionExpediente->save();
-			    	
-			    }else{
+						$facturacion->save();
+
+						$factura = $facturacion->FAC_clave;
+
+						$facturacionExpediente = new FacturaExpedienteWeb;
+						$facturacionExpediente->EXP_folio = $folio;
+						$facturacionExpediente->FAC_clave = $factura;
+						$facturacionExpediente->save();
+				    	
+				    }else{
+
+				    	return Response::json(array('flash' => 'Factura Ya generada'),500);
+				    }
+
+				}else{
 
 			    	return Response::json(array('flash' => 'Factura Ya generada'),500);
 			    }
-
-			}else{
-
-		    	return Response::json(array('flash' => 'Factura Ya generada'),500);
-		    }
-
-
+				}else{
+					return Response::json(array('flash' => 'Error en importe.'),500);
+				}
+			}
+		}else{
+			return Response::json(array('flash' => 'No se ha capturado, favor de consultar al área de sistemas.'),500);
 		}
 
  		return Response::json(array('respuesta' => 'Solicitud Generada Correctamente'));
@@ -642,7 +655,7 @@ class FacturacionExpressController extends BaseController {
 		$fechafin = date('Y-m-d', strtotime(str_replace('/', '-', Input::get('fechafin') ))) . ' 23:59:59';
 
 		//listado de folios x autorizar
-	    $sqlXAutorizar = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
+	   /* $sqlXAutorizar = "SELECT Expediente.Exp_folio, UNI_nombreMV, Expediente.Exp_poliza,
 	            Expediente.Exp_siniestro,Expediente.Exp_reporte,
 	            Exp_completo, Exp_fecreg, Cia_nombrecorto , RIE_nombre
 	            EXP_fechaCaptura,EXP_costoEmpresa,Triage_nombre,Exp_fechaSolicitud,DATEDIFF(Exp_fechaSolicitud,Exp_fecreg) as semaforo
@@ -655,7 +668,29 @@ class FacturacionExpressController extends BaseController {
 	                left join ExpedienteInfo on ExpedienteInfo.Exp_folio = Expediente.Exp_folio
 	            WHERE Exp_fecreg BETWEEN '$fechaini 00:00:00' and '$fechafin 23:59:59' and Compania.Cia_clave in ($id)  and Exp_FE = 1 and Unidad.Uni_clave  not in (8,185)   AND EXP_autorizado = 0 AND Exp_solicitado = 1 AND Exp_rechazado = 0  and EXP_cancelado = 0  AND Expediente.Exp_fecreg >= '2016-02-08 00:00:00'" ;
 
-	    return DB::connection('mysql')->select($sqlXAutorizar);
+	    return DB::connection('mysql')->select($sqlXAutorizar);*/
+	}
+
+	public function cartas($fecha){
+		
+
+		$fec = explode('-', $fecha);
+		$fechaMod=$fec[2].'-'.$fec[1].'-'.$fec[0];
+
+		//listado de folios x autorizar
+	    $sqlCartas = "SELECT Expediente.Exp_folio AS FOLIO, Exp_completo AS NOMBRE, Exp_fecreg, EXP_folioelectronico AS Folio_electronico, EXP_autorizacion AS CEDULA, Arc_clave, Arc_archivo,Expediente.UNI_clave , EXP_fechaCaptura, UNI_nombreMV, if(count(Arc_archivo)>0,'SI','NO') as Cont
+			FROM Expediente 
+			LEFT JOIN ExpedienteInfo ON Expediente.Exp_folio = ExpedienteInfo.Exp_folio
+			LEFT JOIN DocumentosDigitales on Expediente.Exp_folio = DocumentosDigitales.REG_folio
+			INNER JOIN Unidad ON Expediente.Uni_clave = Unidad.Uni_clave 
+			WHERE Exp_fecreg BETWEEN '".$fechaMod."' AND '".$fechaMod." 23:59:59' AND Expediente.Cia_clave=19
+			AND Expediente.UNI_clave IN (232,249,125,110,266,65,1,2,3,184) AND Exp_cancelado<>1 
+			AND (Arc_tipo=1 OR Arc_tipo is null)  GROUP BY Expediente.Exp_folio" ;
+		$resultado = DB::connection('mysql')->select($sqlCartas);
+		foreach ($resultado as $key) {
+
+		}
+	    return $resultado;
 	}
 
 	public function autorizados(){
