@@ -23,8 +23,6 @@ class FacturaUnidadesController extends BaseController {
 	                        //       	 'Pro_nombre as Producto', 'Exp_fecreg as fechaReg')
 	                        ->where(array('Exp_cancelado' => 0,'ATN_estatus' => 5))
 	                        ->select('Expediente.Exp_folio')
-	                        ->skip(10)
-	                        ->take(5)
 	                        ->distinct()
 	                        ->get()
 	                        ->toArray();
@@ -37,6 +35,7 @@ class FacturaUnidadesController extends BaseController {
 	    					->where('DOC_situacionOriginal',1)
 	    					->select('UNI_nombrecorto as Unidad', 'DOC_folio as Folio', 'DOC_lesionado as Lesionado','PRO_nombre AS Producto',
 		    						    'EMP_NombreCorto as Cliente', 'DOC_fechacapturado as fechaReg', 'DOC_claveint as claveDoc')
+	    					->take(10)
 	    					->get()
 	    					->toArray();
      
@@ -96,7 +95,7 @@ public function listadofacturasxfecha(){
 	                        ->distinct()
 	                        ->get()
 	                        ->toArray();
-
+    
 	    $validos = Documento::join('Unidad','Unidad.UNI_claveint','=','Documento.UNI_claveint')
 	                        ->join('Producto','Producto.PRO_claveint','=','Documento.PRO_claveint')
 	                        ->join('Empresa','Empresa.EMP_claveint','=','Documento.EMP_claveint')
@@ -173,6 +172,8 @@ public function buscaxUnidad($id){
 	    					->where('DOC_situacionOriginal',1)
 	    					->select('UNI_nombrecorto as Unidad', 'DOC_folio as Folio', 'DOC_lesionado as Lesionado','PRO_nombre AS Producto',
 		    						    'EMP_NombreCorto as Cliente', 'DOC_fechacapturado as fechaReg', 'DOC_claveint as claveDoc')
+	    				    ->skip(5)
+	                        ->take(0)
 	    					->get()
 	    					->toArray();
 	    // print_r($folios)
@@ -309,6 +310,9 @@ public function buscaxUnidad($id){
 	    	$factura = Input::get('foliointerno');
 	    	$serie = Input::get('serie');
 	    	$subtotal = Input::get('subtotal');
+	    	$descuento = Input::get('descuento');
+	    	$impuesto = Input::get('impuesto');
+	    	$tasa = Input::get('tasa');
 
 	        $Documento = Documento::where(array('DOC_folio' => $folio,'DOC_etapa' => 1, 'DOC_numeroEntrega' => 1))
                                     ->first();
@@ -327,12 +331,13 @@ public function buscaxUnidad($id){
 			$ordenpago->ORP_nombreEmisor = $nombreEmisor;
 			$ordenpago->ORP_rfcemisor = $rfcemisor;
 			$ordenpago->ORP_importe = $subtotal;
-			$ordenpago->ORP_iva = NULL;
+			$ordenpago->ORP_iva = $tasa;
 			$ordenpago->ORP_total= $total;
 			$ordenpago->ORP_fechaemision = date('d/m/Y H:i:s'); 
 			$ordenpago->ORP_usuregistro = $usuario;
 			$ordenpago->ORP_factura = $factura.'-'.$serie;
-
+			$ordenpago->ORP_descuento = $descuento;
+			$ordenpago->ORP_impuesto = $impuesto;
 
 			$ordenpago->save();
 

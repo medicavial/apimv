@@ -363,13 +363,9 @@ Route::group(array('prefix' => 'api'), function()
     Route::group(array('prefix' => 'DetalleRelacion'), function()
 	{
         Route::post('listadetalleRelacion/{relacion}', array('uses' => 'DetalleRelacionController@listadetalleRelacion'));
-        Route::post('generaReporte', array('uses' => 'DetalleRelacionController@generaReporte'));
+        Route::post('generaReporte2/{relacion}', array('uses' => 'DetalleRelacionController@generaReporte2'));
 
     });
-
-
-
-
 
 		Route::get('/xml', function(){
 

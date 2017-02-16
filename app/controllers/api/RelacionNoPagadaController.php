@@ -6,11 +6,12 @@ class RelacionNoPagadaController extends BaseController {
 
 	    DB::disableQueryLog();
 		  $fechaini =  Input::get('fechainiReg'); 
-	    $fechafin =  Input::get('fechafinReg'). ' 23:59:58.999'; 
+	    $fechafin =  Input::get('fechafinReg'); 
 
 		  $relacionado =DB::table('Relacion')
-                              ->select('REL_clave as relacion', 'REL_subtotal as subtotal', 'REL_total as total', 
+                              ->select('Relacion.REL_clave as relacion', 'REL_subtotal as subtotal', 'REL_total as total', 
                                                'UNI_nombrecorto as unidad', 'REL_fecha as fecha')
+                              ->join('OrdenPago', 'Relacion.REL_clave','=', 'OrdenPago.REL_clave')
                               ->join('Unidad', 'Relacion.UNI_claveint', '=', 'Unidad.UNI_claveint')
                               ->whereBetween('REL_fecha', array($fechaini, $fechafin))
                               ->get();

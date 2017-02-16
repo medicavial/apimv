@@ -86,7 +86,7 @@ function revision(){
         $pdf = $datos['pdf'];
         $ruta = $datos['ruta'];
         // $correo = 'entradacfd@medicavial.com.mx';
-        $correo = "adominguez@medicavial.com.mx";
+        $correo = "mvpagos@medicavial.com.mx";
         $asunto = $folio.'-'.$rfc;
 
         // $copias = explode(',', $copias);

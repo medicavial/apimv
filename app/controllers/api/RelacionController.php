@@ -232,6 +232,11 @@ class RelacionController extends BaseController {
 		    }else{
 		    	$importe = $foliodato['importe'];
 		    }
+		    if (!isset($foliodato['subtotal'])){
+		    	$subtotal = 0;
+		    }else{
+		    	$subtotal = $foliodato['subtotal'];
+		    }
         }
                                                                                                                                                                                                                              
 	 //    $relacion = DB::table('RelacionFiscal')->insert(
@@ -257,7 +262,7 @@ class RelacionController extends BaseController {
 						@subtotal = '$importe',
 						@impuesto = '0.00',
 						@total = '$totales',
-						@observaciones = '',
+						@observaciones = '$obs',
 					    @conFactura = 0,  
 						@usuario = '$usuario',
 					    @conIVA = 0,
@@ -362,7 +367,7 @@ class RelacionController extends BaseController {
 					@relacion = '$numrelacion',
 					@referencia = 1,
 				    @factura = 0,
-				    @importeFac = 0.00,
+				    @importeFac = '$total',
 					@siniestro = '',
 					@fechaCaptura = '',
 					@tipoLesion = '1',
