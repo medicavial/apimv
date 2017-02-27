@@ -17,8 +17,8 @@ class FacturacionExpressBetaController extends BaseController {
 	            CASE WHEN Expediente.Exp_folio in (SELECT REG_folio FROM DocumentosDigitales where REG_folio = Expediente.Exp_folio) THEN 'DIGITALIZADO' ELSE 'SIN DIGITALIZAR' END as DocumentosDigitales,
 	            EXP_fechaCaptura,EXP_costoEmpresa,Triage_nombre,UNI_propia,
 	            CASE WHEN DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  = '00-00-0000' THEN NULL ELSE DATE_FORMAT(Exp_fecPaseMed, '%d/%m/%Y')  END as FExpedicion,
-				CASE WHEN ATN_clave is null THEN 'FE' ELSE 'SACE'  END as SACE,
-				CASE WHEN ATN_estatus = 0 THEN 'SIN SOLICITAR' WHEN ATN_estatus = 1 THEN 'SOLICITADO' ELSE 'SN'  END as EstatusSACE,
+	            IF(Expediente.Uni_clave =232 OR Expediente.Uni_clave =249 OR Expediente.Uni_clave =125 OR Expediente.Uni_clave =110 OR Expediente.Uni_clave =266 OR Expediente.Uni_clave =65,'SACE','FE') AS SACE,
+				CASE WHEN ATN_estatus IS NULL THEN 'SIN ATENCION' WHEN ATN_estatus = 0 THEN 'SIN SOLICITAR' WHEN ATN_estatus = 1 THEN 'SOLICITADO' WHEN ATN_estatus = 2 THEN 'AUTORIZADO' WHEN ATN_estatus = 3 THEN 'RECHAZADO'  ELSE 'SN'  END as EstatusSACE,
 				ATN_clave,
 				ATN_estatus
 	            FROM Expediente

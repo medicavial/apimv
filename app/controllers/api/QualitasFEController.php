@@ -232,6 +232,7 @@ class QualitasFEController extends BaseController {
 		$datos =  DB::select("EXEC MVQualitasFEWSarchivos @fechaini = '$fechaini', @fechafin = '$fechafin 23:59:58.999'");
 
 		$data = array();
+		$detalle = array();		
 
 		foreach ($datos as $dato){
 
@@ -268,7 +269,6 @@ class QualitasFEController extends BaseController {
 		$respuesta = array('listado' => $data,'detalle' => $detalle);
 
 		return $respuesta;
-	
 	
 	}
 

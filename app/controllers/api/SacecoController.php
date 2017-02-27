@@ -46,7 +46,7 @@ class SacecoController extends BaseController {
                 inner join TipoAtencion on Atenciones.TIA_clave = TipoAtencion.TIA_clave 
                 left join ExpedienteInfo on Expediente.Exp_folio = ExpedienteInfo.Exp_folio                              
             WHERE ATN_fecreg BETWEEN '$fechaini' and '".$fechafin." 23:59:59'  and Exp_cancelado <> 1  AND Expediente.Exp_fecreg >= 
-            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania." and Unidad.Uni_clave<>185 and Exp_FE=1 ORDER BY Exp_fecreg DESC ";       
+            '2016-02-08 00:00:00' and PRO_clave <> 13 and ATN_estatus=1 ".$porCompania." and Unidad.Uni_clave<>185 and Exp_FE=1 ORDER BY Exp_fecreg DESC";       
 
 
 
@@ -534,6 +534,12 @@ class SacecoController extends BaseController {
 			    		return Response::json(array('flash' => 'Factura Ya generada'),500);
 			    	}
 			    }
+			}else{
+				$datos = FolioWeb::find($datosExp['folio']);
+				$datos->Exp_solicitado = 1;
+				$datos->USU_solicito = $usr;
+				$datos->Exp_fechaSolicitud = date('Y-m-d H:i');
+				$datos->save();
 			}
 		}
 			$respuesta = array('respuesta' => 'exito', 'imags'=>$valImgs, 'fol'=>$datosExp['folio']); 		

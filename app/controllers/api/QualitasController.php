@@ -113,8 +113,7 @@ class QualitasController extends BaseController {
 
  		$envios = DB::select("SELECT EnviosQualitas.ENQ_claveint, ENQ_fechaenvio,ENQ_procesado, (SELECT COUNT(*) from DetalleEnvio where DetalleEnvio.ENQ_claveint = EnviosQualitas.ENQ_claveint) as Cuenta FROM EnviosQualitas WHERE ENQ_fechaenvio BETWEEN '$fechaini' and '$fechafin'");
 
- 		return $envios;
-	
+ 		return $envios;	
 	}
 
 	public function incompletos(){

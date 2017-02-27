@@ -257,7 +257,9 @@ Route::group(array('prefix' => 'api'), function()
     	Route::post('solicitarAutorizacion', array('uses' => 'FacturacionExpressController@solicitarAutorizacion'));
     	Route::post('solicitarAutorizacionRechazos', array('uses' => 'FacturacionExpressController@solicitarAutorizacionRechazos'));
     	Route::post('solicitados', array('uses' => 'FacturacionExpressController@solicitados'));
-    	Route::get('cartas/{fecha}', array('uses' => 'FacturacionExpressController@cartas'));
+    	Route::get('cartas/{fecha}/{fecha1}', array('uses' => 'FacturacionExpressController@cartas'));
+    	Route::post('folioDetalleCancelacion', array('uses' => 'FacturacionExpressController@folioDetalleCancel'));
+    	Route::post('cancelaFolio', array('uses' => 'FacturacionExpressController@cancelaFolio'));
 
 	});
 

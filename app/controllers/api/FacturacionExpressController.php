@@ -324,13 +324,17 @@ class FacturacionExpressController extends BaseController {
 				}else{
 					return Response::json(array('flash' => 'Error en importe.'),500);
 				}
+			}else{
+				$datos = FolioWeb::find($datosExp['folio']);
+				$datos->Exp_autorizado = 1;
+				$datos->USU_solicito = $usr;
+				$datos->Exp_fechaSolicitud = date('Y-m-d H:i');
+				$datos->save();
 			}
 		}else{
 			return Response::json(array('flash' => 'No se ha capturado, favor de consultar al área de sistemas.'),500);
 		}
-
  		return Response::json(array('respuesta' => 'Solicitud Generada Correctamente'));
-
 	}
 
 	public function solicitarAutorizacionRechazos(){
@@ -671,11 +675,13 @@ class FacturacionExpressController extends BaseController {
 	    return DB::connection('mysql')->select($sqlXAutorizar);*/
 	}
 
-	public function cartas($fecha){
+	public function cartas($fecha,$fecha1){
 		
 
 		$fec = explode('-', $fecha);
 		$fechaMod=$fec[2].'-'.$fec[1].'-'.$fec[0];
+		$fec1 = explode('-', $fecha1);
+		$fechaMod1=$fec1[2].'-'.$fec1[1].'-'.$fec1[0];
 
 		//listado de folios x autorizar
 	    $sqlCartas = "SELECT Expediente.Exp_folio AS FOLIO, Exp_completo AS NOMBRE, Exp_fecreg, EXP_folioelectronico AS Folio_electronico, EXP_autorizacion AS CEDULA, Arc_clave, Arc_archivo,Expediente.UNI_clave , EXP_fechaCaptura, UNI_nombreMV, if(count(Arc_archivo)>0,'SI','NO') as Cont
@@ -683,7 +689,7 @@ class FacturacionExpressController extends BaseController {
 			LEFT JOIN ExpedienteInfo ON Expediente.Exp_folio = ExpedienteInfo.Exp_folio
 			LEFT JOIN DocumentosDigitales on Expediente.Exp_folio = DocumentosDigitales.REG_folio
 			INNER JOIN Unidad ON Expediente.Uni_clave = Unidad.Uni_clave 
-			WHERE Exp_fecreg BETWEEN '".$fechaMod."' AND '".$fechaMod." 23:59:59' AND Expediente.Cia_clave=19
+			WHERE Exp_fecreg BETWEEN '".$fechaMod."' AND '".$fechaMod1." 23:59:59' AND Expediente.Cia_clave=19
 			AND Expediente.UNI_clave IN (232,249,125,110,266,65,1,2,3,184) AND Exp_cancelado<>1 
 			AND (Arc_tipo=1 OR Arc_tipo is null)  GROUP BY Expediente.Exp_folio" ;
 		$resultado = DB::connection('mysql')->select($sqlCartas);
@@ -691,6 +697,48 @@ class FacturacionExpressController extends BaseController {
 
 		}
 	    return $resultado;
+	}
+
+	public function folioDetalleCancel(){
+
+		$folio = Input::get('folio');
+		$nombre = Input::get('nombre');
+		if($folio){
+			$queryFolio="AND Expediente.Exp_folio='".$folio."' ";
+		}else{
+			$queryFolio="";
+		}
+		if($folio&&$nombre){
+			$query=" Expediente.Exp_folio='".$folio."' AND Expediente.Exp_completo like'%".$nombre."%'";
+		}elseif ($folio&&!$nombre) {
+			$query=" Expediente.Exp_folio='".$folio."'";
+		}elseif (!$folio&&$nombre) {
+			$query=" Expediente.Exp_completo like '%".$nombre."%'";
+		}else{
+			$query="";
+		}
+
+		//Consulta folio para cacelacion
+	    $detalleFolio = "SELECT Expediente.Exp_folio as FOLIO,Exp_fecreg as FECHA_REGISTRO,Exp_completo AS NOMBRE,Uni_nombre as UNIDAD,Cia_nombrecorto as COMPANIA,if(Exp_cancelado=1,'CANCELADO','ACTIVO') as ESTATUS, Exp_mcancelado as MOTIVO_CANCELACION,if(Exp_solCancela='S','SI','NO') as SOLICITUD_CANCELACION,Exp_obs AS OBSERVACIONES  from Expediente 
+			INNER JOIN Unidad on Expediente.Uni_clave = Unidad.Uni_clave
+			INNER JOIN Compania ON Expediente.Cia_clave = Compania.Cia_clave
+			WHERE ".$query; 
+		$resultado = DB::connection('mysql')->select($detalleFolio);		
+	    return $resultado;
+	}
+
+	public function cancelaFolio(){
+
+		$folioCancelar = Input::get('folioCancelar');
+		$motivoCat = Input::get('motivoCat');
+		$motivo = Input::get('motivo');
+		$folioSustituto = Input::get('folioSustituto');
+		$observaciciones = Input::get('observaciciones');
+		$usr = Input::get('usr_login');
+
+		$cancelaFolio= "UPDATE Expediente SET Exp_cancelado=1, Exp_fcancelado=now(), Exp_mcancelado='".$motivo."', Usu_cancelado='".$usr."' where Exp_folio='".$folioCancelar."'";
+		$resultado = DB::connection('mysql')->update($cancelaFolio);
+		return 'exito';
 	}
 
 	public function autorizados(){
@@ -725,6 +773,7 @@ class FacturacionExpressController extends BaseController {
 	    $nombreCedula 		= str_replace(' ', '', $cedulaQualitas[0]->CQ_paciente);
 	    $nombreExpediente	= str_replace(' ', '', $nombre);
 	    $nombreExpediente = $this->sanear_string($nombreExpediente);
+	    $nombreCedula = strtoupper($nombreCedula);
 	    $contCedulas =  count($cedulaQualitas);	    
 	    if($contCedulas>1){
 	    	return 1;

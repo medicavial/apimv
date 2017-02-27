@@ -11,8 +11,5 @@ class PagosController extends BaseController{
 	//     	$clave = $foliodato['Cliente'];
 	// 	}
 	return Response::json(array('respuesta' => 'Sube la Factura de esta Relación'));
-
   }
-
-
 }
