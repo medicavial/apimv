@@ -5,17 +5,21 @@ class RelacionNoPagadaController extends BaseController {
 	public function fechaRegistro(){
 
 	    DB::disableQueryLog();
-		  $fechaini =  Input::get('fechainiReg'); 
-	    $fechafin =  Input::get('fechafinReg'); 
+		  $fechaini =  Input::get('fechainiReg').' 00:00:00'; 
+	    $fechafin =  Input::get('fechafinReg').' 23:59:59'; 
 
-		  $relacionado =DB::table('Relacion')
-                              ->select('Relacion.REL_clave as relacion', 'REL_subtotal as subtotal', 'REL_total as total', 
-                                               'UNI_nombrecorto as unidad', 'REL_fecha as fecha')
-                              ->join('OrdenPago', 'Relacion.REL_clave','=', 'OrdenPago.REL_clave')
-                              ->join('Unidad', 'Relacion.UNI_claveint', '=', 'Unidad.UNI_claveint')
-                              ->whereBetween('REL_fecha', array($fechaini, $fechafin))
+		  $relacionado =DB::table('RelacionPago')
+                              ->select('RelacionPago.REL_clave as relacion','REL_subtotal as subtotal', 'REL_total as total', 'UNI_nombrecorto as unidad', 'REL_fecha as fecha')
+                              ->join('OrdenPago', 'RelacionPago.REL_clave','=', 'OrdenPago.REL_clave')
+                              ->join('Documento', 'OrdenPago.DOC_folio','=', 'Documento.DOC_folio')
+                              ->join('Unidad', 'Documento.UNI_claveint', '=', 'Unidad.UNI_claveint')
+                              ->join('Relacion', 'RelacionPago.REL_clave', '=', 'Relacion.REL_clave')
+                              ->whereBetween('Relacion.REL_fecha', array($fechaini, $fechafin))
+                              ->distinct()
                               ->get();
       return $relacionado;
+
+      // , 'REL_subtotal as subtotal', 'REL_total as total', 'UNI_nombrecorto as unidad', 'REL_fecha as fecha'
 	}
 
       public function generaReporte(){

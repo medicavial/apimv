@@ -193,7 +193,9 @@ class RelacionController extends BaseController {
 											ORP_nombreEmisor as nombreEmisor,
 											ORP_rfcemisor as rfcemisor,
 											ORP_total as total,
-											ORP_factura as foliointerno'))
+											ORP_factura as foliointerno,
+											ORP_importe as subtotal,
+											ORP_iva as tasa'))
                         ->where('his_area', '=', 6)
                         ->where('Documento.UNI_claveint', '=',$id)
                         ->whereNull('RelacionPago.REL_clave')
@@ -214,6 +216,9 @@ class RelacionController extends BaseController {
 		// $tipofactura = $folios['tipofactura'];
 		$unidad = $folios['unidad'];
 		$totales = $folios['total'];
+		$tasa = $folios['tasa'];
+		$subtotal = $folios['subtotal'];
+
 		$fecha = date('d/m/Y');
 		$fechaH = date('Y-m-d H:i:s');
 		$fechaH  = date( 'd-m-y H:i:s',strtotime($fecha));
@@ -256,11 +261,11 @@ class RelacionController extends BaseController {
 						@relacion = '$numrelacion',
 						@fechaPago = '$fecha',
 						@unidad = '$unidad',
-					    @subtotalp = '$importe',
-					    @impuestop = '0.00',
+					    @subtotalp = '$subtotal',
+					    @impuestop = '$tasa',
 					    @totalp = '$totales',
-						@subtotal = '$importe',
-						@impuesto = '0.00',
+						@subtotal = '$subtotal',
+						@impuesto = '$tasa',
 						@total = '$totales',
 						@observaciones = '$obs',
 					    @conFactura = 0,  

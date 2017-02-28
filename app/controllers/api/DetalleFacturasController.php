@@ -49,8 +49,7 @@ class DetalleFacturasController extends BaseController {
  			$motivo = Input::get('motivo'); 
  			$usuario = Input::get('usuario'); 
 
-			$inserta = DocumentoDigital::where('REG_folio', $folio)->where('Arc_tipo',30)->orWhere('Arc_tipo',29)->update(array('Arc_rechazado' => 1, 'USU_rechazo' => $usuario, 'Arc_motivo' => $motivo, 'Arc_fechaRechazo' => $fecha));
-
+			$inserta = DocumentoDigital::where(array('REG_folio' => $folio))->whereIn('Arc_tipo',array(29,30))->update(array('Arc_rechazado' => 1, 'USU_rechazo' => $usuario, 'Arc_motivo' => $motivo, 'Arc_fechaRechazo' => $fecha));
 			$actualiza_estatus = Atenciones::where('Exp_folio', $folio)->update(array('ATN_estatus' => 6));
 
  		}
@@ -71,8 +70,6 @@ function revision(){
 	$datos = Input::all();
 
 	$folio = $datos['folio'];
-
-
 
     Mail::send('emails.auth.reminder', array($datos), function($message) use ($datos)
 	{

@@ -11,7 +11,6 @@ class FacturaUnidadesController extends BaseController {
 		// $fechaini = DateTime::createFromFormat('d/m/Y', Input::get('fechaini') )->format('Y-m-d') . ' 00:00:00';
 		// $fechafin = DateTime::createFromFormat('d/m/Y', Input::get('fechafin') )->format('Y-m-d') . ' 23:59:59';
 
-
 		$folios = Atenciones::join('Expediente','Expediente.Exp_folio','=','Atenciones.Exp_folio')
 	                        ->join('TipoAtencion','TipoAtencion.TIA_clave','=','Atenciones.TIA_clave')
 	                        ->join('Compania','Compania.Cia_clave','=','Expediente.Cia_clave')
@@ -335,7 +334,8 @@ public function buscaxUnidad($id){
 			$ordenpago->ORP_total= $total;
 			$ordenpago->ORP_fechaemision = date('d/m/Y H:i:s'); 
 			$ordenpago->ORP_usuregistro = $usuario;
-			$ordenpago->ORP_factura = $factura.'-'.$serie;
+			$ordenpago->ORP_factura = $factura;
+			$ordenpago->ORP_serie = $serie;
 			$ordenpago->ORP_descuento = $descuento;
 			$ordenpago->ORP_impuesto = $impuesto;
 

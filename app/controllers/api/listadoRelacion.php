@@ -79,7 +79,7 @@ function dater($x) {
 
 $conexion = conectarActual();
 
-$sql = "SELECT  ROW_NUMBER() OVER(ORDER BY ORP_clave DESC) as Ref,
+$sql = "SELECT ROW_NUMBER() OVER(ORDER BY ORP_clave DESC) as Ref,
                     substring(OrdenPago.DOC_folio,0,5) as Aseguradora,
                     ORP_foliofiscal as FolioFiscal, 
                     ORP_factura as Factura,

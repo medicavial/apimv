@@ -340,9 +340,29 @@ Route::group(array('prefix' => 'api'), function()
 
     });	
 
+    Route::group(array('prefix' => 'DetalleFacturasZima'), function()
+	{
+        Route::post('imprimeDatos/{folio}', array('uses' => 'DetalleFacturasZimaController@imprimeDatos'));
+        Route::post('rechazaFactura', array('uses' => 'DetalleFacturasZimaController@rechazaFactura'));
+        Route::post('revisa', array('uses' => 'DetalleFacturasZimaController@revision'));
+
+
+    });	
+
+    Route::group(array('prefix' => 'PagoManual'), function()
+	{
+        Route::post('upload/{usuario}', array('uses' => 'PagoManualController@upload'));
+        Route::post('consultaFolioFiscal/{foliofiscal}', array('uses' => 'PagoManualController@consultaFolioFiscal'));
+        Route::post('validaUnidad/{rfc}', array('uses' => 'PagoManualController@validaUnidad'));
+        Route::post('eliminaxml/{usuario}', array('uses' => 'PagoManualController@eliminaxml'));
+        Route::post('proveedor', array('uses' => 'PagoManualController@proveedor'));
+
+    });	
+
     Route::group(array('prefix' => 'FacturaZima'), function()
 	{
         Route::post('unidades', array('uses' => 'FacturaZimaController@unidades'));
+        Route::post('listadofacturas', array('uses' => 'FacturaZimaController@listadofacturas'));
 
     });	
 

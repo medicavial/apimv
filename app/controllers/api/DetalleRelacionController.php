@@ -8,14 +8,15 @@ class DetalleRelacionController extends BaseController {
 
 		$detalle = DB::table('OrdenPago')
 					->join('Relacion', 'Relacion.REL_clave', '=', 'OrdenPago.REL_clave')
-					->join('RelacionPago', 'Relacion.REL_clave', '=', 'RelacionPago.REL_clave')
+					// ->join('RelacionPago', 'Relacion.REL_clave', '=', 'RelacionPago.REL_clave')
 					->join('Documento',  'OrdenPago.DOC_folio', '=', 'Documento.DOC_folio')
 					->join('Pase',  'OrdenPago.DOC_folio', '=', 'Pase.PAS_folio')
 					->join('Etapa1', 'Pase.PAS_folio', '=', 'Etapa1.PAS_folio')
 					->join('Reporte', 'Etapa1.REP_claveint', '=', 'Reporte.REP_claveint')
+					->join('Triage', 'Pase.TRI_claveint', '=', 'Triage.TRI_claveint')
 					->where('Relacion.REL_clave', '=', $relacion)
 					->select(DB::raw('ROW_NUMBER() OVER(ORDER BY ORP_clave DESC) as Ref,
-						      substring(OrdenPago.DOC_folio,0,5) as Aseguradora,
+						     OrdenPago.DOC_folio as Aseguradora,
                              ORP_foliofiscal as FolioFiscal, 
                              ORP_factura as Factura,
                              ORP_importe as Subtotal,
@@ -29,7 +30,9 @@ class DetalleRelacionController extends BaseController {
 	                         ORP_importe as SubtotalP,
                              ORP_iva as IVAP,
                              ORP_total as TotalP,  
-	                         DOC_lesionado as Lesionado'))
+	                         DOC_lesionado as Lesionado,
+	                         TRI_nombre as Triage'))
+		            ->distinct()	
 		            ->get();
 
 		return $detalle;
@@ -126,9 +129,10 @@ class DetalleRelacionController extends BaseController {
 public function generaReporte2($relacion){
 
     $sql = "SELECT  ROW_NUMBER() OVER(ORDER BY ORP_clave DESC) as Ref,
-	                    substring(OrdenPago.DOC_folio,0,5) as Aseguradora,
+	                    OrdenPago.DOC_folio as Aseguradora,
 	                    ORP_foliofiscal as FolioFiscal, 
 	                    ORP_factura as Factura,
+	                    ORP_serie as Serie,
 	                    ORP_importe as Subtotal,
 	                    ORP_iva as IVA,
 	                    ORP_total as Total, 
@@ -141,19 +145,21 @@ public function generaReporte2($relacion){
 	                    ORP_iva as IVAP,
 	                    ORP_total as TotalP,  
 	                    DOC_lesionado as Lesionado,
-	                    UNI_nombre as Unidad
+	                    UNI_nombre as Unidad,
+	                    TRI_nombre as Triage
+
 	        FROM OrdenPago
 	        inner join Relacion ON Relacion.REL_clave = OrdenPago.REL_clave
-	        inner join RelacionPago ON Relacion.REL_clave = RelacionPago.REL_clave
+	        -- inner join RelacionPago ON Relacion.REL_clave = RelacionPago.REL_clave
 	        inner join Documento ON  OrdenPago.DOC_folio = Documento.DOC_folio
 	        inner join Pase ON  OrdenPago.DOC_folio = Pase.PAS_folio 
 	        inner join Etapa1 ON Pase.PAS_folio = Etapa1.PAS_folio
 	        inner join Reporte ON Etapa1.REP_claveint = Reporte.REP_claveint
 	        inner join Unidad ON Documento.UNI_claveint = Unidad.UNI_claveint
+	        inner join Triage ON Pase.TRI_claveint = Triage.TRI_claveint
 	        WHERE Relacion.REL_clave = '$relacion'";
 
     $archivos =  DB::connection('sqlsrv')->select($sql);
-
     // print_r($archivos);
 
 
@@ -188,6 +194,19 @@ $style_header = array(
 	      'style' => PHPExcel_Style_Border::BORDER_THIN
 	    )
 	  )
+
+);
+
+$style = array(
+    'font'  => array(
+        'bold'  => true,
+        'color' => array('rgb' => '000000'),
+        'size'  => 13,
+        'name'  => 'Verdana'
+),
+    'alignment' => array(
+    'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER
+)
 
 );
 
@@ -262,7 +281,7 @@ $bordes = array(
 //   );
 
 // $objPHPExcel->getDefaultStyle()->applyFromArray($styleArray);
-$i = 5;
+$i = 7;
 
 $sumaSubtotal = 0; 
 $sumaIVA = 0;
@@ -274,62 +293,85 @@ $sumaTotalP = 0;
 
 foreach ($archivos as $archivo){
 
-$objPHPExcel->getActiveSheet()->mergeCells('A1:N1');
-$objPHPExcel->getActiveSheet()->setCellValue('A1','RELACION DE PAGOS')->getStyle("A1")->applyFromArray($style_header);
+$objPHPExcel->getActiveSheet()->mergeCells('O1:Q1');
+$objPHPExcel->getActiveSheet()->setCellValue('O1','Fecha Elaboro '. $fecha)->getStyle("O1:Q1")->applyFromArray($style_titulos);
 
-$objPHPExcel->getActiveSheet()->mergeCells('A2:N2');
-$objPHPExcel->getActiveSheet()->setCellValue('A2',$archivo->Unidad)->getStyle("A2")->applyFromArray($style_header);
+$objPHPExcel->getActiveSheet()->mergeCells('O2:Q2');
+$objPHPExcel->getActiveSheet()->setCellValue('O2',"RELAUT")->getStyle("O2:Q2")->applyFromArray($style_header);
+
+$objPHPExcel->getActiveSheet()->mergeCells('A3:N3');
+$objPHPExcel->getActiveSheet()->setCellValue('A3','RELACION DE PAGOS')->getStyle("A3")->applyFromArray($style);
+
+$objPHPExcel->getActiveSheet()->mergeCells('A4:N4');
+$objPHPExcel->getActiveSheet()->setCellValue('A4',$archivo->Unidad)->getStyle("A4")->applyFromArray($style);
 
 
-$objPHPExcel->getActiveSheet()->mergeCells('O2:P2');
-$objPHPExcel->getActiveSheet()->setCellValue('O2',$relacion);
-$objPHPExcel->getActiveSheet()->getStyle('O2:P2')->applyFromArray($style_header);
+$objPHPExcel->getActiveSheet()->mergeCells('O3:Q3');
+$objPHPExcel->getActiveSheet()->setCellValue('O3',$relacion);
+$objPHPExcel->getActiveSheet()->getStyle('O3:Q3')->applyFromArray($style_header);
 
-$objPHPExcel->getActiveSheet()->mergeCells('O1:P1');
-$objPHPExcel->getActiveSheet()->setCellValue('O1','MEDICA VIAL')->getStyle("O1")->applyFromArray($style_header);
+$objPHPExcel->getActiveSheet()->mergeCells('O4:Q4');
+$objPHPExcel->getActiveSheet()->setCellValue('O4','MEDICAVIAL')->getStyle("O4:Q4")->applyFromArray($style_header);
 
-$rowNumber = 5; 
+$rowNumber = 6; 
 
-$objPHPExcel->getActiveSheet()->setCellValue("A4", "Ref")->getStyle("A4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("B4", "Aseguradora")->getStyle("B4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("C4", "Folio Fiscal")->getStyle("C4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("D4", "Factura")->getStyle("D4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("E4", "Subtotal")->getStyle("E4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("F4", "IVA")->getStyle("F4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("G4", "Total")->getStyle("G4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("H4", "Fecha Captura")->getStyle("H4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("I4", "Tipo Lesion")->getStyle("I4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("J4", "Diagnostico")->getStyle("J4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("K4", "Etapa")->getStyle("K4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("L4", "Entrega")->getStyle("L4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("M4", "SubtotalP")->getStyle("M4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("N4", "IVAP")->getStyle("N4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("O4", "TotalP")->getStyle("O4")->applyFromArray($style_titulos);
-$objPHPExcel->getActiveSheet()->setCellValue("P4", "Lesionado")->getStyle("P4")->applyFromArray($style_titulos);
 
+//////// ENCABEZADO /////////
+
+$objPHPExcel->getActiveSheet()->setCellValue("A6", "Ref")->getStyle("A6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("B6", "Folio")->getStyle("B6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("C6", "Triage")->getStyle("C6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("D6", "Lesionado")->getStyle("D6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("E6", "Folio Fiscal")->getStyle("E6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("F6", "Factura")->getStyle("F6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("G6", "Serie")->getStyle("G6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("H6", "Subtotal")->getStyle("H6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("I6", "IVA")->getStyle("I6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("J6", "Total")->getStyle("J6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("K6", "Fecha Captura")->getStyle("K6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("L6", "Tipo Lesion")->getStyle("L6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("M6", "Diagnostico")->getStyle("M6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("N6", "Etapa")->getStyle("N6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("O6", "Entrega")->getStyle("O6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("P6", "SubtotalP")->getStyle("P6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("Q6", "IVAP")->getStyle("Q6")->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue("R6", "TotalP")->getStyle("R6")->applyFromArray($style_titulos);
+
+
+/////////////// CUERPO ////////////////////
    
 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A'.$i, $archivo->Ref)->getStyle('A'.$i)->applyFromArray($style_body);
 $objPHPExcel->setActiveSheetIndex(0)->setCellValue('B'.$i, $archivo->Aseguradora)->getStyle('B'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('C'.$i, $archivo->FolioFiscal)->getStyle('C'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('D'.$i, $archivo->Factura)->getStyle('D'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('E'.$i, $archivo->Subtotal)->getStyle('E'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('E'.$i, $archivo->Subtotal)->getStyle('E'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('F'.$i, $archivo->IVA)->getStyle('F'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('G'.$i, $archivo->Total)->getStyle('G'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('E'.$i, $archivo->Subtotal)->getStyle('G'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('H'.$i, $archivo->FechaCaptura)->getStyle('H'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('I'.$i, $archivo->TipoLesion)->getStyle('I'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('J'.$i, $archivo->Diagnostico)->getStyle('J'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('K'.$i, $archivo->Etapa)->getStyle('K'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('L'.$i, $archivo->Entrega)->getStyle('L'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('M'.$i, $archivo->SubtotalP)->getStyle('M'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('M'.$i, $archivo->SubtotalP)->getStyle('M'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('N'.$i, $archivo->IVAP)->getStyle('N'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('O'.$i, $archivo->TotalP)->getStyle('O'.$i)->applyFromArray($style_body);
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('O'.$i, $archivo->TotalP)->getStyle('O'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->setActiveSheetIndex(0)->setCellValue('P'.$i, $archivo->Lesionado)->getStyle('P'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('C'.$i, $archivo->Triage)->getStyle('C'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('D'.$i, $archivo->Lesionado)->getStyle('D'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('E'.$i, $archivo->FolioFiscal)->getStyle('E'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('F'.$i, $archivo->Factura)->getStyle('F'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('G'.$i, $archivo->Serie)->getStyle('G'.$i)->applyFromArray($style_body);
 
-  $i++;
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('H'.$i, $archivo->Subtotal)->getStyle('H'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('H'.$i, $archivo->Subtotal)->getStyle('H'.$i)->getNumberFormat()->setFormatCode('0.00');
+// $objPHPExcel->getActiveSheetIndex(0)->setCellValue('F'.$i, "=SUM(F5:F$i)");
+
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('I'.$i, $archivo->IVA)->getStyle('I'.$i)->applyFromArray($style_body);
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('J'.$i, $archivo->Total)->getStyle('J'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('J'.$i, $archivo->Total)->getStyle('J'.$i)->getNumberFormat()->setFormatCode('0.00');
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('K'.$i, $archivo->FechaCaptura)->getStyle('K'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('L'.$i, $archivo->TipoLesion)->getStyle('L'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('M'.$i, $archivo->Diagnostico)->getStyle('M'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('N'.$i, $archivo->Etapa)->getStyle('N'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('O'.$i, $archivo->Entrega)->getStyle('O'.$i)->applyFromArray($style_body);
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('P'.$i, $archivo->SubtotalP)->getStyle('P'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('P'.$i, $archivo->SubtotalP)->getStyle('P'.$i)->getNumberFormat()->setFormatCode('0.00');
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('Q'.$i, $archivo->IVAP)->getStyle('Q'.$i)->applyFromArray($style_body);
+
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('R'.$i, $archivo->TotalP)->getStyle('R'.$i)->applyFromArray($style_body);
+$objPHPExcel->setActiveSheetIndex(0)->setCellValue('R'.$i, $archivo->TotalP)->getStyle('R'.$i)->getNumberFormat()->setFormatCode('0.00');
 
 $sumaSubtotal+= $archivo->Subtotal;
 $sumaIVA+= $archivo->IVA;
@@ -339,41 +381,33 @@ $sumaSubtotalP+= $archivo->SubtotalP;
 $sumaIVAP+= $archivo->IVAP;
 $sumaTotalP+= $archivo->TotalP;	
 
+  $i++;
+
+
+
 
 }
 
 $find = $i + 4;
 //////// TOTAL FACTURA
+$objPHPExcel->getActiveSheet()->getCell('G'.($i))->setValue('Total')->getStyle("G".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('H'.($i))->getStyle("H".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('I'.($i))->getStyle("I".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('J'.($i))->getStyle("J".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue('H'.$i,"=SUM(H7:H".($i-1).")")->getStyle('H'.$i)->getNumberFormat()->setFormatCode('0.00');
+$objPHPExcel->getActiveSheet()->setCellValue('I'.$i,"=SUM(I7:I".($i-1).")")->getStyle('I'.$i)->getNumberFormat()->setFormatCode('0.00');
+$objPHPExcel->getActiveSheet()->setCellValue('J'.$i,"=SUM(J7:J".($i-1).")")->getStyle('J'.$i)->getNumberFormat()->setFormatCode('0.00');
 
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("A".($find+1).":D".($find+1)))->getStyle(("A".($find+1).":D".($find+1)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('A'.($find+1))->setValue('Subtotal');
-$objPHPExcel->getActiveSheet()->setCellValue('E'.($find+1),$sumaSubtotal)->getStyle('E'.($find+1))->getNumberFormat()->setFormatCode('0.00');
+/////// TOTAL X PAGAR
 
+$objPHPExcel->getActiveSheet()->getCell('O'.($i))->setValue('Total')->getStyle("O".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('P'.($i))->getStyle("P".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('Q'.($i))->getStyle("Q".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->getCell('R'.($i))->getStyle("R".($i))->applyFromArray($style_titulos);
+$objPHPExcel->getActiveSheet()->setCellValue('P'.$i,"=SUM(P7:P".($i-1).")")->getStyle('P'.$i)->getNumberFormat()->setFormatCode('0.00');
+$objPHPExcel->getActiveSheet()->setCellValue('Q'.$i,"=SUM(Q7:Q".($i-1).")")->getStyle('Q'.$i)->getNumberFormat()->setFormatCode('0.00');
+$objPHPExcel->getActiveSheet()->setCellValue('R'.$i,"=SUM(R7:R".($i-1).")")->getStyle('R'.$i)->getNumberFormat()->setFormatCode('0.00');
 
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("A".($find+2).":D".($find+2)))->getStyle(("A".($find+2).":D".($find+2)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('A'.($find+2)) ->setValue('IVA')->getStyle('D'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->getActiveSheet()->setCellValue('E'.($find+2),$sumaIVA)->getStyle('E'.($find+2))->getNumberFormat()->setFormatCode('0.00');
-
-
-
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("A".($find+3).":D".($find+3)))->getStyle(("A".($find+3).":D".($find+3)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('A'.($find+3)) ->setValue('Total')->getStyle('D'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->getActiveSheet()->setCellValue('E'.($find+3),$sumaTotal)->getStyle('E'.($find+3))->getNumberFormat()->setFormatCode('0.00');
-
-///////////////// TOTAL A PAGAR
-
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("F".($find+1).":L".($find+1)))->getStyle(("F".($find+1).":L".($find+1)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('F'.($find+1)) ->setValue('Subtotal')->getStyle('L'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->getActiveSheet()->setCellValue('M'.($find+1),$sumaSubtotalP)->getStyle('M'.($find+1))->getNumberFormat()->setFormatCode('0.00');
-
-
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("F".($find+2).":L".($find+2)))->getStyle(("F".($find+2).":L".($find+2)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('F'.($find+2)) ->setValue('IVA')->getStyle('L'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->getActiveSheet()->setCellValue('M'.($find+2),$sumaIVAP)->getStyle('M'.($find+2))->getNumberFormat()->setFormatCode('0.00');
-
-$objPHPExcel->setActiveSheetIndex(0)->mergeCells(("F".($find+3).":L".($find+3)))->getStyle(("F".($find+3).":L".($find+3)))->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-$objPHPExcel->getActiveSheet()->getCell('F'.($find+3)) ->setValue('Total')->getStyle('L'.$i)->getNumberFormat()->setFormatCode('0.00');
-$objPHPExcel->getActiveSheet()->setCellValue('M'.($find+3),$sumaTotalP)->getStyle('M'.($find+3))->getNumberFormat()->setFormatCode('0.00');
 
 
 $objPHPExcel->setActiveSheetIndex(0)->mergeCells(("A".($find+6).":H".($find+6)))->getStyle(("A".($find+6).":H".($find+6)))->applyFromArray($bordes);

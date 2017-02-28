@@ -90,6 +90,7 @@ return array(
 			'host'     => 'SISTEMAS4',
 			'database' => 'MV2',
 			'username' => 'sa',
+			// 'password' => 'sa',
 			'password' => 'ACc3soMv',
 			'prefix'   => '',
 		),
